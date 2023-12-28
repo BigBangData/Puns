@@ -7,6 +7,9 @@ def home(name):
     # return render_template('index.html', content=name)
     return render_template('index.html', content=['mary', 'joe', 'anna'])
 
+@app.route("/new")
+def new():
+    return render_template('new.html')
 # @app.route('/<name>')
 # def user(name):
 #     return f"Hello {name}!"
