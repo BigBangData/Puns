@@ -8,10 +8,10 @@
                 <p>{{msg}}</p>
             {% endfor %}
         {% endif %}
+    <form action="#" method="POST">
+        <p>Name:</p>
+        <p><input type="text" name="nm"/></p>
+        <p><input type="submit" value="submit"/></p>
+    </form>
     {% endwith %}
-<form action="#" method="post">
-    <p>Name:</p>
-    <p><input type="text" name="nm"/></p>
-    <p><input type="submit" value="submit"/></p>
-</form>
 {% endblock %}
