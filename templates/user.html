@@ -1,8 +1,12 @@
 {% extends "base.html" %}
-{% block title %}User Page{% endblock %}
-{% block header %}<h1>Hi User!</h1>{% endblock %}
+{% block title %}User{% endblock %}
 {% block content %}
-    <!-- {% for x in content %}
-            <p>Hi {{x}}</p>
-    {% endfor %} -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <p>{{msg}}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <p>Welcome {{user}}!</p>
 {% endblock %}
