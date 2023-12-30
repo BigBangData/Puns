@@ -20,3 +20,9 @@ Issues:
     - create separate form to delete email
     - maybe logout user if user is deleted
     - ideally ask to create account instead of just creating one
+
+
+- Test image credit:
+
+Photo by <a href="https://unsplash.com/@dsalcius?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Daniel Salcius</a> on <a href="https://unsplash.com/photos/teal-painted-wall-w17JwWyRPoE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+  
