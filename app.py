@@ -39,7 +39,6 @@ class users(db.Model):
 
 @app.route('/')
 def home():
-    # return render_template('index.html', content=['Mary', 'Joe', 'Anna'])
     return render_template('index.html')
 
 @app.route("/login", methods=["POST", "GET"])
@@ -128,24 +127,27 @@ def view():
         if request.method == "POST":
             requested_user = request.form["user"]
             if logged_user == requested_user:
+                # permission to delete its own data
                 users.query.filter_by(name=logged_user).delete()
                 db.session.commit()
                 msg = f"{logged_user} successfully deleted."
                 flash(msg, "info")
                 logging.info(msg=msg)
-                # since we can have multiple users with the same name
-                same_name_users = users.query.filter_by(name=logged_user).all()
-                return render_template("view.html", values=same_name_users)
+                # user filter
+                # user_filter = users.query.filter_by(name=logged_user).all()
+                # revamped permission to view all users
+                admin_filter = users.query.all()
+                return render_template("view.html", values=admin_filter)
             else:
                 ui_msg = f"User  {logged_user} not authorized to delete requested user."
                 console_msg = f"User {logged_user} not authorized to delete {requested_user}."
                 flash(ui_msg, "info")
                 logging.info(msg=console_msg)
-                same_name_users = users.query.filter_by(name=logged_user).all()
-                return render_template("view.html", values=same_name_users)
+                admin_filter = users.query.all()
+                return render_template("view.html", values=admin_filter)
         elif request.method == "GET":
-            same_name_users = users.query.filter_by(name=logged_user).all()
-            return render_template("view.html", values=same_name_users)
+            admin_filter = users.query.all()
+            return render_template("view.html", values=admin_filter)
         else:
             pass
     else:
