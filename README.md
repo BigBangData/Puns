@@ -1,21 +1,32 @@
 # Puns
 
-_Credits &tc ~_
+Credits:
 - sourced puns from https://wstyler.ucsd.edu/puns/, among others.
 - `curated_puns.txt`: manually curated text file that serves as input to create the database; in question?answer format
 
-_Brainstorm ~_
-- instead of creating account, password, email... just have a login page and my friends must be "in the know"
-    + watch tutorials for logging in?
-    + candidate 1: https://www.youtube.com/watch?v=71EU8gnZqZQ
-        - following: https://github.com/arpanneupane19/Python-Flask-Authentication-Tutorial/blob/main/app.py
-        - at min 18:30
-    + candidate 2: https://www.youtube.com/watch?v=W4GItcW7W-U # Tim
-        - GitHub: https://github.com/techwithtim/Flask-Blog-Tutorial
-- just read directly from `curated_puns.txt` no need to create a database for v1
+Tutorials:
+- followed: https://www.youtube.com/watch?v=71EU8gnZqZQ
+    - GitHub: https://github.com/arpanneupane19/Python-Flask-Authentication-Tutorial/blob/main/app.py
+- did not follow Tim's: https://www.youtube.com/watch?v=W4GItcW7W-U 
+    - GitHub: https://github.com/techwithtim/Flask-Blog-Tutorial
+- just read directly from `curated_puns.txt` no need to create a database for puns
 
+Notes:
+- database is for users so far, and any users can create accounts at any time, only usernames and passwords
+- this would of course open it to crash the server if someone hit it with creating multiple users, restrict to a few
+- use SQL to manage users, in `instance/`, issue:
+```
+$ sqlite3 database.db
+sqlite> .tables
+sqlite> select * from user;
+sqlite> .exit
+```
 
-
+Next Steps:
+- test going from login to view to home etc and think through various flows again to flash messages
+    + it's a bit of a hybrid of tutorials, so look at commented out code for user flows
+- right now functionality is very limited and logout only exists in `view.html`
+- recreate `view.html` to be a dashboard for puns and not a user management page
 
 ---
 

@@ -1,16 +1,24 @@
 {% extends "base.html" %}
-{% block title %}Login Page{% endblock %}
+{% block title %}Login{% endblock %}
 {% block header %}<h1>Login</h1>{% endblock %}
 {% block content %}
+    <!-- flash messages -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for msg in messages %}
                 <p>{{msg}}</p>
             {% endfor %}
         {% endif %}
-    <form action="#" method="POST">
+    <!-- <form action="#" method="POST">
         <p><input type="text" placeholder="Please Enter Your Username" name="username"/></p>
         <p><input type="submit" value="submit"/></p>
-    </form>
+    </form> -->
     {% endwith %}
+    <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        {{ form.username }}
+        {{ form.password }}
+        {{ form.submit }}
+    </form>
+
 {% endblock %}

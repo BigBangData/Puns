@@ -1,12 +1,13 @@
 import os
 import logging
 from datetime import datetime, timedelta
-from flask import Flask, redirect, url_for, render_template, request, session, flash
+from flask import Flask, redirect, url_for, render_template, flash, request, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin
+from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
+from flask_bcrypt import Bcrypt
 
 # setup logging for file and console
 if not os.path.exists('logs'):
@@ -31,6 +32,18 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'qwu#$)_@34FmkmKHDF02'
 db = SQLAlchemy(app)
 
+# security & login
+bcrypt = Bcrypt(app)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+
+# reload user object from user_id stored in session
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), nullable=False, unique=True)
@@ -42,11 +55,11 @@ class User(db.Model, UserMixin):
 
 class RegisterForm(FlaskForm):
     username = StringField(
-        validators=[InputRequired(), Length(min=8, max=20)]
+        validators=[InputRequired(), Length(min=4, max=20)]
         , render_kw={"placeholder": "Username"}
     )
     password = PasswordField(
-        validators=[InputRequired(), Length(min=8, max=20)]
+        validators=[InputRequired(), Length(min=4, max=20)]
         , render_kw={"placeholder": "Password"}
     )
     submit = SubmitField("Register")
@@ -59,11 +72,11 @@ class RegisterForm(FlaskForm):
 
 class LoginForm(FlaskForm):
     username = StringField(
-        validators=[InputRequired(), Length(min=8, max=20)]
+        validators=[InputRequired(), Length(min=4, max=20)]
         , render_kw={"placeholder": "Username"}
     )
     password = PasswordField(
-        validators=[InputRequired(), Length(min=8, max=20)]
+        validators=[InputRequired(), Length(min=4, max=20)]
         , render_kw={"placeholder": "Password"}
     )
     submit = SubmitField("Login")
@@ -75,126 +88,157 @@ def home():
 
 @app.route("/register", methods=["POST", "GET"])
 def register():
-    if request.method == "POST":
-        # start session
-        session.permanent = True
-        # get username
-        username = request.form["username"]
-        session["username"] = username
-        # check if user already exists
-        # if so, redirect to login
-        found_user = User.query.filter_by(username=username).first()
-        if found_user:
-            msg = f"{username}, you already have an account. Please login." # check if logged in already
-            flash(msg, "info")
-            logging.info(msg=msg)
-            return redirect(url_for("login")) # gets two messages if already logged in
-        else:
-            # create an account
-            internal_msg = f"Creating user {username} in database."
-            logging.info(msg=internal_msg)
-            usr = User(username, "")
-            db.session.add(usr) # stage
-            # doesn't add automatically because one could rollback
-            db.session.commit()
-            # message user
-            msg = f"Created account for {username}."
-            logging.info(msg=msg)
-            usr = User(username, "")
-            return redirect(url_for("login")) # gets two messages if already logged in
-    # "GET" method
-    else:
-        return render_template('register.html')
+    form = RegisterForm()
 
+    if form.validate_on_submit():
+        hashed_password = bcrypt.generate_password_hash(form.password.data)
+        new_user = User(username=form.username.data, password=hashed_password)
+        db.session.add(new_user)
+        db.session.commit()
+        return redirect(url_for('login'))
+
+    return render_template("register.html", form=form)
 
 @app.route("/login", methods=["POST", "GET"])
 def login():
-    if request.method == "POST":
-        # start session
-        session.permanent = True
-        # get username
-        username = request.form["username"]
-        session["username"] = username
-        # check if user already exists
-        # find all users with this name, grab first
-        # assumes names are unique, coult try .all() or .delete()
-        # could loop through objects if using .all() to delete them
-        found_user = User.query.filter_by(username=username).first()
-        if found_user:
-            # if user exists, grab password for session
-            session["password"] = found_user.password
-            # authenticate first
-            msg = f"{username}, you are logged in."
-            flash(msg, "info")
-            logging.info(msg=msg)
-            return redirect(url_for("view"))
-        else:
-            # redirect to register
-            msg = f"User {username} not found. Please register for an account."
-            logging.info(msg=msg)
-            flash(msg, "info")
-            return redirect(url_for("register"))
-    # "GET" method
-    else:
-        if "username" in session:
-            logged_user = session["username"]
-            msg = f"{logged_user}, you are already logged in."
-            flash(msg, "info")
-            logging.info(msg=msg)
-            return redirect(url_for("view"))
-        else:
-            return render_template('login.html')
+    form = LoginForm()
+    if form.validate_on_submit():
+        user_id = User.query.filter_by(username=form.username.data).first()
+        if user_id:
+            if bcrypt.check_password_hash(user_id.password, form.password.data):
+                login_user(user_id)
+                msg = f"Hello {user_id.username}, you are logged in."
+                flash(msg, "info")
+                return redirect(url_for('view'))
+    return render_template('login.html', form=form)
+
+# def register():
+#     if request.method == "POST":
+#         # start session
+#         session.permanent = True
+#         # get username
+#         username = request.form["username"]
+#         session["username"] = username
+#         # check if user already exists
+#         # if so, redirect to login
+#         found_user = User.query.filter_by(username=username).first()
+#         if found_user:
+#             msg = f"{username}, you already have an account. Please login." # check if logged in already
+#             flash(msg, "info")
+#             logging.info(msg=msg)
+#             return redirect(url_for("login")) # gets two messages if already logged in
+#         else:
+#             # create an account
+#             internal_msg = f"Creating user {username} in database."
+#             logging.info(msg=internal_msg)
+#             usr = User(username, "")
+#             db.session.add(usr) # stage
+#             # doesn't add automatically because one could rollback
+#             db.session.commit()
+#             # message user
+#             msg = f"Created account for {username}."
+#             logging.info(msg=msg)
+#             usr = User(username, "")
+#             return redirect(url_for("login")) # gets two messages if already logged in
+#     # "GET" method
+#     else:
+#         return render_template('register.html')
+
+# def login():
+#     if request.method == "POST":
+#         # start session
+#         session.permanent = True
+#         # get username
+#         username = request.form["username"]
+#         session["username"] = username
+#         # check if user already exists
+#         # find all users with this name, grab first
+#         # assumes names are unique, coult try .all() or .delete()
+#         # could loop through objects if using .all() to delete them
+#         found_user = User.query.filter_by(username=username).first()
+#         if found_user:
+#             # if user exists, grab password for session
+#             session["password"] = found_user.password
+#             # authenticate first
+#             msg = f"{username}, you are logged in."
+#             flash(msg, "info")
+#             logging.info(msg=msg)
+#             return redirect(url_for("view"))
+#         else:
+#             # redirect to register
+#             msg = f"User {username} not found. Please register for an account."
+#             logging.info(msg=msg)
+#             flash(msg, "info")
+#             return redirect(url_for("register"))
+#     # "GET" method
+#     else:
+#         if "username" in session:
+#             logged_user = session["username"]
+#             msg = f"{logged_user}, you are already logged in."
+#             flash(msg, "info")
+#             logging.info(msg=msg)
+#             return redirect(url_for("view"))
+#         else:
+#             return render_template('login.html')
 
 
-@app.route('/logout')
+@app.route('/logout', methods=["POST", "GET"])
+@login_required
 def logout():
-    if "username" in session:
-        logged_user = session["username"]
-        msg = f"{logged_user}, you have logged out successfully."
-        flash(msg, "info")
-        logging.info(msg=msg)
-        session.pop("username", None)
-        session.pop("password", None)
-        return redirect(url_for("login"))
-    else:
-        msg = "You are not logged in."
-        flash(msg, "info")
-        logging.info(msg=msg)
-        return redirect(url_for("login"))
+    logout_user()
+    return redirect(url_for('login'))
+    # if "username" in session:
+    #     logged_user = session["username"]
+    #     msg = f"{logged_user}, you have logged out successfully."
+    #     flash(msg, "info")
+    #     logging.info(msg=msg)
+    #     session.pop("username", None)
+    #     session.pop("password", None)
+    #     return redirect(url_for("login"))
+    # else:
+    #     msg = "You are not logged in."
+    #     flash(msg, "info")
+    #     logging.info(msg=msg)
+    #     return redirect(url_for("login"))
+
 
 @app.route('/view', methods=["POST", "GET"])
+@login_required
 def view():
-    # only user can delete their data
-    if "username" in session:
-        logged_user = session["username"]
-        if request.method == "POST":
-            requested_user = request.form["username"]
-            if logged_user == requested_user:
-                # permission to delete its own data
-                User.query.filter_by(username=logged_user).delete()
-                db.session.commit()
-                msg = f"{logged_user} successfully deleted."
-                flash(msg, "info")
-                logging.info(msg=msg)
-                # user filter
-                # user_filter = User.query.filter_by(username=logged_user).all()
-                # revamped permission to view all users
-                admin_filter = User.query.all()
-                return render_template("view.html", values=admin_filter)
-            else:
-                ui_msg = f"User {logged_user} not authorized to delete requested user."
-                console_msg = f"User {logged_user} not authorized to delete {requested_user}."
-                flash(ui_msg, "info")
-                logging.info(msg=console_msg)
-                admin_filter = User.query.all()
-                return render_template("view.html", values=admin_filter)
-        # "GET" method
-        else:
-            admin_filter = User.query.all()
-            return render_template("view.html", values=admin_filter)
-    else:
-        flash(f"Please log in to view and manage user data.", "info")
-        return redirect(url_for("login"))
+    admin_filter = User.query.all()
+    return render_template('view.html', values=admin_filter)
+    # # only user can delete their data
+    # if "username" in session:
+    #     logged_user = session["username"]
+    #     if request.method == "POST":
+    #         requested_user = request.form["username"]
+    #         if logged_user == requested_user:
+    #             # permission to delete its own data
+    #             User.query.filter_by(username=logged_user).delete()
+    #             db.session.commit()
+    #             msg = f"{logged_user} successfully deleted."
+    #             flash(msg, "info")
+    #             logging.info(msg=msg)
+    #             # user filter
+    #             # user_filter = User.query.filter_by(username=logged_user).all()
+    #             # revamped permission to view all users
+    #             admin_filter = User.query.all()
+    #             return render_template("view.html", values=admin_filter)
+    #         else:
+    #             ui_msg = f"User {logged_user} not authorized to delete requested user."
+    #             console_msg = f"User {logged_user} not authorized to delete {requested_user}."
+    #             flash(ui_msg, "info")
+    #             logging.info(msg=console_msg)
+    #             admin_filter = User.query.all()
+    #             return render_template("view.html", values=admin_filter)
+    #     # "GET" method
+    #     else:
+    #         admin_filter = User.query.all()
+    #         return render_template("view.html", values=admin_filter)
+    # else:
+    #     flash(f"Please log in to view and manage user data.", "info")
+    #     return redirect(url_for("login"))
+
 
 if __name__ == '__main__':
     # add the console handler to the root logger
