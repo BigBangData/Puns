@@ -2,11 +2,15 @@
 
 Sourced puns from https://wstyler.ucsd.edu/puns/, among others.
 
-- curated_puns.txt:
-    must have a Q?A format
+- curated_puns.txt: must have a Q?A format
 
-Tutorials: https://www.youtube.com/watch?v=9MHYHgh4jYc&list=PLzMcBGfZo4-n4vJJybUVV3Un_NFS5EOgX&index=6
+Tutorials from Tim Ruscica: https://www.youtube.com/@TechWithTim, https://www.techwithtim.net/, https://github.com/techwithtim
 Bootstrap: https://getbootstrap.com/docs/5.3/getting-started/introduction/
+Blueprint tutorial notes:
+    - a way to structure entire project and package it so it's usable in other projects
+    - so for example could create admin folder and in it add templates, static, etc.,
+    - then could import from admin by packaging folder (create __init__.py empty file inside folder)
+    - not going to use this knowledge for this project, focus on deliverable
 
 Solved:
     - a logged out user can log out, doesn't display 'successful logout' if no one is logged in
@@ -20,9 +24,3 @@ Issues:
     - create separate form to delete email
     - maybe logout user if user is deleted
     - ideally ask to create account instead of just creating one
-
-
-- Test image credit:
-
-Photo by <a href="https://unsplash.com/@dsalcius?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Daniel Salcius</a> on <a href="https://unsplash.com/photos/teal-painted-wall-w17JwWyRPoE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
-  
