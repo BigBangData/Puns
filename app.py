@@ -3,6 +3,10 @@ import logging
 from datetime import datetime, timedelta
 from flask import Flask, redirect, url_for, render_template, request, session, flash
 from flask_sqlalchemy import SQLAlchemy
+from flask_login import UserMixin
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField
+from wtforms.validators import InputRequired, Length, ValidationError
 
 # setup logging for file and console
 if not os.path.exists('logs'):
@@ -21,142 +25,176 @@ app.secret_key = "wjer3498$&_VKA3lkf=="
 # store session data for 5 min; works even if browser is open
 app.permanent_session_lifetime = timedelta(minutes=5)
 
-# setup db
-abspath = os.path.abspath(os.path.dirname(__file__))
-sqlite_path = 'sqlite:///' + os.path.join(abspath, 'app.sqlite')
-app.config['SQLALCHEMY_DATABASE_URI'] = sqlite_path
+# setup database
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = 'qwu#$)_@34FmkmKHDF02'
 db = SQLAlchemy(app)
 
-class users(db.Model):
-    _id = db.Column("id", db.Integer, primary_key=True)
-    name = db.Column(db.String(100))
-    email = db.Column(db.String(100))
+class User(db.Model, UserMixin):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(20), nullable=False, unique=True)
+    password = db.Column(db.String(80), nullable=False)
 
-    def __init__(self, name, email):
-        self.name = name
-        self.email = email
+    def __init__(self, username, password):
+        self.username = username
+        self.password = password
+
+class RegisterForm(FlaskForm):
+    username = StringField(
+        validators=[InputRequired(), Length(min=8, max=20)]
+        , render_kw={"placeholder": "Username"}
+    )
+    password = PasswordField(
+        validators=[InputRequired(), Length(min=8, max=20)]
+        , render_kw={"placeholder": "Password"}
+    )
+    submit = SubmitField("Register")
+
+    def validate_username(self, username):
+        existing_username = User.query.filter_by(username=username.data).first()
+        if existing_username:
+            msg = 'Username already exists. Please try another.'
+            raise ValidationError(msg)
+
+class LoginForm(FlaskForm):
+    username = StringField(
+        validators=[InputRequired(), Length(min=8, max=20)]
+        , render_kw={"placeholder": "Username"}
+    )
+    password = PasswordField(
+        validators=[InputRequired(), Length(min=8, max=20)]
+        , render_kw={"placeholder": "Password"}
+    )
+    submit = SubmitField("Login")
+
 
 @app.route('/')
 def home():
     return render_template('index.html')
 
-@app.route("/login", methods=["POST", "GET"])
-def login():
+@app.route("/register", methods=["POST", "GET"])
+def register():
     if request.method == "POST":
+        # start session
         session.permanent = True
-        user = request.form["nm"]
-        session["user"] = user
-        # if user exists
-        # find all users with this name, grab first
-        # assumes names are unique, coult try .all() or .delete()
-        # could loop through objects if using .all() to delete them
-        found_user = users.query.filter_by(name=user).first()
+        # get username
+        username = request.form["username"]
+        session["username"] = username
+        # check if user already exists
+        # if so, redirect to login
+        found_user = User.query.filter_by(username=username).first()
         if found_user:
-            # if user exists, grab email for session
-            session["email"] = found_user.email
-        else:
-            msg = f"Creating user {user} in database."
+            msg = f"{username}, you already have an account. Please login." # check if logged in already
+            flash(msg, "info")
             logging.info(msg=msg)
-            usr = users(user, "") # leave email blank
+            return redirect(url_for("login")) # gets two messages if already logged in
+        else:
+            # create an account
+            internal_msg = f"Creating user {username} in database."
+            logging.info(msg=internal_msg)
+            usr = User(username, "")
             db.session.add(usr) # stage
             # doesn't add automatically because one could rollback
             db.session.commit()
-        # display message
-        msg = f"{user}, you are logged in."
-        flash(msg, "info")
-        logging.info(msg=msg)
-        return redirect(url_for("user"))
+            # message user
+            msg = f"Created account for {username}."
+            logging.info(msg=msg)
+            usr = User(username, "")
+            return redirect(url_for("login")) # gets two messages if already logged in
+    # "GET" method
     else:
-        if "user" in session:
-            logged_user = session["user"]
+        return render_template('register.html')
+
+
+@app.route("/login", methods=["POST", "GET"])
+def login():
+    if request.method == "POST":
+        # start session
+        session.permanent = True
+        # get username
+        username = request.form["username"]
+        session["username"] = username
+        # check if user already exists
+        # find all users with this name, grab first
+        # assumes names are unique, coult try .all() or .delete()
+        # could loop through objects if using .all() to delete them
+        found_user = User.query.filter_by(username=username).first()
+        if found_user:
+            # if user exists, grab password for session
+            session["password"] = found_user.password
+            # authenticate first
+            msg = f"{username}, you are logged in."
+            flash(msg, "info")
+            logging.info(msg=msg)
+            return redirect(url_for("view"))
+        else:
+            # redirect to register
+            msg = f"User {username} not found. Please register for an account."
+            logging.info(msg=msg)
+            flash(msg, "info")
+            return redirect(url_for("register"))
+    # "GET" method
+    else:
+        if "username" in session:
+            logged_user = session["username"]
             msg = f"{logged_user}, you are already logged in."
             flash(msg, "info")
             logging.info(msg=msg)
-            return redirect(url_for("user"))
+            return redirect(url_for("view"))
         else:
             return render_template('login.html')
 
-@app.route('/user', methods=["POST", "GET"])
-def user():
-    email = None
-    if "user" in session:
-        logged_user = session["user"]
-        if request.method == "POST":
-            email = request.form["email"]
-            session["email"] = email
-            found_user = users.query.filter_by(name=logged_user).first()
-            found_user.email = email
-            db.session.commit()
-            msg = f"{logged_user}, your email {email} was saved."
-            flash(msg, "info")
-            logging.info(msg=msg)
-        else:
-            if "email" in session:
-                email = session["email"]
-        return render_template("user.html", email=email)
-    else:
-        msg = f"{user}, you are already logged in."
-        flash(msg, "info")
-        logging.info(msg=msg)
-        return redirect(url_for("login"))
 
 @app.route('/logout')
 def logout():
-    if "user" in session:
-        logged_user = session["user"]
+    if "username" in session:
+        logged_user = session["username"]
         msg = f"{logged_user}, you have logged out successfully."
         flash(msg, "info")
         logging.info(msg=msg)
-        session.pop("user", None)
-        session.pop("email", None)
+        session.pop("username", None)
+        session.pop("password", None)
         return redirect(url_for("login"))
     else:
         msg = "You are not logged in."
         flash(msg, "info")
         logging.info(msg=msg)
-        session.pop("user", None)
-        session.pop("email", None)
         return redirect(url_for("login"))
 
 @app.route('/view', methods=["POST", "GET"])
 def view():
     # only user can delete their data
-    if "user" in session:
-        logged_user = session["user"]
+    if "username" in session:
+        logged_user = session["username"]
         if request.method == "POST":
-            requested_user = request.form["user"]
+            requested_user = request.form["username"]
             if logged_user == requested_user:
                 # permission to delete its own data
-                users.query.filter_by(name=logged_user).delete()
+                User.query.filter_by(username=logged_user).delete()
                 db.session.commit()
                 msg = f"{logged_user} successfully deleted."
                 flash(msg, "info")
                 logging.info(msg=msg)
                 # user filter
-                # user_filter = users.query.filter_by(name=logged_user).all()
+                # user_filter = User.query.filter_by(username=logged_user).all()
                 # revamped permission to view all users
-                admin_filter = users.query.all()
+                admin_filter = User.query.all()
                 return render_template("view.html", values=admin_filter)
             else:
-                ui_msg = f"User  {logged_user} not authorized to delete requested user."
+                ui_msg = f"User {logged_user} not authorized to delete requested user."
                 console_msg = f"User {logged_user} not authorized to delete {requested_user}."
                 flash(ui_msg, "info")
                 logging.info(msg=console_msg)
-                admin_filter = users.query.all()
+                admin_filter = User.query.all()
                 return render_template("view.html", values=admin_filter)
-        elif request.method == "GET":
-            admin_filter = users.query.all()
-            return render_template("view.html", values=admin_filter)
+        # "GET" method
         else:
-            pass
+            admin_filter = User.query.all()
+            return render_template("view.html", values=admin_filter)
     else:
         flash(f"Please log in to view and manage user data.", "info")
         return redirect(url_for("login"))
-
-# @app.route('/admin')
-# def admin():
-#     return redirect(url_for("user", name="admin"))
 
 if __name__ == '__main__':
     # add the console handler to the root logger

@@ -3,7 +3,7 @@
 {% block content %}
     {% with messages = get_flashed_messages() %}
         {% for item in values %}
-            <p>Name: {{item.name}}, Email: {{item.email}}</p>
+            <p>Username: {{item.username}}, Password: {{item.password}}</p>
         {% endfor %}
         {% if messages %}
             {% for msg in messages %}
@@ -12,7 +12,7 @@
         {% endif %}
     <form action="#" method="POST">
         <p>Delete:</p>
-        <input type="name" name="user" placeholder="Enter Name" value="{{user if user}}"/>
+        <input type="username" name="username" placeholder="Enter Name" value="{{username if username}}"/>
         <input type="submit" value="submit"/>
     </form>
     {% endwith %}

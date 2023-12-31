@@ -1,6 +1,6 @@
 {% extends "base.html" %}
-{% block title %}Login Page{% endblock %}
-{% block header %}<h1>Login</h1>{% endblock %}
+{% block title %}Registration Page{% endblock %}
+{% block header %}<h1>Registration</h1>{% endblock %}
 {% block content %}
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -9,7 +9,7 @@
             {% endfor %}
         {% endif %}
     <form action="#" method="POST">
-        <p><input type="text" placeholder="Please Enter Your Username" name="username"/></p>
+        <p><input type="text" placeholder="Please Enter A Username" name="username"/></p>
         <p><input type="submit" value="submit"/></p>
     </form>
     {% endwith %}

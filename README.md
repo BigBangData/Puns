@@ -8,6 +8,10 @@ _Brainstorm ~_
 - instead of creating account, password, email... just have a login page and my friends must be "in the know"
     + watch tutorials for logging in?
     + candidate 1: https://www.youtube.com/watch?v=71EU8gnZqZQ
+        - following: https://github.com/arpanneupane19/Python-Flask-Authentication-Tutorial/blob/main/app.py
+        - at min 18:30
+    + candidate 2: https://www.youtube.com/watch?v=W4GItcW7W-U # Tim
+        - GitHub: https://github.com/techwithtim/Flask-Blog-Tutorial
 - just read directly from `curated_puns.txt` no need to create a database for v1
 
 
