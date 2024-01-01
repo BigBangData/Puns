@@ -3,7 +3,7 @@ import csv
 import random
 import logging
 from datetime import datetime, timedelta
-from flask import Flask, redirect, url_for, render_template, flash, request
+from flask import Flask, redirect, url_for, render_template, flash, request, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
 from flask_wtf import FlaskForm
@@ -132,7 +132,7 @@ def login():
                     flash("Wrong password.", "info")
                     return render_template('login.html', form=form)
             else:
-                flash("Did you signup for an account yet?")
+                flash("Did you signup for an account yet?", "info")
                 return redirect(url_for('signup'))
     # "GET"
     else:
@@ -150,27 +150,63 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("You've logged out.")
+    flash("You've logged out.", "info")
     return redirect(url_for('login'))
+
+def get_pun():
+    if 'question' not in session or 'answer' not in session:
+        # load static puns.csv
+        csv_file_path = os.path.join('static', 'files', 'puns.csv')
+        try:
+            with open(csv_file_path, 'r', encoding='utf-8') as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                puns_list = list(csv_reader)
+                # select random pun joke
+                random_pun = random.choice(puns_list)
+                # separate into question and answer
+                question = f"{random_pun['question']}?"
+                answer = f"{random_pun['answer']}"
+                # add to session to persist specific pair
+                session['question'] = question
+                session['answer'] = answer
+        except FileNotFoundError:
+            logging.error(f"CSV file '{csv_file_path}' not found.")
+    else:
+        question = session['question']
+        answer = session['answer']
+    # return new ones or same ones if already in session
+    return question, answer
 
 # view
 @app.route('/view', methods=["POST", "GET"])
 @login_required
 def view():
-    csv_file_path = os.path.join('static', 'files', 'puns.csv')
-    try:
-        with open(csv_file_path, 'r', encoding='utf-8') as csv_file:
-            csv_reader = csv.DictReader(csv_file)
-            puns_list = list(csv_reader)
-            # Select a random pun
-            random_pun = random.choice(puns_list)
-            # Display the question and answer
-            question = f"{random_pun['question']}?"
-            answer = f"{random_pun['answer']}"
-            return render_template('view.html', values=[question, answer])
-    except FileNotFoundError:
-        logging.error(f"CSV file '{csv_file_path}' not found.")
-        return render_template('view.html', values=["An Error Ocurred."])
+    if request.method == "POST":
+        # clear session variables related to question and answer
+        session.pop('question', None)
+        session.pop('answer', None)
+        return redirect(url_for('view_answer'))
+    else:
+        question, _ = get_pun()
+        return render_template('view.html', values=[question])
+
+# view asnwer
+@app.route('/view_answer', methods=["POST", "GET"])
+@login_required
+def view_answer():
+    # get session answer
+    _, answer = get_pun()
+    if request.method == "POST":
+        # make sure text area is completed
+        textarea_value = request.form.get('user_answer')
+        if not textarea_value.strip():
+            flash("Text area cannot be empty.", "info")
+            return redirect(url_for('view'))
+        else:
+            return render_template('view_answer.html', values=[answer])
+    else:
+        return redirect(url_for('view'))
+
 
 if __name__ == '__main__':
     # add the console handler to the root logger
