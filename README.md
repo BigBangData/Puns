@@ -1,4 +1,4 @@
-# Puns
+# Happy New Year
 
 Credits:
 - sourced puns from https://wstyler.ucsd.edu/puns/, among other random from memory.
