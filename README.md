@@ -15,16 +15,16 @@ sqlite> .exit
 ```
 
 Functionality:
-- signup is always possible, even for logged in users (can signup as another user, but not login)
-- signup username must be unique
-- login only possible if not currently logged in, throws message and redirects to view
-- logout only possible in view
-- view is the ultimate goal, where the "game" happens
+- signup: only possible when logged out, throws message and redirects to view, fails if username exists
+- login: only possible when logged out, throws message and redirects to view
+- login: fails back to login when password is wrong, fails to signup when username doesn't exist
+- view is the ultimate goal of signing up and logging in, it's where the action happens, and only place logging out is possible
+- after logging in, signup/login redirect to view
 
 Todo:
 - change view to the pun game
 - `curated_puns.txt`: manually curated text file that serves as input to create the database; in question?answer format
-- just read directly from `curated_puns.txt` no need to create a database for puns
+- read directly from `curated_puns.txt` no need to create a database for puns... I think, but might be easier not to duplicate puns
 
 Final Steps:
 - deploy to ubuntu server

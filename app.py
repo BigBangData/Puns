@@ -104,24 +104,20 @@ def signup():
             return render_template("signup.html", form=form)
     # "GET"
     else:
-        return render_template("signup.html", form=form)
+        try:
+            msg = f"You're currently logged in as {current_user.username}. \
+                Please log out before signing up with another username."
+            flash(msg, "info")
+            return redirect(url_for('view'))
+        # throws error when current_user is Anonymous (not logged in)
+        except AttributeError:
+            return render_template('signup.html', form=form)
 
 # login
 @app.route("/login", methods=["POST", "GET"])
 def login():
     form = LoginForm()
-    if request.method == "GET":
-        # cannot do "if current_user:"
-        # will have AnonymousUserMixin with no .username
-        try:
-            msg = f"{current_user.username}, you're already logged in."
-            flash(msg, "info")
-            return redirect(url_for('view'))
-        # throws error when current_user is Anonymous (not logged in)
-        except AttributeError:
-            return render_template('login.html', form=form)
-    # "POST"
-    else:
+    if request.method == "POST":
         if form.validate_on_submit():
             user_id = User.query.filter_by(username=form.username.data).first()
             if user_id:
@@ -136,6 +132,16 @@ def login():
             else:
                 flash("Did you signup for an account yet?")
                 return redirect(url_for('signup'))
+    # "GET"
+    else:
+        # cannot do "if current_user" since it exists, yet has no username
+        try:
+            msg = f"{current_user.username}, you're already logged in."
+            flash(msg, "info")
+            return redirect(url_for('view'))
+        # throws error when current_user = AnonymousUserMixin
+        except AttributeError:
+            return render_template('login.html', form=form)
 
 # logout
 @app.route('/logout', methods=["POST", "GET"])
@@ -149,7 +155,7 @@ def logout():
 @app.route('/view', methods=["POST", "GET"])
 @login_required
 def view():
-    #user_filter = User.query.filter_by(username=current_user.username).first()
+    # treats all users as admin
     admin_filter = User.query.all()
     return render_template('view.html', values=admin_filter)
 
