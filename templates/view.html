@@ -8,12 +8,11 @@
                 <p>{{msg}}</p>
             {% endfor %}
         {% endif %}
+    {% endwith %}
     <h1>View</h1>
         {% for item in values %}
-            <p>Username: {{item.username}}</p>
+            <p>{{item}}</p>
         {% endfor %}
-    {% endwith %}
     <hr>
     <p style="text-align: center;"><a href="{{url_for('logout')}}">Logout</a></p>
-    <br>
 {% endblock %}

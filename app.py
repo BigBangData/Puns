@@ -1,4 +1,6 @@
 import os
+import csv
+import random
 import logging
 from datetime import datetime, timedelta
 from flask import Flask, redirect, url_for, render_template, flash, request
@@ -148,17 +150,27 @@ def login():
 @login_required
 def logout():
     logout_user()
-    flash("You've successfully logged out.")
+    flash("You've logged out.")
     return redirect(url_for('login'))
 
 # view
 @app.route('/view', methods=["POST", "GET"])
 @login_required
 def view():
-    # treats all users as admin
-    admin_filter = User.query.all()
-    return render_template('view.html', values=admin_filter)
-
+    csv_file_path = os.path.join('static', 'files', 'puns.csv')
+    try:
+        with open(csv_file_path, 'r', encoding='utf-8') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            puns_list = list(csv_reader)
+            # Select a random pun
+            random_pun = random.choice(puns_list)
+            # Display the question and answer
+            question = f"{random_pun['question']}?"
+            answer = f"{random_pun['answer']}"
+            return render_template('view.html', values=[question, answer])
+    except FileNotFoundError:
+        logging.error(f"CSV file '{csv_file_path}' not found.")
+        return render_template('view.html', values=["An Error Ocurred."])
 
 if __name__ == '__main__':
     # add the console handler to the root logger
