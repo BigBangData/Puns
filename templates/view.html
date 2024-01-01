@@ -1,21 +1,19 @@
 {% extends "base.html" %}
 {% block title %}View{% endblock %}
 {% block content %}
+    <!-- flash messages before header -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for msg in messages %}
                 <p>{{msg}}</p>
             {% endfor %}
         {% endif %}
-    <!-- Redo for Puns -->
+    <h1>View</h1>
         {% for item in values %}
-            <p>Username: {{item.username}}, Password: {{item.password}}</p>
+            <p>Username: {{item.username}}</p>
         {% endfor %}
-    <!-- <form action="#" method="POST">
-        <p>Delete:</p>
-        <input type="username" name="username" placeholder="Enter Name" value="{{username if username}}"/>
-        <input type="submit" value="submit"/>
-    </form> -->
     {% endwith %}
-    <a href="{{url_for('logout')}}">Click here to logout.</a>
+    <hr>
+    <p style="text-align: center;"><a href="{{url_for('logout')}}">Logout</a></p>
+    <br>
 {% endblock %}
