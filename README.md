@@ -27,6 +27,7 @@ Todo:
 - read directly from `curated_puns.txt` no need to create a database for puns... I think, but might be easier not to duplicate puns
 
 Final Steps:
+- figure out security for app.config's secret_key
 - deploy to ubuntu server
 - follow Tim's last tutorial: https://www.youtube.com/watch?v=YFBRVJPhDGY&list=PLzMcBGfZo4-n4vJJybUVV3Un_NFS5EOgX&index=11
 
