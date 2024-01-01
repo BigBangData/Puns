@@ -1,4 +1,4 @@
-# Happy New Year
+# Puns
 
 Credits:
 - sourced puns from https://wstyler.ucsd.edu/puns/, among other random from memory.
@@ -22,9 +22,9 @@ Functionality:
 - after logging in, signup/login redirect to view
 
 Todo:
-- change view to the pun game
-- `curated_puns.txt`: manually curated text file that serves as input to create the database; in question?answer format
-- read directly from `curated_puns.txt` no need to create a database for puns... I think, but might be easier not to duplicate puns
+- add some functionality if user gets it right or wrong, within reason, maybe this is where the "LLMs" come in?
+- Jenny wants confetti when user gets it right
+- extra credit: embelish view pages, add some images without giving away the answer
 
 Final Steps:
 - figure out security for app.config's secret_key
