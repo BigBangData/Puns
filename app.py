@@ -1,7 +1,9 @@
 import os
 import csv
+import spacy
 import random
 import logging
+
 from datetime import datetime, timedelta
 from flask import Flask, redirect, url_for, render_template, flash, request, session
 from flask_sqlalchemy import SQLAlchemy
@@ -10,6 +12,9 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from flask_bcrypt import Bcrypt
+
+# custom import
+from db_model import app, db, User, Answer
 
 # setup logging for file and console
 if not os.path.exists('logs'):
@@ -22,17 +27,7 @@ console_handler.setLevel(logging.INFO)
 formatter = logging.Formatter(log_format)
 console_handler.setFormatter(formatter)
 
-# setup flask app
-app = Flask(__name__)
-# store session data for 5 min; works even if browser is open
-app.permanent_session_lifetime = timedelta(minutes=5)
-
-# setup database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'qwu#$)_@34FmkmKHDF02'
-db = SQLAlchemy(app)
-
+# User
 # security & login
 bcrypt = Bcrypt(app)
 login_manager = LoginManager()
@@ -44,14 +39,30 @@ login_manager.login_view = 'login'
 def load_user(user_id):
     return User.query.get(int(user_id))
 
-class User(db.Model, UserMixin):
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(20), nullable=False, unique=True)
-    password = db.Column(db.String(80), nullable=False)
+# Answer
+# Load English model to compare answers
+# downloaded with: python -m spacy download en_core_web_md
+nlp = spacy.load("en_core_web_md")
 
-    def __init__(self, username, password):
-        self.username = username
-        self.password = password
+def compare_texts(text1, text2):
+    doc1 = nlp(text1)
+    doc2 = nlp(text2)
+    # compute similary score
+    score = doc1.similarity(doc2)
+    # compare with threshold
+    # return 1 if score >= threshold else 0
+    return score
+
+def store_answer(user_answer, answer, score):
+    new_answer = Answer(
+        user_id=current_user.id,
+        answer=answer,
+        user_answer=user_answer,
+        score=score
+    )
+    current_user.answers.append(new_answer)
+    db.session.add(new_answer)
+    db.session.commit()
 
 class RegisterForm(FlaskForm):
     username = StringField(
@@ -79,6 +90,7 @@ class LoginForm(FlaskForm):
         , render_kw={"placeholder": "Password"}
     )
     submit = SubmitField("Login")
+
 
 # home
 @app.route('/')
@@ -190,6 +202,15 @@ def view():
         question, _ = get_pun()
         return render_template('view.html', values=[question])
 
+# Define get_reaction_message function first
+def get_reaction_message(score):
+    if score >= 0.8:
+        return "Punbelievable, you're on fire!"
+    elif 0.6 <= score < 0.8:
+        return "Punderful job."
+    else:
+        return "Hm, that wasn't puntastic."
+
 # view asnwer
 @app.route('/view_answer', methods=["POST", "GET"])
 @login_required
@@ -198,12 +219,19 @@ def view_answer():
     _, answer = get_pun()
     if request.method == "POST":
         # make sure text area is completed
-        textarea_value = request.form.get('user_answer')
-        if not textarea_value.strip():
+        user_answer = request.form.get('user_answer')
+        if not user_answer.strip():
             flash("Text area cannot be empty.", "info")
             return redirect(url_for('view'))
         else:
-            return render_template('view_answer.html', values=[answer])
+            # get score for text comparison
+            score = compare_texts(user_answer, answer)
+            # store data in answer table
+            store_answer(user_answer, answer, score)
+            # determine reaction based on the score
+            reaction_msg = get_reaction_message(score)
+            # flash(reaction_msg)
+            return render_template('view_answer.html', values=[reaction_msg, answer])
     else:
         return redirect(url_for('view'))
 
@@ -211,10 +239,12 @@ def view_answer():
 if __name__ == '__main__':
     # add the console handler to the root logger
     logging.getLogger('').addHandler(console_handler)
-    # access database
+    # initialize app with SQLAlchemy instance
+    # db.init_app(app)
+    # Create database tables given defined models
     with app.app_context():
-        db.create_all()
-    # run app
+       db.create_all()
+    # Run the app
     app.run(debug=True)
     # app.run(host='0.0.0.0', port=5000) # to run in prod
     # close the console handler to avoid resource leaks

@@ -22,62 +22,10 @@ Functionality:
 - after logging in, signup/login redirect to view
 
 Todo:
-- add some functionality if user gets it right or wrong, within reason, maybe this is where the "LLMs" come in?
+- Spacy doesn't seem to get answers correct (see below). Try another method?
+`select * from answer where id=16;`
 - Jenny wants confetti when user gets it right
 - extra credit: embelish view pages, add some images without giving away the answer
-
-Steps:
-- capture user answer in database
-- capture score comparing user answer and actual answer
-- 
-
-```python
-def submit_answer():
-    # Get data from the form or any other source
-    username = request.form.get('username')
-    actual_answer = request.form.get('actual_answer')
-    user_answer = request.form.get('user_answer')
-    score = float(request.form.get('score'))
-
-    # Retrieve the user from the database
-    user = User.query.filter_by(username=username).first()
-
-    if user:
-        # Create a new Answer instance
-        new_answer = Answer(
-            actual_answers=actual_answer,
-            user_answers=user_answer,
-            score=score
-        )
-
-        # Add the answer to the user's answers relationship
-        user.answers.append(new_answer)
-
-        # Commit the changes to the database
-        db.session.commit()
-
-        return "Answer submitted successfully"
-    else:
-        return "User not found"
-
-if __name__ == '__main__':
-    app.run(debug=True)
-
-
-
-
-
-
-
-
-
-
-
-```
-
-
-
-
 
 Tech Debt:
 ```
