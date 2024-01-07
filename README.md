@@ -21,11 +21,13 @@ Functionality:
 - view is the ultimate goal of signing up and logging in, it's where the action happens, and only place logging out is possible
 - after logging in, signup/login redirect to view
 
-Todo:
-- Spacy doesn't seem to get answers correct (see below). Try another method?
-`select * from answer where id=16;`
-- Jenny wants confetti when user gets it right
-- extra credit: embelish view pages, add some images without giving away the answer
+Ideas:
+- Spacy doesn't seem to get answers correct (see below). Try another method such as phonetic similarity.
+- Jenny wants confetti when user gets it right.
+- Embelish view pages, add some images without giving away the answer, or maybe just after giving the answer.
+- Maybe add "confetti" every time except instead it's an image related to the answer.
+- Unsure how much fun it is to submit and get it wrong too often, maybe instead of congratulating or not,
+    just show the scors given the models, and let user see how the model does instead of how user does.
 
 Tech Debt:
 ```
@@ -37,7 +39,8 @@ and becomes a legacy construct in 2.0. The method is now available as Session.ge
 
 Final Steps:
 - figure out security for app.config's secret_key
-- setup so that only a few chosen usernames can signup, password up to them, share with Jenny, who else?
+- use a better algo than bcrypt to hash passwords for chrissakes
+- setup so that only a few chosen usernames can signup, password up to them
 - deploy to ubuntu server
 - follow Tim's last tutorial: https://www.youtube.com/watch?v=YFBRVJPhDGY&list=PLzMcBGfZo4-n4vJJybUVV3Un_NFS5EOgX&index=11
 

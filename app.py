@@ -4,19 +4,17 @@ import spacy
 import random
 import logging
 
-from datetime import datetime, timedelta
-from flask import Flask, redirect, url_for, render_template, flash, request, session
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, LoginManager, login_user, login_required, logout_user, current_user
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
-from wtforms.validators import InputRequired, Length, ValidationError
-from flask_bcrypt import Bcrypt
+from datetime import datetime
+from flask import redirect, url_for, render_template, flash, request, session
+from flask_login import login_user, login_required, logout_user, current_user
 
-# custom import
+# custom
 from db_model import app, db, User, Answer
+from auth import bcrypt, RegisterForm, LoginForm
 
-# setup logging for file and console
+# Setup
+# -----
+# logging for file and console
 if not os.path.exists('logs'):
     os.makedirs('logs')
 log_file = os.path.join('logs', f"{datetime.now().strftime('%Y%m%d_%H%M%SMT')}.log")
@@ -27,19 +25,9 @@ console_handler.setLevel(logging.INFO)
 formatter = logging.Formatter(log_format)
 console_handler.setFormatter(formatter)
 
-# User
-# security & login
-bcrypt = Bcrypt(app)
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = 'login'
-
-# reload user object from user_id stored in session
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
-
-# Answer
+# Functions
+# ---------
+# Asnwer
 # Load English model to compare answers
 # downloaded with: python -m spacy download en_core_web_md
 nlp = spacy.load("en_core_web_md")
@@ -64,34 +52,42 @@ def store_answer(user_answer, answer, score):
     db.session.add(new_answer)
     db.session.commit()
 
-class RegisterForm(FlaskForm):
-    username = StringField(
-        validators=[InputRequired(), Length(min=4, max=20)]
-        , render_kw={"placeholder": "Username"}
-    )
-    password = PasswordField(
-        validators=[InputRequired(), Length(min=4, max=20)]
-        , render_kw={"placeholder": "Password"}
-    )
-    submit = SubmitField("Signup")
+# View
+def get_pun():
+    if 'question' not in session or 'answer' not in session:
+        # load static puns.csv
+        csv_file_path = os.path.join('static', 'files', 'puns.csv')
+        try:
+            with open(csv_file_path, 'r', encoding='utf-8') as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                puns_list = list(csv_reader)
+                # select random pun joke
+                random_pun = random.choice(puns_list)
+                # separate into question and answer
+                question = f"{random_pun['question']}?"
+                answer = f"{random_pun['answer']}"
+                # add to session to persist specific pair
+                session['question'] = question
+                session['answer'] = answer
+        except FileNotFoundError:
+            logging.error(f"CSV file '{csv_file_path}' not found.")
+    else:
+        question = session['question']
+        answer = session['answer']
+    # return new ones or same ones if already in session
+    return question, answer
 
-    def validate_username(self, username):
-        existing_user = User.query.filter_by(username=username.data).first()
-        if existing_user:
-            raise ValidationError("User exists.")
+# View Answer
+def get_reaction_message(score):
+    if score >= 0.8:
+        return "Punbelievable, you're on fire!"
+    elif 0.6 <= score < 0.8:
+        return "Punderful job."
+    else:
+        return "Hm, that wasn't puntastic."
 
-class LoginForm(FlaskForm):
-    username = StringField(
-        validators=[InputRequired(), Length(min=4, max=20)]
-        , render_kw={"placeholder": "Username"}
-    )
-    password = PasswordField(
-        validators=[InputRequired(), Length(min=4, max=20)]
-        , render_kw={"placeholder": "Password"}
-    )
-    submit = SubmitField("Login")
-
-
+# Routes
+# ------
 # home
 @app.route('/')
 def home():
@@ -116,7 +112,6 @@ def signup():
             logging.info(msg=msg)
             flash(msg, "info")
             return render_template("signup.html", form=form)
-    # "GET"
     else:
         try:
             msg = f"You're currently logged in as {current_user.username}. \
@@ -146,7 +141,6 @@ def login():
             else:
                 flash("Did you signup for an account yet?", "info")
                 return redirect(url_for('signup'))
-    # "GET"
     else:
         # cannot do "if current_user" since it exists, yet has no username
         try:
@@ -165,29 +159,7 @@ def logout():
     flash("You've logged out.", "info")
     return redirect(url_for('login'))
 
-def get_pun():
-    if 'question' not in session or 'answer' not in session:
-        # load static puns.csv
-        csv_file_path = os.path.join('static', 'files', 'puns.csv')
-        try:
-            with open(csv_file_path, 'r', encoding='utf-8') as csv_file:
-                csv_reader = csv.DictReader(csv_file)
-                puns_list = list(csv_reader)
-                # select random pun joke
-                random_pun = random.choice(puns_list)
-                # separate into question and answer
-                question = f"{random_pun['question']}?"
-                answer = f"{random_pun['answer']}"
-                # add to session to persist specific pair
-                session['question'] = question
-                session['answer'] = answer
-        except FileNotFoundError:
-            logging.error(f"CSV file '{csv_file_path}' not found.")
-    else:
-        question = session['question']
-        answer = session['answer']
-    # return new ones or same ones if already in session
-    return question, answer
+
 
 # view
 @app.route('/view', methods=["POST", "GET"])
@@ -202,14 +174,6 @@ def view():
         question, _ = get_pun()
         return render_template('view.html', values=[question])
 
-# Define get_reaction_message function first
-def get_reaction_message(score):
-    if score >= 0.8:
-        return "Punbelievable, you're on fire!"
-    elif 0.6 <= score < 0.8:
-        return "Punderful job."
-    else:
-        return "Hm, that wasn't puntastic."
 
 # view asnwer
 @app.route('/view_answer', methods=["POST", "GET"])
