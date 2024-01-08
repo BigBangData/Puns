@@ -1,19 +1,18 @@
 import os
 import csv
 import spacy
-import random
+import numpy
 import logging
 
 from datetime import datetime
 from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_user, login_required, logout_user, current_user
 
+
 # custom
-from db_model import app, db, User, Answer
+from db_model import app, db, User, Answer, Puns
 from auth import bcrypt, RegisterForm, LoginForm
 
-# Setup
-# -----
 # logging for file and console
 if not os.path.exists('logs'):
     os.makedirs('logs')
@@ -25,9 +24,20 @@ console_handler.setLevel(logging.INFO)
 formatter = logging.Formatter(log_format)
 console_handler.setFormatter(formatter)
 
-# Functions
-# ---------
-# Asnwer
+# load data from CSV and populate the puns table
+def populate_puns():
+    try:
+        csv_path = os.path.join('static', 'files', 'puns.csv')
+        with open(csv_path, 'r', encoding='utf-8') as csv_file:
+            csv_reader = csv.DictReader(csv_file)
+            for row in csv_reader:
+                new_pun = Puns(question=row['question'], answer=row['answer'])
+                db.session.add(new_pun)
+        db.session.commit()
+    except FileNotFoundError:
+        logging.error(f"CSV file '{csv_path}' not found.")
+
+# Answer
 # Load English model to compare answers
 # downloaded with: python -m spacy download en_core_web_md
 nlp = spacy.load("en_core_web_md")
@@ -41,12 +51,12 @@ def compare_texts(text1, text2):
     # return 1 if score >= threshold else 0
     return score
 
-def store_answer(user_answer, answer, score):
+def store_answer(user_id, pun_id, user_answer, score):
     new_answer = Answer(
-        user_id=current_user.id,
-        answer=answer,
-        user_answer=user_answer,
-        score=score
+        user_id=user_id
+        , pun_id=pun_id
+        , user_answer=user_answer
+        , score=score
     )
     current_user.answers.append(new_answer)
     db.session.add(new_answer)
@@ -54,28 +64,37 @@ def store_answer(user_answer, answer, score):
 
 # View
 def get_pun():
-    if 'question' not in session or 'answer' not in session:
-        # load static puns.csv
-        csv_file_path = os.path.join('static', 'files', 'puns.csv')
-        try:
-            with open(csv_file_path, 'r', encoding='utf-8') as csv_file:
-                csv_reader = csv.DictReader(csv_file)
-                puns_list = list(csv_reader)
-                # select random pun joke
-                random_pun = random.choice(puns_list)
-                # separate into question and answer
-                question = f"{random_pun['question']}?"
-                answer = f"{random_pun['answer']}"
-                # add to session to persist specific pair
-                session['question'] = question
-                session['answer'] = answer
-        except FileNotFoundError:
-            logging.error(f"CSV file '{csv_file_path}' not found.")
+    if 'pun_id' not in session:
+        # get the max pun_id for user in answers table
+        pun_ids = Answer.query.with_entities(Answer.pun_id)\
+            .filter_by(user_id=current_user.id).distinct().all()
+        pun_ids = [id[0] for id in pun_ids]
+        # check that there are answers for this user before taking max
+        if pun_ids == []:
+            max_pun_id = 0
+        else:
+            max_pun_id = numpy.max(pun_ids)
+        # compute next pun id
+        next_pun_id = max_pun_id + 1
+        logging.info(f"Next pun id = {next_pun_id}")
+        # why does this fail on the 2nd ID?
+        pun = Puns.query.get(next_pun_id)
+        logging.info(f"Pun object from query: {pun}")
+        # this fails on the second time because None has no attribute id
+        pun_id = pun.id
+        question = f"{pun.question}?"
+        answer = pun.answer
+        # add to session to persist specific pair
+        session['pun_id'] = pun_id
+        session['question'] = question
+        session['answer'] = answer
+        logging.info(f"{session}")
     else:
+        pun_id = session['pun_id']
         question = session['question']
         answer = session['answer']
     # return new ones or same ones if already in session
-    return question, answer
+    return pun_id, question, answer
 
 # View Answer
 def get_reaction_message(score):
@@ -159,30 +178,29 @@ def logout():
     flash("You've logged out.", "info")
     return redirect(url_for('login'))
 
-
-
 # view
 @app.route('/view', methods=["POST", "GET"])
 @login_required
 def view():
     if request.method == "POST":
         # clear session variables related to question and answer
+        session.pop('pun_id', None)
         session.pop('question', None)
         session.pop('answer', None)
         return redirect(url_for('view_answer'))
     else:
-        question, _ = get_pun()
+        _, question, _ = get_pun()
         return render_template('view.html', values=[question])
-
 
 # view asnwer
 @app.route('/view_answer', methods=["POST", "GET"])
 @login_required
 def view_answer():
     # get session answer
-    _, answer = get_pun()
+    pun_id, _, answer = get_pun()
     if request.method == "POST":
         # make sure text area is completed
+        user_id = current_user.id
         user_answer = request.form.get('user_answer')
         if not user_answer.strip():
             flash("Text area cannot be empty.", "info")
@@ -191,7 +209,12 @@ def view_answer():
             # get score for text comparison
             score = compare_texts(user_answer, answer)
             # store data in answer table
-            store_answer(user_answer, answer, score)
+            store_answer(
+                user_id=user_id
+                , pun_id=pun_id
+                , user_answer=user_answer
+                , score=score
+            )
             # determine reaction based on the score
             reaction_msg = get_reaction_message(score)
             # flash(reaction_msg)
@@ -208,6 +231,7 @@ if __name__ == '__main__':
     # Create database tables given defined models
     with app.app_context():
        db.create_all()
+       populate_puns()
     # Run the app
     app.run(debug=True)
     # app.run(host='0.0.0.0', port=5000) # to run in prod

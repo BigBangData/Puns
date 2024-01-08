@@ -22,6 +22,7 @@ Functionality:
 - after logging in, signup/login redirect to view
 
 Ideas:
+- Go through questions in order for every user instead of randomly, persist questions asked through sessions
 - Spacy doesn't seem to get answers correct (see below). Try another method such as phonetic similarity.
 - Jenny wants confetti when user gets it right.
 - Embelish view pages, add some images without giving away the answer, or maybe just after giving the answer.
