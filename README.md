@@ -23,6 +23,8 @@ Functionality:
 
 Ideas:
 - Go through questions in order for every user instead of randomly, persist questions asked through sessions
+    + see https://chat.openai.com/c/f9163661-dede-4b94-bb4f-a2890e7deab8 (ultimately had to troubleshoot myself)
+
 - Spacy doesn't seem to get answers correct (see below). Try another method such as phonetic similarity.
 - Jenny wants confetti when user gets it right.
 - Embelish view pages, add some images without giving away the answer, or maybe just after giving the answer.

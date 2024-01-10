@@ -13,9 +13,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'qwu#$)_@34FmkmKHDF02'
 
-# uncomment for creating new database from scratch
-if 'sqlalchemy' in app.extensions:
-   del app.extensions['sqlalchemy']
+# # uncomment for creating new database from scratch
+# if 'sqlalchemy' in app.extensions:
+#    del app.extensions['sqlalchemy']
 
 # instantiate database
 db = SQLAlchemy(app)
