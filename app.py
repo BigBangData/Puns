@@ -1,57 +1,13 @@
-import os
-import csv
-import spacy
-import numpy
 import logging
-
 from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_required, current_user
-from sqlalchemy.orm import Session
-
-# custom
+# custom imports
 from db_model import app, db, Answer, Puns
 from login import login_bp, start_logs
+from answer import compare_answer_similarity, store_answer
 
 # register the login blueprint
 app.register_blueprint(login_bp)
-
-# load data from CSV and populate the puns table
-def populate_puns():
-    try:
-        csv_path = os.path.join('static', 'files', 'puns.csv')
-        with open(csv_path, 'r', encoding='utf-8') as csv_file:
-            csv_reader = csv.DictReader(csv_file)
-            for row in csv_reader:
-                new_pun = Puns(question=row['question'], answer=row['answer'])
-                db.session.add(new_pun)
-        db.session.commit()
-    except FileNotFoundError:
-        logging.error(f"CSV file '{csv_path}' not found.")
-
-# Answer
-# Load English model to compare answers
-# downloaded with: python -m spacy download en_core_web_md
-nlp = spacy.load("en_core_web_md")
-
-def compare_texts(text1, text2):
-    doc1 = nlp(text1)
-    doc2 = nlp(text2)
-    # compute similary score
-    score = doc1.similarity(doc2)
-    # compare with threshold
-    # return 1 if score >= threshold else 0
-    return score
-
-def store_answer(user_id, pun_id, user_answer, score):
-    new_answer = Answer(
-        user_id=user_id
-        , pun_id=pun_id
-        , user_answer=user_answer
-        , score=score
-    )
-    current_user.answers.append(new_answer)
-    db.session.add(new_answer)
-    db.session.commit()
 
 # View
 def get_users_latest_answer():
@@ -82,7 +38,7 @@ def get_next_pun():
         # use filter query to get the pun row
         pun = Puns.query.filter_by(id=next_pun_id).first()
         logging.info(f"Pun object id: {pun}")
-
+        # None when next pun_id isn't in the puns table
         if pun is None:
             logging.info(f"User {current_user.id} answered all puns.")
             # No more puns for the user, start back at first pun
@@ -147,7 +103,7 @@ def view_answer():
             return redirect(url_for('view'))
         else:
             # get score for text comparison
-            score = compare_texts(user_answer, answer)
+            score = compare_answer_similarity(user_answer, answer)
             # store data in answer table
             store_answer(
                 user_id=user_id
@@ -173,7 +129,6 @@ if __name__ == '__main__':
     # Create database tables given defined models
     with app.app_context():
        db.create_all()
-       populate_puns()
     # Run the app
     app.run(debug=True)
     # app.run(host='0.0.0.0', port=5000) # to run in prod
