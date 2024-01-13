@@ -54,31 +54,37 @@ def store_answer(user_id, pun_id, user_answer, score):
     db.session.commit()
 
 # View
+def get_users_latest_answer():
+    """Helper function for get_next_pun()"""
+    latest_answer = (
+        db.session.query(Answer)
+            .filter_by(user_id=current_user.id)
+            .order_by(Answer.id.desc())
+            .first()
+    )
+    if latest_answer:
+        latest_pun_id = latest_answer.pun_id
+        logging.info(f"latest_pun_id: {latest_pun_id}")
+    else:
+        logging.info(f"No answers found for {current_user.id}.")
+        latest_pun_id = 0
+    return latest_pun_id
+
 def get_next_pun():
+    """Gets the next pun."""
     if 'pun_id' not in session:
-        # get the max pun_id for user in answers table
-        pun_ids = Answer.query.with_entities(Answer.pun_id)\
-            .filter_by(user_id=current_user.id).distinct().all()
-        pun_ids = [id[0] for id in pun_ids]
-        # check that there are answers for this user before taking max
-        logging.info(f"Current pun_ids: {pun_ids}")
-        if pun_ids == []:
-            max_pun_id = 0
-        else:
-            # great the first time around, but the second time around the max is the same
-            # so it maxes out and goes back to the first pun every time and gets stuck on id=1
-            max_pun_id = numpy.max(pun_ids)
-            logging.info(f"Else max_pun_id: {max_pun_id}")
-        # compute next pun id
-        # convert to int because Puns query cannot handle class 'numpy.int32'
-        next_pun_id = int(max_pun_id + 1)
-        # logging.info(f"Next pun id = {next_pun_id}")
-        # Use filter query to get the pun
-        # logging.info(f"Type: {type(int(next_pun_id))}")
+        # get users' latest pun_id
+        # 0 if user hasn't answered yet
+        latest_pun_id = get_users_latest_answer()
+        # get next pun
+        next_pun_id = latest_pun_id + 1
+        logging.info(f"next_pun_id: {next_pun_id}")
+        # use filter query to get the pun row
         pun = Puns.query.filter_by(id=next_pun_id).first()
-        # logging.info(f"Pun object from query: {pun}")
+        logging.info(f"Pun object id: {pun}")
+
         if pun is None:
-            logging.info(f"User {current_user.id} maxed out of the puns table")
+            logging.info(f"User {current_user.id} answered all puns.")
             # No more puns for the user, start back at first pun
             pun = Puns.query.filter_by(id=1).first()
         # get pun id, question, answer from pun object

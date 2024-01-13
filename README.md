@@ -32,13 +32,6 @@ Ideas:
 - Unsure how much fun it is to submit and get it wrong too often, maybe instead of congratulating or not,
     just show the scors given the models, and let user see how the model does instead of how user does.
 
-Tech Debt:
-```
-app.py:45: LegacyAPIWarning: The Query.get() method is considered legacy as of the 1.x series of SQLAlchemy 
-and becomes a legacy construct in 2.0. The method is now available as Session.get() (deprecated since: 2.0) 
-(Background on SQLAlchemy 2.0 at: https://sqlalche.me/e/b8d9)
-    return User.query.get(int(user_id))
-```
 
 Final Steps:
 - figure out security for app.config's secret_key
