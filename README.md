@@ -25,47 +25,31 @@ Ideas:
 - 1. Go through questions in order for every user instead of randomly, persist questions asked through sessions [DONE]
     + After user goes through all the questions, start at the beginning again
 - 2. Spacy doesn't seem to get answers correct (see below). Try another method such as phonetic similarity [STARTED]
+    + So far the word2vec approach is rough, lots of errors to debug.
+    + NOTE: don't forget to populate the puns table - not sure having a separate script is ideal.
 
 See ideas in this chat: https://chat.openai.com/share/68f55fbf-1d69-40ae-bb2a-ee26d4513a81
 
-    Given the nature of puns relying on wordplay and sound, a better approach could be to use techniques specifically designed for semantic similarity or word embeddings. One popular method is to use word embeddings such as Word2Vec, GloVe, or fastText. These embeddings capture semantic relationships between words and might be more suitable for understanding the nuanced similarities in puns.
+__Word Embeddings__
 
-    Here's a brief overview of how you could approach this using Word2Vec embeddings:
+One popular method is to use word embeddings such as Word2Vec, GloVe, or fastText. These embeddings capture semantic relationships between words and might be more suitable for understanding the nuanced similarities in puns. Here's a brief overview of Word2Vec:
 
-    Word Embeddings Preparation:
+1. Word Embeddings Preparation:
+    - Download pre-trained Word2Vec embeddings or train your own on a corpus that includes puns.
+    - Convert each word in your user's answer and actual answer to its corresponding vector representation.
 
-    Download pre-trained Word2Vec embeddings or train your own on a corpus that includes puns.
-    Convert each word in your user's answer and actual answer to its corresponding vector representation.
-    Vector Comparison:
+2. Vector Comparison:
+    - Calculate the similarity score between the user's answer and the actual answer by comparing the vectors of individual words.
+    - Aggregate these scores to get an overall similarity measure.
 
-    Calculate the similarity score between the user's answer and the actual answer by comparing the vectors of individual words.
-    Aggregate these scores to get an overall similarity measure.
-    Threshold Adjustment:
+3. Threshold Adjustment:
+    - Set a threshold based on your observations. Adjust it to find a balance that works for your specific case.
 
-    Set a threshold based on your observations. Adjust it to find a balance that works for your specific case.
-    Here's a simplified example using the Gensim library, which includes Word2Vec:
+See https://github.com/piskvorky/gensim-data for a list of pre-trained models.
 
-```python
-    from gensim.models import Word2Vec
-    from gensim.similarities import cosine_similarity
 
-    # Load pre-trained Word2Vec model
-    word2vec_model = Word2Vec.load('path/to/word2vec_model')
+__Phonetic Similarity__
 
-    def compare_texts_with_word2vec(text1, text2, threshold):
-        # Tokenize and get vectors for each word in the texts
-        tokens1 = [word for word in text1.split() if word in word2vec_model.wv.vocab]
-        tokens2 = [word for word in text2.split() if word in word2vec_model.wv.vocab]
-
-        # Calculate cosine similarity between the vectors
-        similarity_scores = cosine_similarity(word2vec_model[tokens1], word2vec_model[tokens2])
-
-        # Calculate the average similarity score
-        avg_similarity = similarity_scores.mean()
-
-        # Return 1 if similarity is above the threshold, else return 0
-        return 1 if avg_similarity >= threshold else 0
-```
 To incorporate phonetic similarity, you can leverage a library that focuses on sound-alike comparisons, such as the Double Metaphone algorithm. This algorithm phonetically encodes words, allowing you to compare their sounds rather than their literal spellings.
 
 Here's an example of how you could integrate Double Metaphone into your comparison function:

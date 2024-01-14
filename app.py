@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 # custom imports
 from db_model import app, db, Answer, Puns
 from login import login_bp, start_logs
-from answer import compare_answer_similarity, store_answer
+from answer import compare_answer_similarity, get_mean_cosine_similarity, store_answer
 
 # register the login blueprint
 app.register_blueprint(login_bp)
@@ -22,7 +22,7 @@ def get_users_latest_answer():
         latest_pun_id = latest_answer.pun_id
         logging.info(f"latest_pun_id: {latest_pun_id}")
     else:
-        logging.info(f"No answers found for {current_user.id}.")
+        logging.info(f"No answers found for user: {current_user.id}.")
         latest_pun_id = 0
     return latest_pun_id
 
@@ -59,13 +59,9 @@ def get_next_pun():
     return pun_id, question, answer
 
 # View Answer
+# Instead: create some sort of table of results for the different models.
 def get_reaction_message(score):
-    if score >= 0.8:
-        return "Punbelievable, you're on fire!"
-    elif 0.6 <= score < 0.8:
-        return "Punderful job."
-    else:
-        return "Hm, that wasn't puntastic."
+    return f"Punbelievable, your score is: {score}"
 
 # Routes
 # home
@@ -102,8 +98,9 @@ def view_answer():
             flash("Text area cannot be empty.", "info")
             return redirect(url_for('view'))
         else:
-            # get score for text comparison
+            # get score for text comparison using Spacy
             score = compare_answer_similarity(user_answer, answer)
+            avg_similarity = get_mean_cosine_similarity(user_answer, answer)
             # store data in answer table
             store_answer(
                 user_id=user_id
@@ -112,9 +109,11 @@ def view_answer():
                 , score=score
             )
             # determine reaction based on the score
-            reaction_msg = get_reaction_message(score)
-            # flash(reaction_msg)
-            return render_template('view_answer.html', values=[reaction_msg, answer])
+            score_msg = get_reaction_message(score)
+            avg_similarity_msg = get_reaction_message(avg_similarity)
+            flash(f"Mean similarity: {avg_similarity}")
+            # return template with reactions
+            return render_template('view_answer.html', values=[score_msg, avg_similarity_msg, answer])
     else:
         return redirect(url_for('view'))
 
