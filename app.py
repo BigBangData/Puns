@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 # custom imports
 from db_model import app, db, Answer, Puns
 from login import login_bp, start_logs
-from answer import compare_text_similarity, compare_phonetic_similarity, store_answer
+from answer import compare_text_similarity, calculate_phonetic_fuzzy_similarity, store_answer
 
 # register the login blueprint
 app.register_blueprint(login_bp)
@@ -113,7 +113,7 @@ def view_answer():
             user_answer = user_answer.replace('\n', '').replace('\r', '')
             # get score for text comparison using Spacy
             t_score = compare_text_similarity(user_answer, answer)
-            p_score = compare_phonetic_similarity(user_answer, answer)
+            p_score = calculate_phonetic_fuzzy_similarity(user_answer, answer)
             # round score
             t_score_4pt = float(np.round(t_score, 4))
             p_score_4pt = float(np.round(p_score, 4))

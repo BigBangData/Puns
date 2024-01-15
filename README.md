@@ -28,16 +28,9 @@ __Ideas__
     + After user goes through all the questions, start at the beginning again
 - 2. Spacy doesn't seem to get answers correct (see below). Try another method such as phonetic similarity [DONE]
     + word2vec approach is cumbersome, slows down the app and has dubious results
-    + phonetic similarity v1 complete, need to user test it and understand what it does more fully
-
-__To Do__
-
-- Confetti when user gets it right? Average scores and set a threshold?
-- Add some images without giving away the answer, or maybe just after giving the answer.
-- Maybe add "confetti" every time except instead it's an image related to the answer.
-- Unsure how much fun it is to submit and get it wrong too often, maybe instead of congratulating or not,
-    just show the scors given the models, and let user see how the model does instead of how user does.
-
+    + phonetic fuzzy similarity completed
+- 3. Average scores and set a threshold for success + message and confetti or images
+- 4. Change homepage image
 
 __Final Steps__
 
