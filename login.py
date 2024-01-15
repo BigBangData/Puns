@@ -11,7 +11,6 @@ from auth import bcrypt, RegisterForm, LoginForm
 # define blueprint for login.py
 login_bp = Blueprint('login', __name__)
 
-# ------
 # logging for file and console
 def start_logs():
     if not os.path.exists('logs'):

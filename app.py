@@ -1,3 +1,4 @@
+import numpy
 import logging
 from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_required, current_user
@@ -62,10 +63,6 @@ def get_next_pun():
         answer = session['answer']
     return pun_id, question, answer
 
-# View Answer
-# Create some sort of table of results instead
-def get_reaction_message(score, type):
-    return f"The {type} score is: {score}"
 
 # Routes
 # home
@@ -77,14 +74,19 @@ def home():
 @app.route('/view', methods=["POST", "GET"])
 @login_required
 def view():
+    """Delivers pun question.
+    Uses get_next_pun(), which checks for session data.
+    Session pun data is cleared when either:
+        1. Users login, or
+        2. Users answer a question ("POST" method below)
+    """
     if request.method == "POST":
-        # clear session variables related to question and answer
+        # POST: clear session pun data
         session.pop('pun_id', None)
         session.pop('question', None)
         session.pop('answer', None)
         return redirect(url_for('view_answer'))
     else:
-        # GET method should already have session pun_id, etc. but...
         _, question, _ = get_next_pun()
         return render_template('view.html', values=[question])
 
@@ -92,6 +94,10 @@ def view():
 @app.route('/view_answer', methods=["POST", "GET"])
 @login_required
 def view_answer():
+    """Delivers pun answer.
+    Uses get_next_pun(), which checks for session data.
+    Compares user answer with pun answer and returns scores.
+    """
     # get session answer
     pun_id, _, answer = get_next_pun()
     if request.method == "POST":
@@ -104,6 +110,8 @@ def view_answer():
         else:
             # get score for text comparison using Spacy
             score = compare_answer_similarity(user_answer, answer)
+            # round score
+            score = float(numpy.round(score, 4))
             # store data in answer table
             store_answer(
                 user_id=user_id
@@ -111,10 +119,14 @@ def view_answer():
                 , user_answer=user_answer
                 , score=score
             )
-            # determine reaction based on the score
-            score_msg = get_reaction_message(score, 'text_similarity')
             # return template with reactions
-            return render_template('view_answer.html', values=[score_msg, answer])
+            return render_template(
+                        'view_answer.html'
+                        , values=[answer]
+                        , user_answer=user_answer
+                        , score=score
+                        , type='Text Similarity'
+                    )
     else:
         return redirect(url_for('view'))
 
