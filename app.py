@@ -104,10 +104,13 @@ def view_answer():
         # make sure text area is completed
         user_id = current_user.id
         user_answer = request.form.get('user_answer')
+
         if not user_answer.strip():
             flash("Text area cannot be empty.", "info")
             return redirect(url_for('view'))
         else:
+            # remove newlines
+            user_answer = user_answer.replace('\n', '').replace('\r', '')
             # get score for text comparison using Spacy
             score = compare_answer_similarity(user_answer, answer)
             # round score
