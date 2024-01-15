@@ -1,7 +1,7 @@
 import os
 import logging
 from datetime import datetime
-from flask import Blueprint, redirect, url_for, render_template, flash, request
+from flask import Blueprint, redirect, url_for, render_template, flash, request, session
 from flask_login import login_user, login_required, logout_user, current_user
 
 # custom
@@ -63,6 +63,10 @@ def login():
             user_id = User.query.filter_by(username=form.username.data).first()
             if user_id:
                 if bcrypt.check_password_hash(user_id.password, form.password.data):
+                    # clear any session variables related to question and answer
+                    session.pop('pun_id', None)
+                    session.pop('question', None)
+                    session.pop('answer', None)
                     login_user(user_id)
                     flash(f"Hello {user_id.username}, you are logged in.", "info")
                     return redirect(url_for('view'))

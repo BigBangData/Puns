@@ -44,10 +44,13 @@ def get_mean_cosine_similarity(text1, text2):
     tokens1 = [word for word in text1.split() if word in w2v_model.key_to_index]
     tokens2 = [word for word in text2.split() if word in w2v_model.key_to_index]
     # Calculate cosine similarity between the vectors
-    similarity_scores = cosine_similarity(w2v_model[tokens1], w2v_model[tokens2])
-    # Calculate the average similarity score
-    avg_similarity = similarity_scores.mean()
-    # return 1 if avg_similarity >= thresh else 0
+    try:
+        similarity_scores = cosine_similarity(w2v_model[tokens1], w2v_model[tokens2])
+        # Calculate the average similarity score
+        avg_similarity = similarity_scores.mean()
+        # return 1 if avg_similarity >= thresh else 0
+    except ValueError:
+        avg_similarity = 0
     return avg_similarity
 
 # Answer table

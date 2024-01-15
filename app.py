@@ -4,7 +4,7 @@ from flask_login import login_required, current_user
 # custom imports
 from db_model import app, db, Answer, Puns
 from login import login_bp, start_logs
-from answer import compare_answer_similarity, get_mean_cosine_similarity, store_answer
+from answer import compare_answer_similarity, store_answer
 
 # register the login blueprint
 app.register_blueprint(login_bp)
@@ -12,35 +12,39 @@ app.register_blueprint(login_bp)
 # View
 def get_users_latest_answer():
     """Helper function for get_next_pun()"""
-    latest_answer = (
+    last_answer = (
         db.session.query(Answer)
             .filter_by(user_id=current_user.id)
             .order_by(Answer.id.desc())
             .first()
     )
-    if latest_answer:
-        latest_pun_id = latest_answer.pun_id
-        logging.info(f"latest_pun_id: {latest_pun_id}")
+    if last_answer:
+        last_pun_id = last_answer.pun_id
+        logging.info(f"User {current_user} - lastest pun id {last_pun_id}")
     else:
-        logging.info(f"No answers found for user: {current_user.id}.")
-        latest_pun_id = 0
-    return latest_pun_id
+        logging.info(f"No answers found for user: {current_user}.")
+        last_pun_id = 0
+    # return last pun_id
+    return last_pun_id
 
 def get_next_pun():
     """Gets the next pun."""
     if 'pun_id' not in session:
         # get users' latest pun_id
         # 0 if user hasn't answered yet
-        latest_pun_id = get_users_latest_answer()
+        if current_user.is_authenticated:
+            latest_pun_id = get_users_latest_answer()
+        else:
+            latest_pun_id = 0
         # get next pun
         next_pun_id = latest_pun_id + 1
-        logging.info(f"next_pun_id: {next_pun_id}")
+        logging.info(f"Next pun id: {next_pun_id}")
         # use filter query to get the pun row
         pun = Puns.query.filter_by(id=next_pun_id).first()
-        logging.info(f"Pun object id: {pun}")
+        logging.info(f"Pun object: {pun}")
         # None when next pun_id isn't in the puns table
         if pun is None:
-            logging.info(f"User {current_user.id} answered all puns.")
+            logging.info(f"User {current_user} answered all puns.")
             # No more puns for the user, start back at first pun
             pun = Puns.query.filter_by(id=1).first()
         # get pun id, question, answer from pun object
@@ -59,9 +63,9 @@ def get_next_pun():
     return pun_id, question, answer
 
 # View Answer
-# Instead: create some sort of table of results for the different models.
-def get_reaction_message(score):
-    return f"Punbelievable, your score is: {score}"
+# Create some sort of table of results instead
+def get_reaction_message(score, type):
+    return f"The {type} score is: {score}"
 
 # Routes
 # home
@@ -100,7 +104,6 @@ def view_answer():
         else:
             # get score for text comparison using Spacy
             score = compare_answer_similarity(user_answer, answer)
-            avg_similarity = get_mean_cosine_similarity(user_answer, answer)
             # store data in answer table
             store_answer(
                 user_id=user_id
@@ -109,11 +112,9 @@ def view_answer():
                 , score=score
             )
             # determine reaction based on the score
-            score_msg = get_reaction_message(score)
-            avg_similarity_msg = get_reaction_message(avg_similarity)
-            flash(f"Mean similarity: {avg_similarity}")
+            score_msg = get_reaction_message(score, 'text_similarity')
             # return template with reactions
-            return render_template('view_answer.html', values=[score_msg, avg_similarity_msg, answer])
+            return render_template('view_answer.html', values=[score_msg, answer])
     else:
         return redirect(url_for('view'))
 

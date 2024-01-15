@@ -26,9 +26,11 @@ Ideas:
     + After user goes through all the questions, start at the beginning again
 - 2. Spacy doesn't seem to get answers correct (see below). Try another method such as phonetic similarity [STARTED]
     + So far the word2vec approach is rough, lots of errors to debug.
-    + NOTE: don't forget to populate the puns table - not sure having a separate script is ideal.
 
-See ideas in this chat: https://chat.openai.com/share/68f55fbf-1d69-40ae-bb2a-ee26d4513a81
+__NOTE__
+- Don't forget to populate the puns table
+- Reassess need for separate script, idea is that the table is static and should be part of an app that is constantly running
+- Maybe ask chatGPT for help on best practices
 
 __Word Embeddings__
 
@@ -82,8 +84,8 @@ Here's an example of how you could integrate Double Metaphone into your comparis
         return 1 if all(score >= phonetic_threshold for score in phonetic_scores) and combined_similarity >= semantic_threshold else 0
 ```
 
-- Jenny wants confetti when user gets it right.
-- Embelish view pages, add some images without giving away the answer, or maybe just after giving the answer.
+- Confetti when user gets it right?
+- Maybe just embelish view pages, add some images without giving away the answer, or maybe just after giving the answer.
 - Maybe add "confetti" every time except instead it's an image related to the answer.
 - Unsure how much fun it is to submit and get it wrong too often, maybe instead of congratulating or not,
     just show the scors given the models, and let user see how the model does instead of how user does.
