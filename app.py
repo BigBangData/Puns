@@ -1,11 +1,11 @@
-import numpy
 import logging
+import numpy as np
 from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_required, current_user
 # custom imports
 from db_model import app, db, Answer, Puns
 from login import login_bp, start_logs
-from answer import compare_answer_similarity, store_answer
+from answer import compare_text_similarity, compare_phonetic_similarity, store_answer
 
 # register the login blueprint
 app.register_blueprint(login_bp)
@@ -94,9 +94,9 @@ def view():
 @app.route('/view_answer', methods=["POST", "GET"])
 @login_required
 def view_answer():
-    """Delivers pun answer.
+    """Delivers pun answer and results.
     Uses get_next_pun(), which checks for session data.
-    Compares user answer with pun answer and returns scores.
+    Compares user answer with pun answer given methods; returns scores.
     """
     # get session answer
     pun_id, _, answer = get_next_pun()
@@ -112,24 +112,32 @@ def view_answer():
             # remove newlines
             user_answer = user_answer.replace('\n', '').replace('\r', '')
             # get score for text comparison using Spacy
-            score = compare_answer_similarity(user_answer, answer)
+            t_score = compare_text_similarity(user_answer, answer)
+            p_score = compare_phonetic_similarity(user_answer, answer)
             # round score
-            score = float(numpy.round(score, 4))
+            t_score_4pt = float(np.round(t_score, 4))
+            p_score_4pt = float(np.round(p_score, 4))
+            # # convert to array
+            # t_score_arr = np.array([t_score_4pt])
+            # p_score_arr = np.array([p_score_4pt])
+            # # calculate mean score
+            # mean_score = np.mean([t_score_arr, p_score_arr])
             # store data in answer table
             store_answer(
                 user_id=user_id
                 , pun_id=pun_id
                 , user_answer=user_answer
-                , score=score
+                , t_score=t_score_4pt
+                , p_score=p_score_4pt
             )
-            # return template with reactions
-            return render_template(
-                        'view_answer.html'
-                        , values=[answer]
-                        , user_answer=user_answer
-                        , score=score
-                        , type='Text Similarity'
-                    )
+            # zip data
+            data = zip(
+                [user_answer, user_answer]
+                , ['Textual', 'Phonetic']
+                , [t_score_4pt, p_score_4pt]
+            )
+            # return view answer
+            return render_template('view_answer.html', values=[answer], data=data)
     else:
         return redirect(url_for('view'))
 

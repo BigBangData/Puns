@@ -20,16 +20,18 @@
                 <thead>
                     <tr>
                         <th>Your Answer</th>
-                        <th>Match Type</th>
-                        <th>Score</th>
+                        <th>Similarity Type</th>
+                        <th>Match Score</th>
                     </tr>
                 </thead>
                 <tbody>
+                    {% for user_answer, type, score in data %}
                     <tr>
                         <td>{{ user_answer }}</td>
                         <td>{{ type }}</td>
                         <td>{{ score }}</td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
             <!-- no textarea box -->

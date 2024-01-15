@@ -49,5 +49,6 @@ class Answer(db.Model):
     pun_id = db.Column(db.Integer, db.ForeignKey('puns.id'), nullable=False)
     # user answer & score compared to pun answer
     user_answer = db.Column(db.String(100), nullable=False)
-    score = db.Column(db.Float, nullable=False)
+    text_similarity_score = db.Column(db.Float, nullable=False)
+    phonetic_similarity_score = db.Column(db.Float, nullable=False)
 
