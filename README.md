@@ -24,17 +24,17 @@ __Functionality__
 - after logging in, signup/login redirect to view
 
 __Ideas__
-- 1. Go through questions in order for every user instead of randomly, persist questions asked through sessions [DONE]
-    + After user goes through all the questions, start at the beginning again
-- 2. Spacy doesn't seem to get answers correct (see below). Try another method such as phonetic similarity [DONE]
-    + word2vec approach is cumbersome, slows down the app and has dubious results
-    + phonetic fuzzy similarity completed
-- 3. Average scores and set a threshold for success + message and confetti or images
-- 4. Add hints?
-- 5. Add a "go back to last one" button?
-- 6. Add a grid with numbers for all the puns or a select by number or...
-- 7. Strip user input of newlines BEFORE doing matching, also strip for security reasons (no SQL)
-- 8. Delete all the printing of securecookiesession and whatnot.
+1. Go through questions in order for every user instead of randomly, persist questions asked through sessions [DONE]
+  + After user goes through all the questions, start at the beginning again
+2. Spacy doesn't seem to get answers correct (see below). Try another method such as phonetic similarity [DONE]
+  + word2vec approach is cumbersome, slows down the app and has dubious results
+  + phonetic fuzzy similarity completed
+3. Average scores and set a threshold for success + message and confetti or images
+4. Add hints?
+5. Add a "go back to last one" button?
+6. Add a grid with numbers for all the puns or a select by number or...
+7. Strip user input of newlines BEFORE doing matching, also strip for security reasons (no SQL)
+8. Delete all the printing of securecookiesession and whatnot.
 
 __Final Steps__
 
