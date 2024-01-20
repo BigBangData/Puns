@@ -51,5 +51,6 @@ class Answer(db.Model):
     user_answer = db.Column(db.String(100), nullable=False)
     md_txt_sim_score = db.Column(db.Float, nullable=False)
     sm_txt_sim_score = db.Column(db.Float, nullable=False)
+    st_txt_sim_score = db.Column(db.Float, nullable=False)
     phonetic_fuzzy_sim_score = db.Column(db.Float, nullable=False)
 

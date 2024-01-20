@@ -2,10 +2,15 @@ import spacy
 import numpy as np
 from fuzzywuzzy import fuzz
 from metaphone import doublemetaphone
+from sentence_transformers import SentenceTransformer, util
 
 # custom
 from flask_login import current_user
 from db_model import db, Answer
+
+# Sentence Transformer text similarity
+# ------------------------------------
+st_nlp = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
 # Spacy text similarity
 # ---------------------
@@ -13,11 +18,16 @@ from db_model import db, Answer
 md_nlp = spacy.load("en_core_web_md")
 sm_nlp = spacy.load("en_core_web_sm")
 
-def get_text_similarity_score(text1, text2, model):
+def get_text_similarity_score(text1, text2, model, transf: bool=False):
     """Get text similarity score given two texts and a model"""
-    doc1 = model(text1)
-    doc2 = model(text2)
-    t_score = doc1.similarity(doc2)
+    if transf:
+        embed1 = model.encode(text1, convert_to_tensor=True)
+        embed2 = model.encode(text2, convert_to_tensor=True)
+        t_score = util.pytorch_cos_sim(embed1, embed2).item()
+    else:
+        doc1 = model(text1)
+        doc2 = model(text2)
+        t_score = doc1.similarity(doc2)
     return t_score
 
 def get_md_text_similarity(text1, text2, model=md_nlp):
@@ -25,6 +35,10 @@ def get_md_text_similarity(text1, text2, model=md_nlp):
 
 def get_sm_text_similarity(text1, text2, model=sm_nlp):
     return get_text_similarity_score(text1, text2, model)
+
+def get_st_text_similarity(text1, text2, model=st_nlp):
+    return get_text_similarity_score(text1, text2, model, transf=True)
+
 
 # Phonetic Matching
 # -----------------
@@ -69,6 +83,7 @@ def get_phonetic_fuzzy_similarity(text1, text2, debug=False):
         print(f"Flattened Metaphones 2: {flat_m2}")
     return normalized_score
 
+
 # Answer table
 # ------------
 # Store answer, including scores, in database
@@ -78,6 +93,7 @@ def store_answer(
         , user_answer
         , md_txt_sim_score
         , sm_txt_sim_score
+        , st_txt_sim_score
         , phonetic_fuzzy_sim_score
     ):
     new_answer = Answer(
@@ -86,6 +102,7 @@ def store_answer(
         , user_answer=user_answer
         , md_txt_sim_score=md_txt_sim_score
         , sm_txt_sim_score=sm_txt_sim_score
+        , st_txt_sim_score=st_txt_sim_score
         , phonetic_fuzzy_sim_score=phonetic_fuzzy_sim_score
     )
     current_user.answers.append(new_answer)

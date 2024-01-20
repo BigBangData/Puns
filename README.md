@@ -29,8 +29,8 @@ __Functionality__
   + does matching in two ways: spacy text (looks to be semantic?) and phonetic
 
 __Backlog__
-- Try `en_core_web_sm` for short texts -- EVALUATE RESULTS IN QA FOLDER
 - Try some other models here: https://chat.openai.com/share/17fac774-7de9-4e9b-b41b-2bcc7eba708f
+  + evaluating results in qa/
 - Change "view.html" to "puns.html" or "play.html"
 - Average scores and set a threshold for success
 - Add success messages and confetti or images
