@@ -5,7 +5,7 @@ from flask_login import login_required, current_user
 # custom imports
 from db_model import app, db, Answer, Puns
 from login import login_bp, start_logs
-from answer import compare_text_similarity, calculate_phonetic_fuzzy_similarity, store_answer
+from answer import get_md_text_similarity, get_sm_text_similarity, get_phonetic_fuzzy_similarity, store_answer
 
 # register the login blueprint
 app.register_blueprint(login_bp)
@@ -112,11 +112,13 @@ def view_answer():
             # remove newlines
             user_answer = user_answer.replace('\n', '').replace('\r', '')
             # get score for text comparison using Spacy
-            t_score = compare_text_similarity(user_answer, answer)
-            p_score = calculate_phonetic_fuzzy_similarity(user_answer, answer)
+            md_t_score = get_md_text_similarity(user_answer, answer)
+            sm_t_score = get_sm_text_similarity(user_answer, answer)
+            p_score = get_phonetic_fuzzy_similarity(user_answer, answer)
             # round score
-            t_score_4pt = float(np.round(t_score, 4))
-            p_score_4pt = float(np.round(p_score, 4))
+            md_t_score = float(np.round(md_t_score, 4))
+            sm_t_score = float(np.round(sm_t_score, 4))
+            p_score = float(np.round(p_score, 4))
             # # convert to array
             # t_score_arr = np.array([t_score_4pt])
             # p_score_arr = np.array([p_score_4pt])
@@ -127,14 +129,15 @@ def view_answer():
                 user_id=user_id
                 , pun_id=pun_id
                 , user_answer=user_answer
-                , t_score=t_score_4pt
-                , p_score=p_score_4pt
+                , md_txt_sim_score=md_t_score
+                , sm_txt_sim_score=sm_t_score
+                , phonetic_fuzzy_sim_score=p_score
             )
             # zip data
             data = zip(
-                [user_answer, user_answer]
-                , ['Textual', 'Phonetic']
-                , [t_score_4pt, p_score_4pt]
+                [user_answer, "", ""]
+                , ['Text (Medium)', 'Text (Small)', 'Phonetic Fuzzy']
+                , [md_t_score, sm_t_score, p_score]
             )
             # return view answer
             return render_template('view_answer.html', values=[answer], data=data)

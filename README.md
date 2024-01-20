@@ -14,35 +14,42 @@ sqlite> .tables
 sqlite> select * from user;
 sqlite> .exit
 ```
-- after launching app, populate the puns table via `python populate_puns.py`
+- after launching app, populate the puns table via `python populate_puns.py` (only once)
 
 __Functionality__
 - signup: only possible when logged out, throws message and redirects to view, fails if username exists
 - login: only possible when logged out, throws message and redirects to view
 - login: fails back to login when password is wrong, fails to signup when username doesn't exist
-- view is the ultimate goal of signing up and logging in, it's where the action happens, and only place logging out is possible
-- after logging in, signup/login redirect to view
+- view: goal of signing up and logging in, where the action happens, and only place logging out is possible
+  + after logging in, signup/login redirect to view
+- view:
+  + goes through questions in order for every user
+  + persist questions asked beyond single session
+  + starts over when all questions have been asked for a given user
+  + does matching in two ways: spacy text (looks to be semantic?) and phonetic
 
-__Ideas__
-1. Go through questions in order for every user instead of randomly, persist questions asked through sessions [DONE]
-  + After user goes through all the questions, start at the beginning again
-2. Spacy doesn't seem to get answers correct (see below). Try another method such as phonetic similarity [DONE]
-  + word2vec approach is cumbersome, slows down the app and has dubious results
-  + phonetic fuzzy similarity completed
-3. Average scores and set a threshold for success + message and confetti or images
-4. Add hints?
-5. Add a "go back to last one" button?
-6. Add a grid with numbers for all the puns or a select by number or...
-7. Strip user input of newlines BEFORE doing matching, also strip for security reasons (no SQL)
-8. Delete all the printing of securecookiesession and whatnot.
+__Backlog__
+- Try `en_core_web_sm` for short texts -- EVALUATE RESULTS IN QA FOLDER
+- Try some other models here: https://chat.openai.com/share/17fac774-7de9-4e9b-b41b-2bcc7eba708f
+- Change "view.html" to "puns.html" or "play.html"
+- Average scores and set a threshold for success
+- Add success messages and confetti or images
+- Add hints or at least how many words the answer contains
+- Add a "go back to last one" button
+- Add a grid with numbers for all the puns or a select by number
+- Strip user input of newlines _before_ matching
+- Strip user inpute for security reasons
+- Use a better algo than bcrypt to hash passwords
+- Delete all the logging.info of <SecureCookieSession> and others
+
+__Discarded__
+- Word embeddings in `word2vec` were cumbersome, slowed down the app, and yielded dubious results
+- Spacy's `en_core_web_trf` yielded 0.0 similarity scores; mostly for longer texts
 
 __Final Steps__
-
-- figure out security for app.config's secret_key
-- use a better algo than bcrypt to hash passwords for chrissakes
-- setup so that only a few chosen usernames can signup, password up to them
-- deploy to ubuntu server
-- follow Tim's last tutorial: https://www.youtube.com/watch?v=YFBRVJPhDGY&list=PLzMcBGfZo4-n4vJJybUVV3Un_NFS5EOgX&index=11
+- Figure out security for app.config's secret_key
+- Maybe setup so that only a few chosen usernames can signup, password up to them
+- Deploy (follow Tim's last tutorial)
 
 ---
 

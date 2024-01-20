@@ -9,18 +9,22 @@ from db_model import db, Answer
 
 # Spacy text similarity
 # ---------------------
-# Load English model to compare answers
-# downloaded with: python -m spacy download en_core_web_md
-nlp = spacy.load("en_core_web_md")
+# Load English models to compare answers
+md_nlp = spacy.load("en_core_web_md")
+sm_nlp = spacy.load("en_core_web_sm")
 
-def compare_text_similarity(text1, text2):
-    doc1 = nlp(text1)
-    doc2 = nlp(text2)
-    # compute similary score
+def get_text_similarity_score(text1, text2, model):
+    """Get text similarity score given two texts and a model"""
+    doc1 = model(text1)
+    doc2 = model(text2)
     t_score = doc1.similarity(doc2)
-    # compare with threshold
-    # return 1 if score >= threshold else 0
     return t_score
+
+def get_md_text_similarity(text1, text2, model=md_nlp):
+    return get_text_similarity_score(text1, text2, model)
+
+def get_sm_text_similarity(text1, text2, model=sm_nlp):
+    return get_text_similarity_score(text1, text2, model)
 
 # Phonetic Matching
 # -----------------
@@ -42,7 +46,7 @@ def match_words_by_sound(word1, word2, debug=False):
         print(f"match: {match}")
     return match
 
-def calculate_phonetic_fuzzy_similarity(text1, text2, debug=False):
+def get_phonetic_fuzzy_similarity(text1, text2, debug=False):
     # tokenize texts into words
     words1 = text1.split()
     words2 = text2.split()
@@ -68,13 +72,21 @@ def calculate_phonetic_fuzzy_similarity(text1, text2, debug=False):
 # Answer table
 # ------------
 # Store answer, including scores, in database
-def store_answer(user_id, pun_id, user_answer, t_score, p_score):
+def store_answer(
+        user_id
+        , pun_id
+        , user_answer
+        , md_txt_sim_score
+        , sm_txt_sim_score
+        , phonetic_fuzzy_sim_score
+    ):
     new_answer = Answer(
         user_id=user_id
         , pun_id=pun_id
         , user_answer=user_answer
-        , text_similarity_score=t_score
-        , phonetic_similarity_score=p_score
+        , md_txt_sim_score=md_txt_sim_score
+        , sm_txt_sim_score=sm_txt_sim_score
+        , phonetic_fuzzy_sim_score=phonetic_fuzzy_sim_score
     )
     current_user.answers.append(new_answer)
     db.session.add(new_answer)

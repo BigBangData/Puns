@@ -13,9 +13,9 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'qwu#$)_@34FmkmKHDF02'
 
-# # uncomment for creating new database from scratch
-# if 'sqlalchemy' in app.extensions:
-#    del app.extensions['sqlalchemy']
+# uncomment for creating new database from scratch
+if 'sqlalchemy' in app.extensions:
+   del app.extensions['sqlalchemy']
 
 # instantiate database
 db = SQLAlchemy(app)
@@ -49,6 +49,7 @@ class Answer(db.Model):
     pun_id = db.Column(db.Integer, db.ForeignKey('puns.id'), nullable=False)
     # user answer & score compared to pun answer
     user_answer = db.Column(db.String(100), nullable=False)
-    text_similarity_score = db.Column(db.Float, nullable=False)
-    phonetic_similarity_score = db.Column(db.Float, nullable=False)
+    md_txt_sim_score = db.Column(db.Float, nullable=False)
+    sm_txt_sim_score = db.Column(db.Float, nullable=False)
+    phonetic_fuzzy_sim_score = db.Column(db.Float, nullable=False)
 
