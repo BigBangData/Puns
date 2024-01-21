@@ -3,11 +3,12 @@ import numpy as np
 from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_required, current_user
 # custom imports
-from db_model import app, db, Answer, Puns
+from db_model import app, db, Answer, Puns, Models
+from db_insert_static import insert_into_puns, insert_into_models
 from login import login_bp, start_logs
 from answer import get_web_sm_similarity, get_web_md_similarity \
     , get_all_st_similarity, get_par_st_similarity \
-    , get_phonetic_fuzzy_similarity, store_answer
+    , get_phonetic_fuzzy_similarity, store_answer, store_answer_update
 
 # register the login blueprint
 app.register_blueprint(login_bp)
@@ -85,6 +86,13 @@ def view():
     if request.method == "POST":
         selected_model = request.form.get('selected_model')
         logging.info(f"selected model: {selected_model}")
+        # query models to get the id
+        model = Models.query.filter_by(short_name=selected_model).first()
+        store_answer_update(
+            user_id=current_user.id
+            , pun_id=session['pun_id']
+            , selected_model=model.id
+        )
         # HERE: add model selected to answer? Maybe have a models table and keep votes there
         # And have model_id, model_name, num_votes, then calculate the weighted_avg 
         # with num model votes / tot votes
@@ -148,16 +156,15 @@ def view_answer():
                 , pun_id=pun_id
                 , user_answer=user_answer
                 , scores=scores
+                , selected_model=None
             )
-            models = [
-                'en_core_web_sm'
-                , 'en_core_web_md'
-                , 'all-MiniLM-L6-v2'
-                , 'paraphrase-MiniLM-L6-v2'
-                , 'fuzzy_phonetic'
-            ]
+
+            # query all the short_name values from the Models table
+            names = Models.query.with_entities(Models.short_name).all()
+            # Convert the result to a list
+            model_names = [name[0] for name in names]
             answer_list = [user_answer] + ['']*4
-            data = zip(answer_list, models, scores)
+            data = zip(answer_list, model_names, scores)
             # return view answer
             return render_template('view_answer.html', values=[answer], data=data)
     else:
@@ -173,7 +180,9 @@ if __name__ == '__main__':
     # db.init_app(app)
     # Create database tables given defined models
     with app.app_context():
-       db.create_all()
+        db.create_all()
+        insert_into_puns()
+        insert_into_models()
     # Run the app
     app.run(debug=True)
     # app.run(host='0.0.0.0', port=5000) # to run in prod

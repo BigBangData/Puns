@@ -33,6 +33,7 @@ __Functionality__
   + that click loads next question
 
 __Backlog__
+- Add model voted for in answer as model ID
 - Persist user votes
   + keep models table with model_id, model_name, num_votes
   + user vote should end up in models table via model_id in answer for model selected with click

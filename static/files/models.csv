@@ -1,0 +1,6 @@
+short_name,long_name,num_votes
+spacy-small,"Spacy Ensligh Core Web - Small",0
+spacy-medium,"Spacy English Core Web - Medium",0
+all-MiniLM,"Sentence Transformers All MiniLM L6v2",0
+paraphrase-MiniLM,"Sentece Transformers Paraphrase MiniLM L6v2",0
+fuzzy-phonetic,"Custom Phonetic Metaphone with fuzzywuzzy ratio",0

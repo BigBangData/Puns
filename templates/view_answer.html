@@ -25,10 +25,10 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user_answer, model, score in data %}
+                    {% for user_answer, model_name, score in data %}
                     <tr>
                         <td>{{ user_answer }}</td>
-                        <td><button type="submit" class="btn-info" name="selected_model" value="{{ model }}">{{ model }}</button></td>
+                        <td><button type="submit" class="btn-info" name="selected_model" value="{{ model_name }}">{{ model_name }}</button></td>
                         <td>{{ score }}</td>
                     </tr>
                     {% endfor %}

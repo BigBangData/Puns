@@ -91,14 +91,37 @@ def get_phonetic_fuzzy_similarity(text1, text2, debug=False):
 
 # Answer table
 # ------------
-# Store answer, including scores, in database
-def store_answer(user_id: int, pun_id: int, user_answer: str, scores: List[float]):
+# store answer, including scores, in database
+def store_answer(
+        user_id: int
+        , pun_id: int
+        , user_answer: str
+        , scores: List[float]
+        , selected_model: str = None
+    ):
     new_answer = Answer(
-        user_id=user_id,
-        pun_id=pun_id,
-        user_answer=user_answer,
-        scores=scores
+        user_id=user_id
+        , pun_id=pun_id
+        , user_answer=user_answer
+        , scores=scores
+        , selected_model=selected_model # pass None
     )
     current_user.answers.append(new_answer)
     db.session.add(new_answer)
     db.session.commit()
+
+# update selected model from None to user's selected model, given an answer
+def store_answer_update(
+        user_id: int
+        , pun_id: int
+        , selected_model: str
+    ):
+    # order by Answer.id desc to update the latest answer for that user-pun combo
+    # since user-pun is not unique once user has gone through all the puns once
+    latest_existing_answer = Answer.query.\
+        filter_by(user_id=user_id, pun_id=pun_id).\
+            order_by(Answer.id.desc()).first()
+    # update the answer's selected model for the latest existing user-pun combo
+    if latest_existing_answer:
+        latest_existing_answer.selected_model = selected_model
+        db.session.commit()
