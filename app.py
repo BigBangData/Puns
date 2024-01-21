@@ -8,7 +8,8 @@ from db_insert import insert_into_puns, insert_into_models
 from login import login_bp, start_logs
 from answer import get_web_sm_similarity, get_web_md_similarity \
     , get_all_st_similarity, get_par_st_similarity \
-    , get_phonetic_fuzzy_similarity, store_answer, store_answer_update
+    , get_phonetic_fuzzy_similarity, get_model_weights \
+    , store_answer, store_answer_update
 
 # register the login blueprint
 app.register_blueprint(login_bp)
@@ -59,7 +60,7 @@ def get_next_pun():
         session['pun_id'] = pun_id
         session['question'] = question
         session['answer'] = answer
-        logging.info(f"{session}")
+        #logging.info(f"{session}")
     else:
         pun_id = session['pun_id']
         question = session['question']
@@ -128,45 +129,36 @@ def view_answer():
             # remove newlines
             user_answer = user_answer.replace('\n', '').replace('\r', '')
             # get score for text comparison using Spacy
-            web_sm_score = float(np.round(
-                get_web_sm_similarity(user_answer, answer), 4))
-            web_md_score = float(np.round(
-                get_web_md_similarity(user_answer, answer), 4))
-            all_st_score = float(np.round(
-                get_all_st_similarity(user_answer, answer), 4))
-            par_st_score = float(np.round(
-                get_par_st_similarity(user_answer, answer), 4))
-            ph_fuz_score = float(np.round(
-                get_phonetic_fuzzy_similarity(user_answer, answer), 4))
-            # round scores
-            scores = [
-                web_sm_score
-                , web_md_score
-                , all_st_score
-                , par_st_score
-                , ph_fuz_score
-            ]
-            # # convert to array
-            # t_score_arr = np.array([t_score_4pt])
-            # p_score_arr = np.array([p_score_4pt])
-            # # calculate mean score
-            # mean_score = np.mean([t_score_arr, p_score_arr])
+            score1 = get_web_sm_similarity(user_answer, answer)
+            score2 = get_web_md_similarity(user_answer, answer)
+            score3 = get_all_st_similarity(user_answer, answer)
+            score4 = get_par_st_similarity(user_answer, answer)
+            score5 = get_phonetic_fuzzy_similarity(user_answer, answer)
+            # gather scores
+            scores = [score1, score2, score3, score4, score5]
+            rounded_scores = [float(np.round(score, 6)) for score in scores]
+            # calculate weighted avg score
+            logging.info(f"Model scores: {rounded_scores}")
+            weights = get_model_weights()
+            logging.info(f"Model weights: {weights}")
+            weighted_avg_score = np.sum([score * weight for score, weight in zip(scores, weights)])
+            logging.info(f"Weighted Avg. Score: {weighted_avg_score}")
             # store data in answer table
             store_answer(
                 user_id=user_id
                 , pun_id=pun_id
                 , user_answer=user_answer
-                , scores=scores
+                , scores=rounded_scores
                 , selected_model=None
             )
-
             # query all the short_name values from the Models table
             names = Models.query.with_entities(Models.short_name).all()
             # Convert the result to a list
             model_names = [name[0] for name in names]
             answer_list = [user_answer] + ['']*4
-            data = zip(answer_list, model_names, scores)
+            data = zip(answer_list, model_names, rounded_scores)
             # return view answer
+            flash(f"Weighted Avg. Score: {np.round(weighted_avg_score, 6)}", "info")
             return render_template('view_answer.html', values=[answer], data=data)
     else:
         return redirect(url_for('view'))

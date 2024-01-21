@@ -30,16 +30,10 @@ __Functionality__
 - view answer:
   + view answer and own answer
   + view model scores and has to select best model by clicking on its name
-  + that click loads next question
+  + that click loads next question, increments the selected model's num_votes in the models table
+  + which in turn increases the weight for that model in the final weighted avg score
 
 __Backlog__
-- Add model voted for in answer as model ID
-- Persist user votes
-  + keep models table with model_id, model_name, num_votes
-  + user vote should end up in models table via model_id in answer for model selected with click
-  + weights chould show in table but that might affect user?
-- Calculate weighted average score based on num votes for a model / total votes
-  + cold start problem: give each model 1 vote always
 - Weighted average score over thresholds display messages about match
 - Change "view.html" to "puns.html" or "play.html"
 - Average scores and set a threshold for success

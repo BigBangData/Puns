@@ -7,7 +7,7 @@ from sentence_transformers import SentenceTransformer, util
 
 # custom
 from flask_login import current_user
-from db_model import db, Answer
+from db_model import db, Answer, Models
 
 # Spacy
 # -----
@@ -88,6 +88,14 @@ def get_phonetic_fuzzy_similarity(text1, text2, debug=False):
         print(f"Flattened Metaphones 2: {flat_m2}")
     return normalized_score
 
+def get_model_weights():
+    # query models
+    models = Models.query.all()
+    # calculate the total number of votes
+    total_votes = np.sum([model.num_votes for model in models])
+    # calculate the models' weights (percentages)
+    model_weights = [model.num_votes / total_votes for model in models]
+    return model_weights
 
 # Answer table
 # ------------
