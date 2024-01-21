@@ -20,22 +20,20 @@
                 <thead>
                     <tr>
                         <th>Your Answer</th>
-                        <th>Similarity Type</th>
-                        <th>Match Score</th>
+                        <th>Model</th>
+                        <th>Score</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user_answer, type, score in data %}
+                    {% for user_answer, model, score in data %}
                     <tr>
                         <td>{{ user_answer }}</td>
-                        <td>{{ type }}</td>
+                        <td><button type="submit" class="btn-info" name="selected_model" value="{{ model }}">{{ model }}</button></td>
                         <td>{{ score }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-            <!-- no textarea box -->
-            <center><input type="submit" class="btn-info" value="TRY ANOTHER"></center>
         </form>
     </div>
     <hr>

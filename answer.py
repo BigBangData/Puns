@@ -1,5 +1,6 @@
 import spacy
 import numpy as np
+from typing import List
 from fuzzywuzzy import fuzz
 from metaphone import doublemetaphone
 from sentence_transformers import SentenceTransformer, util
@@ -8,36 +9,40 @@ from sentence_transformers import SentenceTransformer, util
 from flask_login import current_user
 from db_model import db, Answer
 
-# Sentence Transformer text similarity
-# ------------------------------------
-st_nlp = SentenceTransformer('paraphrase-MiniLM-L6-v2')
+# Spacy
+# -----
+web_sm = spacy.load("en_core_web_sm")
+web_md = spacy.load("en_core_web_md")
 
-# Spacy text similarity
+# Sentence Transformers
 # ---------------------
-# Load English models to compare answers
-md_nlp = spacy.load("en_core_web_md")
-sm_nlp = spacy.load("en_core_web_sm")
+all_st = SentenceTransformer("all-MiniLM-L6-v2")
+par_st = SentenceTransformer('paraphrase-MiniLM-L6-v2')
 
-def get_text_similarity_score(text1, text2, model, transf: bool=False):
-    """Get text similarity score given two texts and a model"""
+def get_similarity_score(text1, text2, model, transf: bool=False):
+    """Get cosine similarity score given two texts and a model.
+    """
     if transf:
-        embed1 = model.encode(text1, convert_to_tensor=True)
-        embed2 = model.encode(text2, convert_to_tensor=True)
-        t_score = util.pytorch_cos_sim(embed1, embed2).item()
+        embeddings1 = model.encode(text1, convert_to_tensor=True)
+        embeddings2 = model.encode(text2, convert_to_tensor=True)
+        similarity_score = util.pytorch_cos_sim(embeddings1, embeddings2).item()
     else:
-        doc1 = model(text1)
-        doc2 = model(text2)
-        t_score = doc1.similarity(doc2)
-    return t_score
+        document1 = model(text1)
+        document2 = model(text2)
+        similarity_score = document1.similarity(document2)
+    return similarity_score
 
-def get_md_text_similarity(text1, text2, model=md_nlp):
-    return get_text_similarity_score(text1, text2, model)
+def get_web_sm_similarity(text1, text2, model=web_sm):
+    return get_similarity_score(text1, text2, model)
 
-def get_sm_text_similarity(text1, text2, model=sm_nlp):
-    return get_text_similarity_score(text1, text2, model)
+def get_web_md_similarity(text1, text2, model=web_md):
+    return get_similarity_score(text1, text2, model)
 
-def get_st_text_similarity(text1, text2, model=st_nlp):
-    return get_text_similarity_score(text1, text2, model, transf=True)
+def get_all_st_similarity(text1, text2, model=all_st):
+    return get_similarity_score(text1, text2, model, transf=True)
+
+def get_par_st_similarity(text1, text2, model=par_st):
+    return get_similarity_score(text1, text2, model, transf=True)
 
 
 # Phonetic Matching
@@ -45,16 +50,16 @@ def get_st_text_similarity(text1, text2, model=st_nlp):
 def match_words_by_sound(word1, word2, debug=False):
     """Helper function for calculate_phonetic_fuzzy_similarity()"""
     # get double metaphone codes for each word
-    a = doublemetaphone(word1)
-    b = doublemetaphone(word2)
+    code1 = doublemetaphone(word1)
+    code2 = doublemetaphone(word2)
     # calculate primary and secondary matches
-    primary_match = (a[0] == b[0] or a[1] == b[0])
-    secondary_match = (a[0] == b[1] or a[1] == b[1])
+    primary_match = (code1[0] == code2[0] or code1[1] == code2[0])
+    secondary_match = (code1[0] == code2[1] or code1[1] == code2[1])
     # return when both match
     match = primary_match and secondary_match
     if debug:
-        print(f"a: {a}")
-        print(f"b: {b}")
+        print(f"code1: {code1}")
+        print(f"code2: {code2}")
         print(f"primary_match: {primary_match}")
         print(f"secondary_match: {secondary_match}")
         print(f"match: {match}")
@@ -87,23 +92,12 @@ def get_phonetic_fuzzy_similarity(text1, text2, debug=False):
 # Answer table
 # ------------
 # Store answer, including scores, in database
-def store_answer(
-        user_id
-        , pun_id
-        , user_answer
-        , md_txt_sim_score
-        , sm_txt_sim_score
-        , st_txt_sim_score
-        , phonetic_fuzzy_sim_score
-    ):
+def store_answer(user_id: int, pun_id: int, user_answer: str, scores: List[float]):
     new_answer = Answer(
-        user_id=user_id
-        , pun_id=pun_id
-        , user_answer=user_answer
-        , md_txt_sim_score=md_txt_sim_score
-        , sm_txt_sim_score=sm_txt_sim_score
-        , st_txt_sim_score=st_txt_sim_score
-        , phonetic_fuzzy_sim_score=phonetic_fuzzy_sim_score
+        user_id=user_id,
+        pun_id=pun_id,
+        user_answer=user_answer,
+        scores=scores
     )
     current_user.answers.append(new_answer)
     db.session.add(new_answer)

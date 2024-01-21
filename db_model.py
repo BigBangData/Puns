@@ -1,3 +1,4 @@
+import json
 from datetime import timedelta
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
@@ -49,8 +50,14 @@ class Answer(db.Model):
     pun_id = db.Column(db.Integer, db.ForeignKey('puns.id'), nullable=False)
     # user answer & score compared to pun answer
     user_answer = db.Column(db.String(100), nullable=False)
-    md_txt_sim_score = db.Column(db.Float, nullable=False)
-    sm_txt_sim_score = db.Column(db.Float, nullable=False)
-    st_txt_sim_score = db.Column(db.Float, nullable=False)
-    phonetic_fuzzy_sim_score = db.Column(db.Float, nullable=False)
+    # store scores as a JSON-encoded string
+    scores = db.Column(db.String, nullable=False)
+
+    def __init__(self, user_id, pun_id, user_answer, scores):
+        self.user_id = user_id
+        self.pun_id = pun_id
+        self.user_answer = user_answer
+        self.scores = json.dumps(scores)
+
+
 

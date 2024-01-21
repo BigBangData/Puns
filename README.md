@@ -27,10 +27,19 @@ __Functionality__
   + persist questions asked beyond single session
   + starts over when all questions have been asked for a given user
   + does matching in two ways: spacy text (looks to be semantic?) and phonetic
+- view answer:
+  + view answer and own answer
+  + view model scores and has to select best model by clicking on its name
+  + that click loads next question
 
 __Backlog__
-- Try some other models here: https://chat.openai.com/share/17fac774-7de9-4e9b-b41b-2bcc7eba708f
-  + evaluating results in qa/
+- Persist user votes
+  + keep models table with model_id, model_name, num_votes
+  + user vote should end up in models table via model_id in answer for model selected with click
+  + weights chould show in table but that might affect user?
+- Calculate weighted average score based on num votes for a model / total votes
+  + cold start problem: give each model 1 vote always
+- Weighted average score over thresholds display messages about match
 - Change "view.html" to "puns.html" or "play.html"
 - Average scores and set a threshold for success
 - Add success messages and confetti or images
