@@ -110,11 +110,11 @@ def store_answer(
     db.session.add(new_answer)
     db.session.commit()
 
-# update selected model from None to user's selected model, given an answer
+# update answers.selected_model from None to user's selected model
 def store_answer_update(
         user_id: int
         , pun_id: int
-        , selected_model: str
+        , selected_model: int
     ):
     # order by Answer.id desc to update the latest answer for that user-pun combo
     # since user-pun is not unique once user has gone through all the puns once

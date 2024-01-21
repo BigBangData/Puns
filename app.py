@@ -4,7 +4,7 @@ from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_required, current_user
 # custom imports
 from db_model import app, db, Answer, Puns, Models
-from db_insert_static import insert_into_puns, insert_into_models
+from db_insert import insert_into_puns, insert_into_models
 from login import login_bp, start_logs
 from answer import get_web_sm_similarity, get_web_md_similarity \
     , get_all_st_similarity, get_par_st_similarity \
@@ -93,9 +93,10 @@ def view():
             , pun_id=session['pun_id']
             , selected_model=model.id
         )
-        # HERE: add model selected to answer? Maybe have a models table and keep votes there
-        # And have model_id, model_name, num_votes, then calculate the weighted_avg 
-        # with num model votes / tot votes
+        # increment the num_votes in models
+        model.num_votes += 1
+        db.session.commit()
+        # calculate the weighted_avg: model.num_votes / sum_votes
         # clear session pun data
         session.pop('pun_id', None)
         session.pop('question', None)

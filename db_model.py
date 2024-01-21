@@ -64,6 +64,7 @@ class Answer(db.Model):
     user_answer = db.Column(db.String(100), nullable=False)
     # store scores as a JSON-encoded string
     scores = db.Column(db.String, nullable=False)
+    # id of selected model
     selected_model = db.Column(db.Integer)
 
     def __init__(self, user_id, pun_id, user_answer, scores, selected_model):
