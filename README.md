@@ -35,30 +35,16 @@ __Functionality__
 
 __Backlog__
 
-- Success Messages:
+- Add Success Messages:
   + Weighted average score over certain thresholds should display various messages about increased success in match
   + Most successful match throws confetti, least successful throws something else, etc.
-
-- Revise Q&A:
-  + Make it easier to answer... how? 
-  + Is the game fun to play or too difficult?
-  + Rethink UI:
-    - add a "for nerds" area to the right with the models
-    - user just clicks whether she got it right or wrong
-  + Why questions are hard so to avoid "cuz" "because" answers just remove those and explain
-
-- View Answer:
-  + Clarify that user needs to select model that performs the best
-  + which means picking the _lowest_ score if answer shouldn't match
-  + order answers from high to low match for ease, round to 2 decimal points
-
 - Change "view.html" to "puns.html" or "play.html"
 - Add a "go back to last one" button
-- Add a grid with numbers for all the puns or a select by number
+- Add a view your answers button that redirects to a page with your stats
 - Strip user input of newlines _before_ matching
 - Strip user inpute for security reasons
 - Use a better algo than bcrypt to hash passwords
-- Delete all the logging.info of <SecureCookieSession> and others
+- Delete all unneccessary logging.info
 
 __Discarded__
 - Word embeddings in `word2vec` were cumbersome, slowed down the app, and yielded dubious results

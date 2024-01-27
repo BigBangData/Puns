@@ -143,25 +143,34 @@ def view_answer():
             logging.info(f"Model scores: {rounded_scores}")
             weights = get_model_weights()
             logging.info(f"Model weights: {weights}")
-            weighted_avg_score = np.sum([score * weight for score, weight in zip(scores, weights)])
-            logging.info(f"Weighted Avg. Score: {weighted_avg_score}")
+            avg_score = np.sum([score * weight for score, weight in zip(scores, weights)])
+            avg_score = np.round(avg_score, 6)
+            logging.info(f"Weighted Avg. Score: {avg_score}")
             # store data in answer table
             store_answer(
                 user_id=user_id
                 , pun_id=pun_id
                 , user_answer=user_answer
                 , scores=rounded_scores
+                , avg_score=avg_score
                 , selected_model=None
             )
             # query all the short_name values from the Models table
             names = Models.query.with_entities(Models.short_name).all()
-            # Convert the result to a list
+            # convert the result to a list
             model_names = [name[0] for name in names]
+            # gather data
+            data = list(zip(model_names, rounded_scores))
+            # sort on scores desc.
+            sorted_data = sorted(data, key=lambda x: x[1], reverse=True)
+            # append average score
+            average_score_row = ("Weighted Avg. Score:", avg_score)
+            sorted_data.append(average_score_row)
+            # return user answer for ease of comparison
             your_answer = f"Your Answer: {user_answer}"
-            data = zip(model_names, rounded_scores)
+            values = [question, answer, your_answer]
             # return view answer
-            flash(f"Weighted Avg. Score: {np.round(weighted_avg_score, 6)}", "info")
-            return render_template('view_answer.html', values=[question, answer, your_answer], data=data)
+            return render_template('view_answer.html', values=values, data=sorted_data)
     else:
         return redirect(url_for('view'))
 

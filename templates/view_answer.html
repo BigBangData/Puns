@@ -10,34 +10,46 @@
         {% endif %}
     {% endwith %}
     <div class="container">
-        <form action="{{url_for('view')}}" method="POST">
-            <br>
-            {% for item in values %}
-                {% if loop.index < 3 %}
-                    <h3 class="text-center">{{ item }}</h2>
-                {% else %}
-                    <br>
-                    <h4 class="text-center">{{ item }}</h4>
-                {% endif %}
-            {% endfor %}
-            <br>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Model</th>
-                        <th>Match Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for model_name, score in data %}
-                    <tr>
-                        <td><button type="submit" class="btn-info" name="selected_model" value="{{ model_name }}">{{ model_name }}</button></td>
-                        <td>{{ score }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </form>
+        <div class="row">
+            <div class="col-md-8">
+                <!-- Left section -->
+                {% for item in values %}
+                    {% if loop.index == 1 %}
+                        <h3 class="h3-blue text-center">{{ item }}</h3>
+                    {% elif loop.index == 2 %}
+                        <h3 class="h3-red text-center">{{ item }}</h3>
+                    {% else %}
+                        <br>
+                        <h4 class="text-center">{{ item }}</h4>
+                    {% endif %}
+                {% endfor %}
+            </div>
+            <div class="col-md-4">
+                <!-- Right section -->
+                <form action="{{url_for('view')}}" method="POST">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Select Best Model</th>
+                                <th>Match Score</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for model_name, score in data %}
+                            <tr>
+                                {% if not loop.last %}
+                                    <td><button type="submit" class="btn-info" name="selected_model" value="{{ model_name }}">{{ model_name }}</button></td>
+                                {% else %}
+                                    <td>{{ model_name }}</td>
+                                {% endif %}
+                                <td>{{ score }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </form>
+            </div>
+        </div>
     </div>
     <hr>
     <p style="text-align: center;"><a href="{{url_for('logout')}}">Logout</a></p>

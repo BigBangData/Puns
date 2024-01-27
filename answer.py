@@ -105,6 +105,7 @@ def store_answer(
         , pun_id: int
         , user_answer: str
         , scores: List[float]
+        , avg_score: float
         , selected_model: str = None
     ):
     new_answer = Answer(
@@ -112,6 +113,7 @@ def store_answer(
         , pun_id=pun_id
         , user_answer=user_answer
         , scores=scores
+        , avg_score=avg_score
         , selected_model=selected_model # pass None
     )
     current_user.answers.append(new_answer)

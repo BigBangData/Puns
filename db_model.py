@@ -64,12 +64,15 @@ class Answer(db.Model):
     user_answer = db.Column(db.String(100), nullable=False)
     # store scores as a JSON-encoded string
     scores = db.Column(db.String, nullable=False)
+    # weighted avg score (based on previous weights in models & scores)
+    avg_score = db.Column(db.Float)
     # id of selected model
     selected_model = db.Column(db.Integer)
 
-    def __init__(self, user_id, pun_id, user_answer, scores, selected_model):
+    def __init__(self, user_id, pun_id, user_answer, scores, selected_model, avg_score):
         self.user_id = user_id
         self.pun_id = pun_id
         self.user_answer = user_answer
         self.scores = json.dumps(scores)
+        self.avg_score = avg_score
         self.selected_model = selected_model

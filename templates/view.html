@@ -13,7 +13,11 @@
         <form action="{{url_for('view_answer')}}" method="POST">
             <br>
             {% for item in values %}
-                <h3 class="text-center">{{ item }}</h3>
+            {% if loop.index == 1 %}
+                <h3 class="h3-blue text-center">{{ item }}</h3>
+            {% else %}
+                <h3 class="h3-red text-center">{{ item }}</h3>
+            {% endif %}
             {% endfor %}
             <br>
             <center><textarea name="user_answer" rows="2" cols="80" maxlength = "50"></textarea></center>
