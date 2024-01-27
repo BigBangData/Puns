@@ -104,8 +104,10 @@ def view():
         session.pop('answer', None)
         return redirect(url_for('view_answer'))
     else:
-        _, question, _ = get_next_pun()
-        return render_template('view.html', values=[question])
+        _, question, answer = get_next_pun()
+        num_words = len(answer.split(" "))
+        hint = f"[{num_words} words]"
+        return render_template('view.html', values=[question, hint])
 
 # view asnwer
 @app.route('/view_answer', methods=["POST", "GET"])
@@ -116,7 +118,7 @@ def view_answer():
     Compares user answer with pun answer given methods; returns scores.
     """
     # get session answer
-    pun_id, _, answer = get_next_pun()
+    pun_id, question, answer = get_next_pun()
     if request.method == "POST":
         # make sure text area is completed
         user_id = current_user.id
@@ -155,11 +157,11 @@ def view_answer():
             names = Models.query.with_entities(Models.short_name).all()
             # Convert the result to a list
             model_names = [name[0] for name in names]
-            answer_list = [user_answer] + ['']*4
-            data = zip(answer_list, model_names, rounded_scores)
+            your_answer = f"Your Answer: {user_answer}"
+            data = zip(model_names, rounded_scores)
             # return view answer
             flash(f"Weighted Avg. Score: {np.round(weighted_avg_score, 6)}", "info")
-            return render_template('view_answer.html', values=[answer], data=data)
+            return render_template('view_answer.html', values=[question, answer, your_answer], data=data)
     else:
         return redirect(url_for('view'))
 

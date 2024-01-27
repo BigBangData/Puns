@@ -34,11 +34,25 @@ __Functionality__
   + which in turn increases the weight for that model in the final weighted avg score
 
 __Backlog__
-- Weighted average score over thresholds display messages about match
+
+- Success Messages:
+  + Weighted average score over certain thresholds should display various messages about increased success in match
+  + Most successful match throws confetti, least successful throws something else, etc.
+
+- Revise Q&A:
+  + Make it easier to answer... how? 
+  + Is the game fun to play or too difficult?
+  + Rethink UI:
+    - add a "for nerds" area to the right with the models
+    - user just clicks whether she got it right or wrong
+  + Why questions are hard so to avoid "cuz" "because" answers just remove those and explain
+
+- View Answer:
+  + Clarify that user needs to select model that performs the best
+  + which means picking the _lowest_ score if answer shouldn't match
+  + order answers from high to low match for ease, round to 2 decimal points
+
 - Change "view.html" to "puns.html" or "play.html"
-- Average scores and set a threshold for success
-- Add success messages and confetti or images
-- Add hints or at least how many words the answer contains
 - Add a "go back to last one" button
 - Add a grid with numbers for all the puns or a select by number
 - Strip user input of newlines _before_ matching

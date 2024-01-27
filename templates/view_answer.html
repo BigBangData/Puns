@@ -13,21 +13,24 @@
         <form action="{{url_for('view')}}" method="POST">
             <br>
             {% for item in values %}
-                <h3 class="text-center">{{ item }}</h3>
+                {% if loop.index < 3 %}
+                    <h3 class="text-center">{{ item }}</h2>
+                {% else %}
+                    <br>
+                    <h4 class="text-center">{{ item }}</h4>
+                {% endif %}
             {% endfor %}
             <br>
             <table border="1">
                 <thead>
                     <tr>
-                        <th>Your Answer</th>
                         <th>Model</th>
-                        <th>Score</th>
+                        <th>Match Score</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for user_answer, model_name, score in data %}
+                    {% for model_name, score in data %}
                     <tr>
-                        <td>{{ user_answer }}</td>
                         <td><button type="submit" class="btn-info" name="selected_model" value="{{ model_name }}">{{ model_name }}</button></td>
                         <td>{{ score }}</td>
                     </tr>
