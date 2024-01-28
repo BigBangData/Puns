@@ -1,5 +1,71 @@
 {% extends "base.html" %}
 {% block title %}View{% endblock %}
+{% block header %}
+    <!-- Confetti script -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    <script>
+        var scalar = 4;
+        var unicorn = confetti.shapeFromText({ text: '🦄', scalar });
+        var lobster = confetti.shapeFromText({ text: '🦞', scalar });
+    
+        var defaults = {
+            spread: 360,
+            ticks: 140,
+            gravity: 0.8,
+            decay: 0.9,
+            startVelocity: 35,
+            shapes: [unicorn],
+            scalar
+        };
+    
+        function shootUnicorns() {
+            confetti({
+                ...defaults,
+                shapes: [unicorn],
+                particleCount: 30
+            });
+            confetti({
+                ...defaults,
+                shapes: [unicorn],
+                particleCount: 20,
+                flat: true
+            });
+            confetti({
+                ...defaults,
+                particleCount: 15,
+                scalar: scalar / 2,
+                shapes: ['square']
+            });
+        }
+    
+        function shootLobsters() {
+            confetti({
+                ...defaults,
+                shapes: [lobster],
+                particleCount: 20,
+                gravity: 0.3
+            });
+            confetti({
+                ...defaults,
+                shapes: [lobster],
+                particleCount: 20,
+                flat: true,
+                gravity: 0,
+                startVelocity: 20
+
+            });
+        }
+        // If user guesses correctly according to weighted avg score
+        var correctGuess = {{ correct_guess|safe }};
+        if (correctGuess) {
+            setTimeout(shootUnicorns, 0);
+            setTimeout(shootUnicorns, 600);
+        } else {
+            setTimeout(shootLobsters, 0);
+            setTimeout(shootLobsters, 80);
+        }
+    </script>
+{% endblock %}
 {% block content %}
     <!-- flash messages before content -->
     {% with messages = get_flashed_messages() %}

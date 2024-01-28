@@ -169,8 +169,15 @@ def view_answer():
             # return user answer for ease of comparison
             your_answer = f"Your Answer: {user_answer}"
             values = [question, answer, your_answer]
+            # add Boolean int for correct guess to be passed to Javascript frontend for effects
+            correct_guess = int(avg_score > 0.6)
             # return view answer
-            return render_template('view_answer.html', values=values, data=sorted_data)
+            return render_template(
+                'view_answer.html'
+                , values=values
+                , data=sorted_data
+                , correct_guess=correct_guess
+            )
     else:
         return redirect(url_for('view'))
 

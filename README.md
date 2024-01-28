@@ -35,9 +35,11 @@ __Functionality__
 
 __Backlog__
 
-- Add Success Messages:
-  + Weighted average score over certain thresholds should display various messages about increased success in match
-  + Most successful match throws confetti, least successful throws something else, etc.
+- Hints:
+  + use chatGPT to generate initial hints; iterate
+- Button to press if reaction was correct or not:
+  + if correct, choose model with highest score; if wrong, choose model with lowest score
+  + add right or wrong to answers so later can use SQL to figure out better thresholds
 - Change "view.html" to "puns.html" or "play.html"
 - Add a "go back to last one" button
 - Add a view your answers button that redirects to a page with your stats
@@ -45,6 +47,7 @@ __Backlog__
 - Strip user inpute for security reasons
 - Use a better algo than bcrypt to hash passwords
 - Delete all unneccessary logging.info
+- Add explanations in homepage
 
 __Discarded__
 - Word embeddings in `word2vec` were cumbersome, slowed down the app, and yielded dubious results

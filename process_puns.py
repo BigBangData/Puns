@@ -23,9 +23,17 @@ with open(output_file_path, 'w', newline='', encoding='utf-8') as output_file:
     # Create header
     csv_writer.writerow(['question', 'answer'])
     # Process each line in the input file
-    for line in input_lines:
+    for ix, line in enumerate(input_lines):
         # Split the line into question and answer
-        question, answer = line.split('?', 1)
+        try:
+            question, answer = line.split('?', 1)
+        except ValueError as e:
+            try:
+                question, answer = line.split('...', 1)
+            except ValueError as e:
+                print(f"Line {ix} did not split.")
+                print(f"Content: {line}")
+                continue
         # Trim leading and trailing whitespaces
         question = question.strip()
         answer = answer.strip()
