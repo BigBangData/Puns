@@ -106,6 +106,8 @@ def store_answer(
         , user_answer: str
         , scores: List[float]
         , avg_score: float
+        , correct_guess: bool
+        , user_confirmed_as = None
         , selected_model: str = None
     ):
     new_answer = Answer(
@@ -114,16 +116,20 @@ def store_answer(
         , user_answer=user_answer
         , scores=scores
         , avg_score=avg_score
-        , selected_model=selected_model # pass None
+        , correct_guess=correct_guess
+        , user_confirmed_as=user_confirmed_as
+        , selected_model=selected_model
     )
     current_user.answers.append(new_answer)
     db.session.add(new_answer)
     db.session.commit()
 
 # update answers.selected_model from None to user's selected model
+# and answers.user_confirmed_as from None to user's reaction
 def store_answer_update(
         user_id: int
         , pun_id: int
+        , user_confirmed_as: str
         , selected_model: int
     ):
     # order by Answer.id desc to update the latest answer for that user-pun combo
@@ -134,4 +140,5 @@ def store_answer_update(
     # update the answer's selected model for the latest existing user-pun combo
     if latest_existing_answer:
         latest_existing_answer.selected_model = selected_model
+        latest_existing_answer.user_confirmed_as = user_confirmed_as
         db.session.commit()

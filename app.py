@@ -1,4 +1,6 @@
+import ast
 import logging
+import random
 import numpy as np
 from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_required, current_user
@@ -13,6 +15,9 @@ from answer import get_web_sm_similarity, get_web_md_similarity \
 
 # register the login blueprint
 app.register_blueprint(login_bp)
+
+# threshold for success based on avg_score
+THRESH = 0.6
 
 # View
 def get_users_latest_answer():
@@ -67,6 +72,57 @@ def get_next_pun():
         answer = session['answer']
     return pun_id, question, answer
 
+def select_best_model():
+        # given reaction
+        reaction = request.form.get("reaction")
+        logging.info(f"Received reaction: {reaction}")
+        # given last answer's avg score
+        last_answer = (
+            db.session.query(Answer)
+                .filter_by(user_id=current_user.id)
+                .order_by(Answer.id.desc())
+                .first()
+        )
+        # calculate whether user guessed correctly, given the same threshold
+        correct_guess = last_answer.avg_score > THRESH
+        logging.info(f"Guessed correctly? {correct_guess}")
+        # get min/max scores
+        scores_list = ast.literal_eval(last_answer.scores)
+        scores_array = np.array(scores_list)
+        max_score = np.max(scores_array)
+        min_score = np.min(scores_array)
+        logging.info(f"Max score: {max_score}")
+        logging.info(f"Min score: {min_score}")
+        # select best model given reaction and guess
+        # model with highest match score performed best IF...
+        # it was deemed a correct guess and the reaction confirmed it with Yes OR
+        # it was deemed an incorrect guess but the reaction disconfirmed it with No
+        if correct_guess and reaction == 'Yes' or not correct_guess and reaction == 'No':
+            # get ix for model with best score
+            # account for possibility of more than one model having the max score
+            ix_list = [ix for ix, score in enumerate(scores_array) if score == max_score]
+            logging.info(f"Chosen model indices for max score: {ix_list}")
+            # chose randomly out of candidates
+            logging.info(f"# of indices: {len(ix_list)}")
+            random_ix = random.randint(0, len(ix_list)-1)
+            logging.info(f"Random index: {random_ix}")
+            best_model_ix = ix_list[random_ix]
+            logging.info(f"Best model imdex: {best_model_ix}")
+        # ELSE the model with lowest match score performed best because...
+        # it was deemed an incorrect guess and the reaction confirmed it with Yes OR
+        # it was deemed a correct guess and the reaction disconfirmed it with No
+        else:
+            # get ix for model with worst score
+            # account for possibility of more than one model having the min score
+            ix_list = [ix for ix, score in enumerate(scores_array) if score == min_score]
+            logging.info(f"Chosen model indices for min score: {ix_list}")
+            # chose randomly out of candidates
+            logging.info(f"# of indices: {len(ix_list)}")
+            random_ix = random.randint(0, len(ix_list)-1)
+            logging.info(f"Random index: {random_ix}")
+            best_model_ix = ix_list[random_ix]
+            logging.info(f"Best model imdex: {best_model_ix}")
+        return reaction, best_model_ix
 
 # Routes
 # home
@@ -85,13 +141,14 @@ def view():
         2. Users answer a question ("POST" method below)
     """
     if request.method == "POST":
-        selected_model = request.form.get('selected_model')
-        logging.info(f"selected model: {selected_model}")
+        # get best model given reaction and guess
+        reaction, best_model_ix = select_best_model()
         # query models to get the id
-        model = Models.query.filter_by(short_name=selected_model).first()
+        model = Models.query.filter_by(id=best_model_ix).first()
         store_answer_update(
             user_id=current_user.id
             , pun_id=session['pun_id']
+            , user_confirmed_as=reaction
             , selected_model=model.id
         )
         # increment the num_votes in models
@@ -109,6 +166,7 @@ def view():
         hint = f"[{num_words} words]"
         return render_template('view.html', values=[question, hint])
 
+
 # view asnwer
 @app.route('/view_answer', methods=["POST", "GET"])
 @login_required
@@ -123,7 +181,6 @@ def view_answer():
         # make sure text area is completed
         user_id = current_user.id
         user_answer = request.form.get('user_answer')
-
         if not user_answer.strip():
             flash("Text area cannot be empty.", "info")
             return redirect(url_for('view'))
@@ -146,13 +203,17 @@ def view_answer():
             avg_score = np.sum([score * weight for score, weight in zip(scores, weights)])
             avg_score = np.round(avg_score, 6)
             logging.info(f"Weighted Avg. Score: {avg_score}")
-            # store data in answer table
+            # add Boolean int for correct guess to be passed to Javascript frontend for effects
+            correct_guess = int(avg_score > THRESH)
+            # store known view data in answer table
             store_answer(
                 user_id=user_id
                 , pun_id=pun_id
                 , user_answer=user_answer
                 , scores=rounded_scores
                 , avg_score=avg_score
+                , correct_guess=correct_guess
+                , user_confirmed_as=None
                 , selected_model=None
             )
             # query all the short_name values from the Models table
@@ -169,8 +230,6 @@ def view_answer():
             # return user answer for ease of comparison
             your_answer = f"Your Answer: {user_answer}"
             values = [question, answer, your_answer]
-            # add Boolean int for correct guess to be passed to Javascript frontend for effects
-            correct_guess = int(avg_score > 0.6)
             # return view answer
             return render_template(
                 'view_answer.html'

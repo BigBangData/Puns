@@ -66,13 +66,29 @@ class Answer(db.Model):
     scores = db.Column(db.String, nullable=False)
     # weighted avg score (based on previous weights in models & scores)
     avg_score = db.Column(db.Float)
-    # id of selected model
+    # T/F for whether user guessed correctly or not
+    correct_guess = db.Column(db.Boolean)
+    # user response confirming Y/N for the reaction (the deemed 'correct' guess)
+    user_confirmed_as = db.Column(db.String)
+    # id of selected model (best model, to be incremented in Models.num_votes)
     selected_model = db.Column(db.Integer)
 
-    def __init__(self, user_id, pun_id, user_answer, scores, selected_model, avg_score):
+    def __init__(
+            self
+            , user_id
+            , pun_id
+            , user_answer
+            , scores
+            , avg_score
+            , correct_guess
+            , user_confirmed_as
+            , selected_model
+        ):
         self.user_id = user_id
         self.pun_id = pun_id
         self.user_answer = user_answer
         self.scores = json.dumps(scores)
         self.avg_score = avg_score
+        self.correct_guess = correct_guess
+        self.user_confirmed_as = user_confirmed_as
         self.selected_model = selected_model

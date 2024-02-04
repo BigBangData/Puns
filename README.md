@@ -32,14 +32,13 @@ __Functionality__
   + view model scores and has to select best model by clicking on its name
   + that click loads next question, increments the selected model's num_votes in the models table
   + which in turn increases the weight for that model in the final weighted avg score
+  + button to press if the page's success/not reaction was correct or not:
+    + selects best model based on whether user guessed correctly/not and confirmed/not with the button
+    + adds correct/wrong to answer table to keep user's selection
 
 __Backlog__
 
-- Hints:
-  + use chatGPT to generate initial hints; iterate
-- Button to press if reaction was correct or not:
-  + if correct, choose model with highest score; if wrong, choose model with lowest score
-  + add right or wrong to answers so later can use SQL to figure out better thresholds
+- Add actual hints; use chatGPT for v1; iterate for better hints
 - Change "view.html" to "puns.html" or "play.html"
 - Add a "go back to last one" button
 - Add a view your answers button that redirects to a page with your stats
@@ -48,15 +47,13 @@ __Backlog__
 - Use a better algo than bcrypt to hash passwords
 - Delete all unneccessary logging.info
 - Add explanations in homepage
+- Figure out security for app.config's secret_key
+- Setup so that only a few chosen usernames can signup, password up to them
+- Deploy (follow Tim's last tutorial)
 
 __Discarded__
 - Word embeddings in `word2vec` were cumbersome, slowed down the app, and yielded dubious results
 - Spacy's `en_core_web_trf` yielded 0.0 similarity scores; mostly for longer texts
-
-__Final Steps__
-- Figure out security for app.config's secret_key
-- Maybe setup so that only a few chosen usernames can signup, password up to them
-- Deploy (follow Tim's last tutorial)
 
 ---
 
