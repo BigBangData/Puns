@@ -1,4 +1,5 @@
 import ast
+import re
 import logging
 import random
 import numpy as np
@@ -185,8 +186,9 @@ def view_answer():
             flash("Text area cannot be empty.", "info")
             return redirect(url_for('play'))
         else:
-            # remove newlines
+            # remove newlines and 2+ spaces and html chars
             user_answer = user_answer.replace('\n', '').replace('\r', '')
+            user_answer = re.sub(r'\s+', ' ', user_answer).strip()
             # get score for text comparison using Spacy
             score1 = get_web_sm_similarity(user_answer, answer)
             score2 = get_web_md_similarity(user_answer, answer)

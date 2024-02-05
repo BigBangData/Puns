@@ -39,8 +39,7 @@ __Functionality__
 __Backlog__
 
 - Add actual hints; use chatGPT for v1; iterate for better hints
-- Strip user input of newlines _before_ matching
-- Strip user inpute for security reasons
+- Escape user input for security reasons (read https://benhoyt.com/writings/dont-sanitize-do-escape/)
 - Use a better algo than bcrypt to hash passwords
 - Delete all unneccessary logging.info
 - Add brief explanation of how it all works in homepage instead of a dog face
