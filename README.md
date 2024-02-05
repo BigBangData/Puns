@@ -17,12 +17,12 @@ sqlite> .exit
 - after launching app, populate the puns table via `python populate_puns.py` (only once)
 
 __Functionality__
-- signup: only possible when logged out, throws message and redirects to view, fails if username exists
-- login: only possible when logged out, throws message and redirects to view
+- signup: only possible when logged out, throws message and redirects to play, fails if username exists
+- login: only possible when logged out, throws message and redirects to play
 - login: fails back to login when password is wrong, fails to signup when username doesn't exist
-- view: goal of signing up and logging in, where the action happens, and only place logging out is possible
-  + after logging in, signup/login redirect to view
-- view:
+- play: goal of signing up and logging in, where the action happens, and only place logging out is possible
+  + after logging in, signup/login redirect to play
+- play:
   + goes through questions in order for every user
   + persist questions asked beyond single session
   + starts over when all questions have been asked for a given user
@@ -39,17 +39,17 @@ __Functionality__
 __Backlog__
 
 - Add actual hints; use chatGPT for v1; iterate for better hints
-- Change "view.html" to "puns.html" or "play.html"
-- Add a "go back to last one" button
-- Add a view your answers button that redirects to a page with your stats
 - Strip user input of newlines _before_ matching
 - Strip user inpute for security reasons
 - Use a better algo than bcrypt to hash passwords
 - Delete all unneccessary logging.info
-- Add explanations in homepage
+- Add brief explanation of how it all works in homepage instead of a dog face
 - Figure out security for app.config's secret_key
 - Setup so that only a few chosen usernames can signup, password up to them
 - Deploy (follow Tim's last tutorial)
+
+__Extra Features__
+- Add a "view your answers" button that redirects to a page with your stats
 
 __Discarded__
 - Word embeddings in `word2vec` were cumbersome, slowed down the app, and yielded dubious results

@@ -48,7 +48,7 @@ def signup():
             msg = f"You're currently logged in as {current_user.username}. \
                 Please log out before signing up with another username."
             flash(msg, "info")
-            return redirect(url_for('view'))
+            return redirect(url_for('play'))
         # throws error when current_user is Anonymous (not logged in)
         except AttributeError:
             return render_template('signup.html', form=form)
@@ -68,7 +68,7 @@ def login():
                     session.pop('answer', None)
                     login_user(user_id)
                     flash(f"Hello {user_id.username}, you are logged in.", "info")
-                    return redirect(url_for('view'))
+                    return redirect(url_for('play'))
                 else:
                     logging.info(msg=f"Wrong password for {form.username.data}.")
                     flash("Wrong password.", "info")
@@ -81,7 +81,7 @@ def login():
         try:
             msg = f"{current_user.username}, you're already logged in."
             flash(msg, "info")
-            return redirect(url_for('view'))
+            return redirect(url_for('play'))
         # throws error when current_user = AnonymousUserMixin
         except AttributeError:
             return render_template('login.html', form=form)

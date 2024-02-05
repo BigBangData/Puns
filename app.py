@@ -19,7 +19,7 @@ app.register_blueprint(login_bp)
 # threshold for success based on avg_score
 THRESH = 0.6
 
-# View
+# Play.html
 def get_users_latest_answer():
     """Helper function for get_next_pun()"""
     last_answer = (
@@ -130,10 +130,10 @@ def select_best_model():
 def home():
     return render_template('index.html')
 
-# view
-@app.route('/view', methods=["POST", "GET"])
+# play
+@app.route('/play', methods=["POST", "GET"])
 @login_required
-def view():
+def play():
     """Delivers pun question.
     Uses get_next_pun(), which checks for session data.
     Session pun data is cleared when either:
@@ -164,7 +164,7 @@ def view():
         _, question, answer = get_next_pun()
         num_words = len(answer.split(" "))
         hint = f"[{num_words} words]"
-        return render_template('view.html', values=[question, hint])
+        return render_template('play.html', values=[question, hint])
 
 
 # view asnwer
@@ -183,7 +183,7 @@ def view_answer():
         user_answer = request.form.get('user_answer')
         if not user_answer.strip():
             flash("Text area cannot be empty.", "info")
-            return redirect(url_for('view'))
+            return redirect(url_for('play'))
         else:
             # remove newlines
             user_answer = user_answer.replace('\n', '').replace('\r', '')
@@ -205,7 +205,7 @@ def view_answer():
             logging.info(f"Weighted Avg. Score: {avg_score}")
             # add Boolean int for correct guess to be passed to Javascript frontend for effects
             correct_guess = int(avg_score > THRESH)
-            # store known view data in answer table
+            # store known 'play' data in answer table
             store_answer(
                 user_id=user_id
                 , pun_id=pun_id
@@ -238,7 +238,7 @@ def view_answer():
                 , correct_guess=correct_guess
             )
     else:
-        return redirect(url_for('view'))
+        return redirect(url_for('play'))
 
 
 if __name__ == '__main__':
