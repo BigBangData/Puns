@@ -2,17 +2,18 @@
 import os
 import csv
 
-from db_model import app, db, Puns, Models
+from db_model import db, Puns, Models
 
 def insert_into_puns():
     try:
         existing_records = Puns.query.first()
         if existing_records is None:
-            csv_path = os.path.join('static', 'files', 'puns.csv')
-            with open(csv_path, 'r', encoding='utf-8') as csv_file:
+            csv_path = os.path.join('static', 'files', 'puns_hints.csv')
+            with open(csv_path, mode='r', encoding='utf-8-sig') as csv_file:
                 csv_reader = csv.DictReader(csv_file)
                 for row in csv_reader:
-                    new_pun = Puns(question=row['question'], answer=row['answer'])
+                    print(row)
+                    new_pun = Puns(question=row['question'], answer=row['answer'], hint=row['hint'])
                     db.session.add(new_pun)
             db.session.commit()
         else:

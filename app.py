@@ -62,16 +62,19 @@ def get_next_pun():
         pun_id = pun.id
         question = f"{pun.question}?"
         answer = pun.answer
+        hint = pun.hint
         # persist for single answer
         session['pun_id'] = pun_id
         session['question'] = question
         session['answer'] = answer
+        session['hint'] = hint
         #logging.info(f"{session}")
     else:
         pun_id = session['pun_id']
         question = session['question']
         answer = session['answer']
-    return pun_id, question, answer
+        hint = session['hint']
+    return pun_id, question, answer, hint
 
 def select_best_model():
         # given reaction
@@ -108,7 +111,7 @@ def select_best_model():
             random_ix = random.randint(0, len(ix_list)-1)
             logging.info(f"Random index: {random_ix}")
             best_model_ix = ix_list[random_ix]
-            logging.info(f"Best model imdex: {best_model_ix}")
+            logging.info(f"Best model index: {best_model_ix}")
         # ELSE the model with lowest match score performed best because...
         # it was deemed an incorrect guess and the reaction confirmed it with Yes OR
         # it was deemed a correct guess and the reaction disconfirmed it with No
@@ -162,10 +165,10 @@ def play():
         session.pop('answer', None)
         return redirect(url_for('view_answer'))
     else:
-        _, question, answer = get_next_pun()
+        _, question, answer, hint = get_next_pun()
         num_words = len(answer.split(" "))
-        hint = f"[{num_words} words]"
-        return render_template('play.html', values=[question, hint])
+        num_words_msg = f"[{num_words} words]"
+        return render_template('play.html', values=[question, num_words_msg, hint])
 
 
 # view asnwer
@@ -177,7 +180,7 @@ def view_answer():
     Compares user answer with pun answer given methods; returns scores.
     """
     # get session answer
-    pun_id, question, answer = get_next_pun()
+    pun_id, question, answer, _ = get_next_pun()
     if request.method == "POST":
         # make sure text area is completed
         user_id = current_user.id

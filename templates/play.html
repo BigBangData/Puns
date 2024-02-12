@@ -5,7 +5,7 @@
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for msg in messages %}
-                <p>{{msg}}</p>
+                <p>{{ msg }}</p>
             {% endfor %}
         {% endif %}
     {% endwith %}
@@ -15,15 +15,39 @@
             {% for item in values %}
             {% if loop.index == 1 %}
                 <h3 class="h3-blue text-center">{{ item }}</h3>
-            {% else %}
+            {% elif loop.index == 2 %}
                 <h3 class="h3-red text-center">{{ item }}</h3>
             {% endif %}
             {% endfor %}
             <br>
-            <center><textarea name="user_answer" rows="2" cols="80" maxlength = "100"></textarea></center>
-            <center><input type="submit" class="btn-info" value="VIEW ANSWER"></center>
+                <center>
+                    <button type="button" class="btn-info" id="view-hint-btn">VIEW HINT</button>
+                    <p id="hint-text" style="display: none;">
+                        {% for item in values %}
+                            {% if loop.index == 3 %}
+                                {{ item }}
+                            {% endif %}
+                        {% endfor %}
+                    </p>
+                </center>
+            <br>
+                <center>
+                    <textarea name="user_answer" rows="2" cols="80" maxlength = "100"></textarea>
+                </center>
+            <br>
+                <center>
+                    <input type="submit" class="btn-info" value="VIEW ANSWER">
+                </center>
+            <br>
         </form>
     </div>
     <hr>
     <p style="text-align: center;"><a href="{{url_for('logout')}}">Logout</a></p>
+    <!-- Javascript for showing the hint when user clicks the view hint button-->
+    <script>
+        document.getElementById('view-hint-btn').addEventListener('click', function() {
+            document.getElementById('view-hint-btn').style.display = 'none';
+            document.getElementById('hint-text').style.display = 'block';
+        });
+    </script>
 {% endblock %}
