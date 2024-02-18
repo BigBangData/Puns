@@ -38,12 +38,11 @@ __Functionality__
 
 __Backlog__
 
-- Bug: when random.randint(0,) returns the best_model_ix as 0, an error occurs - check logs
 - How to handle explanation of "he was a little horse" vs "he was a little hoarse"? Which is the "correct pun"?
   + User must know ahead of time what is the preferred answer, if there is one
 - Escape user input for security reasons (read https://benhoyt.com/writings/dont-sanitize-do-escape/)
 - Use a better algo than bcrypt to hash passwords
-- Delete all unneccessary logging.info
+- Delete or comment out all unneccessary logging.info
 - Add brief explanation of how it all works in homepage instead of a dog face
 - Figure out security for app.config's secret_key
 - Setup so that only a few chosen usernames can signup, password up to them

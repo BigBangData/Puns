@@ -1,6 +1,7 @@
 
 import os
 import csv
+import logging
 
 from db_model import db, Puns, Models
 
@@ -11,15 +12,19 @@ def insert_into_puns():
             csv_path = os.path.join('static', 'files', 'puns_hints.csv')
             with open(csv_path, mode='r', encoding='utf-8-sig') as csv_file:
                 csv_reader = csv.DictReader(csv_file)
+                logging.info(f"Inserted {len(list(csv_reader))} rows into Puns.")
                 for row in csv_reader:
-                    print(row)
-                    new_pun = Puns(question=row['question'], answer=row['answer'], hint=row['hint'])
+                    new_pun = Puns(
+                        question=row['question']
+                        , answer=row['answer']
+                        , hint=row['hint']
+                    )
                     db.session.add(new_pun)
             db.session.commit()
         else:
-            print("Data already exists in the Puns table. Skipping insert.")
+            logging.info("Skipped Insert - table Puns already exists.")
     except FileNotFoundError:
-        print(f"CSV file '{csv_path}' not found.")
+        logging.error(f"CSV file '{csv_path}' not found.")
 
 def insert_into_models():
     try:
@@ -28,15 +33,16 @@ def insert_into_models():
             csv_path = os.path.join('static', 'files', 'models.csv')
             with open(csv_path, 'r', encoding='utf-8') as csv_file:
                 csv_reader = csv.DictReader(csv_file)
+                logging.info(f"Inserted {len(list(csv_reader))} rows into Models.")
                 for row in csv_reader:
                     new_model = Models(
                         short_name=row['short_name']
                         , long_name=row['long_name']
                         , num_votes=row['num_votes']
-                        )
+                    )
                     db.session.add(new_model)
             db.session.commit()
         else:
-            print("Data already exists in the Models table. Skipping insert.")
+            logging.info("Skipped Insert - table Models already exists.")
     except FileNotFoundError:
-        print(f"CSV file '{csv_path}' not found.")
+        logging.error(f"CSV file '{csv_path}' not found.")
