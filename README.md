@@ -38,7 +38,9 @@ __Functionality__
 
 __Backlog__
 
-- Add actual hints; use chatGPT for v1; iterate for better hints
+- Bug: when random.randint(0,) returns the best_model_ix as 0, an error occurs - check logs
+- How to handle explanation of "he was a little horse" vs "he was a little hoarse"? Which is the "correct pun"?
+  + User must know ahead of time what is the preferred answer, if there is one
 - Escape user input for security reasons (read https://benhoyt.com/writings/dont-sanitize-do-escape/)
 - Use a better algo than bcrypt to hash passwords
 - Delete all unneccessary logging.info
@@ -49,6 +51,7 @@ __Backlog__
 
 __Extra Features__
 - Add a "view your answers" button that redirects to a page with your stats
+- Add a "suggest a hint" button for users to suggest
 
 __Discarded__
 - Word embeddings in `word2vec` were cumbersome, slowed down the app, and yielded dubious results
