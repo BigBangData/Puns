@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% block title %}View Answer{% endblock %}
 {% block header %}
-    <!-- Confetti script -->
+    <!-- Confetti script for success/failure reactions -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <script>
         var scalar = 4;
@@ -22,17 +22,18 @@
             confetti({
                 ...defaults,
                 shapes: [unicorn],
-                particleCount: 30
+                particleCount: 400
             });
             confetti({
                 ...defaults,
                 shapes: [unicorn],
-                particleCount: 20,
+                particleCount: 200,
+                startVelocity: 55,
                 flat: true
             });
             confetti({
                 ...defaults,
-                particleCount: 15,
+                particleCount: 200,
                 scalar: scalar / 2,
                 shapes: ['square']
             });
@@ -42,27 +43,30 @@
             confetti({
                 ...defaults,
                 shapes: [lobster],
-                particleCount: 20,
-                gravity: 0.3
+                particleCount: 25,
+                flat: true,
+                gravity: 0.1,
+                startVelocity: 15,
+                scalar: 6
             });
             confetti({
                 ...defaults,
                 shapes: [lobster],
-                particleCount: 20,
+                particleCount: 40,
                 flat: true,
-                gravity: 0,
-                startVelocity: 20
-
+                gravity: 0.1,
+                startVelocity: 45,
+                scalar: 6
             });
         }
         // If user guesses correctly according to weighted avg score
         var correctGuess = {{ correct_guess|safe }};
         if (correctGuess) {
             setTimeout(shootUnicorns, 0);
-            setTimeout(shootUnicorns, 600);
+            setTimeout(shootUnicorns, 300);
         } else {
             setTimeout(shootLobsters, 0);
-            setTimeout(shootLobsters, 80);
+            setTimeout(shootLobsters, 40);
         }
     </script>
 {% endblock %}
