@@ -90,42 +90,38 @@ def select_best_model():
         # calculate whether user guessed correctly, given the same threshold
         correct_guess = last_answer.avg_score > THRESH
         logging.info(f"Guessed correctly? {correct_guess}")
-        # get min/max scores
+        # get max / min scores
         scores_list = ast.literal_eval(last_answer.scores)
         scores_array = np.array(scores_list)
         max_score = np.max(scores_array)
         min_score = np.min(scores_array)
-        logging.info(f"Max score: {max_score}")
-        logging.info(f"Min score: {min_score}")
         # select best model given reaction and guess
-        # model with highest match score performed best IF...
-        # it was deemed a correct guess and the reaction confirmed it with Yes OR
-        # it was deemed an incorrect guess but the reaction disconfirmed it with No
-        if correct_guess and reaction == 'Yes' or not correct_guess and reaction == 'No':
-            # get ix for model with best score
-            # account for possibility of more than one model having the max score
-            ix_list = [ix for ix, score in enumerate(scores_array) if score == max_score]
-            logging.info(f"Chosen model indices for max score: {ix_list}")
+        def get_best_ix_given_score(score, score_str):
+            # helper function to get model ix for best / worst scores
+            # account for possibility of more than one model having the max or min score
+            logging.info(f"{score_str} score: {score}")
+            ix_list = [ix for ix, score in enumerate(scores_array) if score == score]
+            logging.info(f"Chosen model indices for {score_str} score: {ix_list}")
             # chose randomly out of candidates
             logging.info(f"# of indices: {len(ix_list)}")
             random_ix = random.randint(0, len(ix_list)-1)
             logging.info(f"Random index: {random_ix}")
-            best_model_ix = ix_list[random_ix]
+            # adjust index from python zero-base to database one-base numbering
+            best_model_ix = ix_list[random_ix] +1
             logging.info(f"Best model index: {best_model_ix}")
+            return best_model_ix
+        # model with highest match score performed best IF...
+        # it was deemed a correct guess and the reaction confirmed it with Yes OR
+        # it was deemed an incorrect guess but the reaction disconfirmed it with No
+        if correct_guess and reaction == 'Yes' or not correct_guess and reaction == 'No':
+            # get ix for model with best or worst score
+            best_model_ix = get_best_ix_given_score(max_score, 'max')
         # ELSE the model with lowest match score performed best because...
         # it was deemed an incorrect guess and the reaction confirmed it with Yes OR
         # it was deemed a correct guess and the reaction disconfirmed it with No
         else:
             # get ix for model with worst score
-            # account for possibility of more than one model having the min score
-            ix_list = [ix for ix, score in enumerate(scores_array) if score == min_score]
-            logging.info(f"Chosen model indices for min score: {ix_list}")
-            # chose randomly out of candidates
-            logging.info(f"# of indices: {len(ix_list)}")
-            random_ix = random.randint(0, len(ix_list)-1)
-            logging.info(f"Random index: {random_ix}")
-            best_model_ix = ix_list[random_ix]
-            logging.info(f"Best model imdex: {best_model_ix}")
+            best_model_ix = get_best_ix_given_score(min_score, 'min')
         return reaction, best_model_ix
 
 # Routes
