@@ -11,6 +11,7 @@ from db_model import db, Answer, Models
 
 # Spacy
 # -----
+# if migrating, run: python -m spacy download en_core_web_sm, etc.
 web_sm = spacy.load("en_core_web_sm")
 web_md = spacy.load("en_core_web_md")
 
