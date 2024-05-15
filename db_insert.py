@@ -12,14 +12,16 @@ def insert_into_puns():
             csv_path = os.path.join('static', 'files', 'puns_hints.csv')
             with open(csv_path, mode='r', encoding='utf-8-sig') as csv_file:
                 csv_reader = csv.DictReader(csv_file)
-                logging.info(f"Inserted {len(list(csv_reader))} rows into Puns.")
+                row_count = 0
                 for row in csv_reader:
                     new_pun = Puns(
-                        question=row['question']
-                        , answer=row['answer']
-                        , hint=row['hint']
+                        question=row['question'],
+                        answer=row['answer'],
+                        hint=row['hint']
                     )
                     db.session.add(new_pun)
+                    row_count += 1
+                logging.info(f"Inserted {row_count} rows into Puns.")
             db.session.commit()
         else:
             logging.info("Skipped Insert - table Puns already exists.")
@@ -33,7 +35,7 @@ def insert_into_models():
             csv_path = os.path.join('static', 'files', 'models.csv')
             with open(csv_path, 'r', encoding='utf-8') as csv_file:
                 csv_reader = csv.DictReader(csv_file)
-                logging.info(f"Inserted {len(list(csv_reader))} rows into Models.")
+                row_count = 0
                 for row in csv_reader:
                     new_model = Models(
                         short_name=row['short_name']
@@ -41,6 +43,8 @@ def insert_into_models():
                         , num_votes=row['num_votes']
                     )
                     db.session.add(new_model)
+                    row_count += 1
+                logging.info(f"Inserted {row_count} rows into Models.")
             db.session.commit()
         else:
             logging.info("Skipped Insert - table Models already exists.")
