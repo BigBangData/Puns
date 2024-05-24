@@ -15,9 +15,9 @@ def insert_into_puns():
                 row_count = 0
                 for row in csv_reader:
                     new_pun = Puns(
-                        question=row['question'],
-                        answer=row['answer'],
-                        hint=row['hint']
+                        question=row['question']
+                        , answer=row['answer']
+                        , hint=row['hint']
                     )
                     db.session.add(new_pun)
                     row_count += 1
