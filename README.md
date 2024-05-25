@@ -40,20 +40,18 @@ __Functionality__
   + view model "leaderboard" with scores
 
 __Backlog__
-
-- How to handle explanation of "he was a little horse" vs "he was a little hoarse"? Which is the "correct pun"?
-  + User must know ahead of time what is the preferred answer, if there is one
-- Escape user input for security reasons (read https://benhoyt.com/writings/dont-sanitize-do-escape/)
-- Use a better algo than bcrypt to hash passwords
-- Delete or comment out all unneccessary logging.info, add more if needed (say, when spinning up project)
 - Add brief explanation of how it all works in homepage instead of a dog face
 - Figure out security for app.config's secret_key
 - Setup so that only a few chosen usernames can signup, password up to them of course
+- Add LICENSE and copyright notices to all files, mention use of chatGPT for help
 - Deploy (follow Tim's last tutorial)
 
 __Extra Features__
 - Add a "view your answers" button that redirects to a page with your stats
 - Add a "suggest a hint" button for users to suggest
+- Escape user input for security reasons (read https://benhoyt.com/writings/dont-sanitize-do-escape/)
+- How to handle explanation of "he was a little horse" vs "he was a little hoarse"? Which is the "correct pun"?
+  + User must know ahead of time what is the preferred answer, if there is one
 
 __Discarded__
 - Word embeddings in `word2vec` were cumbersome, slowed down the app, and yielded dubious results

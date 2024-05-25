@@ -101,9 +101,7 @@ def select_best_model():
             # account for possibility of more than one model having the max or min score
             logging.info(f"{score_str} score: {score}")
             ix_list = [ix for ix, score in enumerate(scores_array) if score == score]
-            logging.info(f"Chosen model indices for {score_str} score: {ix_list}")
             # chose randomly out of candidates
-            logging.info(f"# of indices: {len(ix_list)}")
             random_ix = random.randint(0, len(ix_list)-1)
             logging.info(f"Random index: {random_ix}")
             # adjust index from python zero-base to database one-base numbering
