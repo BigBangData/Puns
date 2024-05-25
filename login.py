@@ -6,7 +6,7 @@ from flask_login import login_user, login_required, logout_user, current_user
 
 # custom
 from db_model import app, db, User
-from auth import bcrypt, RegisterForm, LoginForm
+from auth import RegisterForm, LoginForm, hash_password, check_password_hash
 
 # define blueprint for login.py
 login_bp = Blueprint('login', __name__)
@@ -30,7 +30,11 @@ def signup():
     form = RegisterForm()
     if request.method == "POST":
         if form.validate_on_submit():
-            hashed_password = bcrypt.generate_password_hash(form.password.data)
+            existing_user = User.query.filter_by(username=form.username.data).first()
+            if existing_user:
+                flash(f"Username '{form.username.data}' exists. Please try another.", "warning")
+                return render_template("signup.html", form=form)
+            hashed_password = hash_password(form.password.data)
             new_user = User(username=form.username.data, password=hashed_password)
             db.session.add(new_user)
             db.session.commit()
@@ -39,9 +43,9 @@ def signup():
             flash(msg, "info")
             return redirect(url_for('login'))
         else:
-            msg = f"Username '{form.username.data}' exists. Please try another."
-            logging.info(msg=msg)
-            flash(msg, "info")
+            for field, errors in form.errors.items():
+                for error in errors:
+                    flash(f"Error in {getattr(form, field).label.text}: {error}", "danger")
             return render_template("signup.html", form=form)
     else:
         try:
@@ -61,7 +65,7 @@ def login():
         if form.validate_on_submit():
             user_id = User.query.filter_by(username=form.username.data).first()
             if user_id:
-                if bcrypt.check_password_hash(user_id.password, form.password.data):
+                if check_password_hash(user_id.password, form.password.data):
                     # clear any session variables related to question and answer
                     session.pop('pun_id', None)
                     session.pop('question', None)
