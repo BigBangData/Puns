@@ -29,12 +29,15 @@ __Functionality__
   + does matching in two ways: spacy text (looks to be semantic?) and phonetic
 - view answer:
   + view answer and own answer
-  + view model scores and has to select best model by clicking on its name
-  + that click loads next question, increments the selected model's num_votes in the models table
-  + which in turn increases the weight for that model in the final weighted avg score
-  + button to press if the page's success/not reaction was correct or not:
-    + selects best model based on whether user guessed correctly/not and confirmed/not with the button
-    + adds correct/wrong to answer table to keep user's selection
+  + see a message that reflects whether answer was correct or not
+  + if answer is correct, unicorn confetti are thrown, if not, crab confetti
+  + click on an AGREE / DISAGREE button
+    - this action is the only way to load the next question
+      + technically, it increments the selected model's num_votes in the models table
+      + which in turn increases the weight for that model in the final weighted avg score
+      + also adds correct/wrong to answer table to keep user's selection
+    - side note: clicking on Play again reloads the same question
+  + view model "leaderboard" with scores
 
 __Backlog__
 
@@ -42,10 +45,10 @@ __Backlog__
   + User must know ahead of time what is the preferred answer, if there is one
 - Escape user input for security reasons (read https://benhoyt.com/writings/dont-sanitize-do-escape/)
 - Use a better algo than bcrypt to hash passwords
-- Delete or comment out all unneccessary logging.info
+- Delete or comment out all unneccessary logging.info, add more if needed (say, when spinning up project)
 - Add brief explanation of how it all works in homepage instead of a dog face
 - Figure out security for app.config's secret_key
-- Setup so that only a few chosen usernames can signup, password up to them
+- Setup so that only a few chosen usernames can signup, password up to them of course
 - Deploy (follow Tim's last tutorial)
 
 __Extra Features__

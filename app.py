@@ -77,9 +77,9 @@ def get_next_pun():
     return pun_id, question, answer, hint
 
 def select_best_model():
-        # given reaction
-        reaction = request.form.get("reaction")
-        logging.info(f"Received reaction: {reaction}")
+        # given feedback
+        feedback = request.form.get("feedback")
+        logging.info(f"Received feedback: {feedback}")
         # given last answer's avg score
         last_answer = (
             db.session.query(Answer)
@@ -95,7 +95,7 @@ def select_best_model():
         scores_array = np.array(scores_list)
         max_score = np.max(scores_array)
         min_score = np.min(scores_array)
-        # select best model given reaction and guess
+        # select best model given feedback and guess
         def get_best_ix_given_score(score, score_str):
             # helper function to get model ix for best / worst scores
             # account for possibility of more than one model having the max or min score
@@ -111,18 +111,18 @@ def select_best_model():
             logging.info(f"Best model index: {best_model_ix}")
             return best_model_ix
         # model with highest match score performed best IF...
-        # it was deemed a correct guess and the reaction confirmed it with Yes OR
-        # it was deemed an incorrect guess but the reaction disconfirmed it with No
-        if correct_guess and reaction == 'Yes' or not correct_guess and reaction == 'No':
+        # it was deemed a correct guess and the feedback confirmed it with AGREE OR
+        # it was deemed an incorrect guess but the feedback disconfirmed it with DISAGREE
+        if correct_guess and feedback == 'AGREE' or not correct_guess and feedback == 'DISAGREE':
             # get ix for model with best or worst score
             best_model_ix = get_best_ix_given_score(max_score, 'max')
         # ELSE the model with lowest match score performed best because...
-        # it was deemed an incorrect guess and the reaction confirmed it with Yes OR
-        # it was deemed a correct guess and the reaction disconfirmed it with No
+        # it was deemed an incorrect guess and the feedback confirmed it with AGREE OR
+        # it was deemed a correct guess and the feedback disconfirmed it with DISAGREE
         else:
             # get ix for model with worst score
             best_model_ix = get_best_ix_given_score(min_score, 'min')
-        return reaction, best_model_ix
+        return feedback, best_model_ix
 
 # Routes
 # home
@@ -141,14 +141,14 @@ def play():
         2. Users answer a question ("POST" method below)
     """
     if request.method == "POST":
-        # get best model given reaction and guess
-        reaction, best_model_ix = select_best_model()
+        # get best model given feedback and guess
+        feedback, best_model_ix = select_best_model()
         # query models to get the id
         model = Models.query.filter_by(id=best_model_ix).first()
         store_answer_update(
             user_id=current_user.id
             , pun_id=session['pun_id']
-            , user_confirmed_as=reaction
+            , user_confirmed_as=feedback
             , selected_model=model.id
         )
         # increment the num_votes in models

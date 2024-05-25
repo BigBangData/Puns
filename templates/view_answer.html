@@ -4,7 +4,7 @@
     <!-- Confetti script for success/failure reactions -->
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <script>
-        var scalar = 4;
+        var scalar = 2;
         var unicorn = confetti.shapeFromText({ text: '🦄', scalar });
         var lobster = confetti.shapeFromText({ text: '🦞', scalar });
     
@@ -22,18 +22,18 @@
             confetti({
                 ...defaults,
                 shapes: [unicorn],
-                particleCount: 400
+                particleCount: 300
             });
             confetti({
                 ...defaults,
                 shapes: [unicorn],
-                particleCount: 200,
+                particleCount: 150,
                 startVelocity: 55,
                 flat: true
             });
             confetti({
                 ...defaults,
-                particleCount: 200,
+                particleCount: 100,
                 scalar: scalar / 2,
                 shapes: ['square']
             });
@@ -43,30 +43,20 @@
             confetti({
                 ...defaults,
                 shapes: [lobster],
-                particleCount: 25,
+                particleCount: 100,
                 flat: true,
                 gravity: 0.1,
-                startVelocity: 15,
-                scalar: 6
-            });
-            confetti({
-                ...defaults,
-                shapes: [lobster],
-                particleCount: 40,
-                flat: true,
-                gravity: 0.1,
-                startVelocity: 45,
-                scalar: 6
+                startVelocity: 20,
+                scalar: 3
             });
         }
         // If user guesses correctly according to weighted avg score
-        var correctGuess = {{ correct_guess|safe }};
+        var correctGuess = {{ correct_guess | safe }};
         if (correctGuess) {
             setTimeout(shootUnicorns, 0);
-            setTimeout(shootUnicorns, 300);
+            setTimeout(shootUnicorns, 100)
         } else {
-            setTimeout(shootLobsters, 0);
-            setTimeout(shootLobsters, 40);
+            setTimeout(shootLobsters, 0)
         }
     </script>
 {% endblock %}
@@ -95,9 +85,13 @@
                 {% endfor %}
                 <hr><br>
                 <form action="{{url_for('play')}}" method="POST">
-                    <h4>Was that the correct reaction?
-                        {% for reaction in ["Yes", "No"] %}
-                            <button type="submit" class="btn-info" name="reaction" value="{{ reaction }}">{{ reaction }}</button>
+                    <h4>{% if correct_guess %}
+                            <h3 class="h3-blue text-center">Great punning!</h3>
+                        {% else %}
+                            <h3 class="h3-red text-center">Better luck next time...</h3>
+                        {% endif %}
+                        {% for feedback in ["AGREE", "DISAGREE"] %}
+                            <button type="submit" class="btn-info" name="feedback" value="{{ feedback }}">{{ feedback }}</button>
                         {% endfor %}
                     </h4>
                 </form>
