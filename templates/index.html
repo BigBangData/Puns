@@ -1,8 +1,33 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
+{% block header %}<h2 class="h2-purple text-center">Welcome to Puns!</h2>{% endblock %}
 {% block content %}
-    <image alt="Dog in disguise" style="max-width:50%;" src="{{url_for('static', filename='images/braydon-anderson-wOHH-NUTvVc-unsplash.jpg')}}">
     <br><br>
-    <p style="text-align:center;font-size:12px">Photo by <a href="https://unsplash.com/@braydona?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Braydon Anderson</a> on <a href="https://unsplash.com/photos/black-and-white-dog-with-disguise-eyeglasses-wOHH-NUTvVc?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+    <p style="text-align:center; font-size:18px">
+    This simple website provides a question-and-answer game for guessing puns.
+    Signup and login to start playing.
     </p>
+    <p style="text-align:center; font-size:18px">
+    User is given a question and must attempt to answer it and use a pun.
+    If the answer given is close to the spirit of the actual answer, a success message appears, otherwise, a failure message appears.
+    The user must click a button to agree or disagree with the message to load a new question.
+    <p style="text-align:center; font-size:18px">
+    The user views a table of models which compared the user answer with the actual answer and scored their similarity.
+    This table contains the models' current match scores for the evaluated answers.
+    </p>
+    <p style="text-align:center; font-size:18px">
+    Technically, it is a weighted average of all models' scores that is evaluated against a threshold, and if above the threshold, the user's answer is deemed successful.
+    When the user provides feedback on the website's reaction, model weights are updated accordingly, to penalize the models that got it wrong and promote the models that got it right and in time generate a more accurate weighted average.
+    Since there are positive (AGREE) and negative (DISAGREE) forms of feedback and the website's reaction can also be positive (success message) or negative (failure message), this gets a wee bit complex but not too much.
+    [Link to code bit that does this.]
+    </p>
+    <p style="text-align:center; font-size:18px">
+    This means that the users "train" the system by answering and providing feedback.
+    If users train the system in bad faith and provide wrong feedback, the system will not improve.
+    </p>
+    <p style="text-align:center; font-size:18px">
+    The project is found in GitHub.
+    Acknowledge sources of puns.
+    </p>
+    <br><br>
 {% endblock %}

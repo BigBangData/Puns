@@ -6,7 +6,6 @@ __Credits__
 
 __Notes__
 - any user can create an account at any time, only usernames and passwords
-- this would of course open it to crash the server if someone hit it with creating multiple users, restrict to a few
 - use SQL to manage users, in `instance/`, issue:
 ```
 $ sqlite3 database.db
@@ -14,7 +13,9 @@ sqlite> .tables
 sqlite> select * from user;
 sqlite> .exit
 ```
-- after launching app, populate the puns table via `python populate_puns.py` (only once)
+- [DEPRECATED] after launching app, populate the puns table via `python populate_puns.py`
+  + app auto-populate puns in `static/files/puns_hints.csv` which is saved from the `.xlsx` file
+  + the initial flow was `raw_puns.txt >> curated_puns.txt >> puns.csv`
 
 __Functionality__
 - signup: only possible when logged out, throws message and redirects to play, fails if username exists
@@ -50,7 +51,8 @@ __Extra Features__
 - Add a "view your answers" button that redirects to a page with your stats
 - Add a "suggest a hint" button for users to suggest
 - Escape user input for security reasons (read https://benhoyt.com/writings/dont-sanitize-do-escape/)
-- How to handle explanation of "he was a little horse" vs "he was a little hoarse"? Which is the "correct pun"?
+- Handle explanation of "he was a little horse" vs "he was a little hoarse"
+  + Which is the "correct pun"?
   + User must know ahead of time what is the preferred answer, if there is one
 
 __Discarded__
