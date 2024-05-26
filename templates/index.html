@@ -1,33 +1,61 @@
 {% extends "base.html" %}
 {% block title %}Home{% endblock %}
-{% block header %}<h2 class="h2-purple text-center">Welcome to Puns!</h2>{% endblock %}
+{% block header %}<h3 class="h3-blue">Welcome to Puns!</h1>{% endblock %}
 {% block content %}
-    <br><br>
-    <p style="text-align:center; font-size:18px">
-    This simple website provides a question-and-answer game for guessing puns.
-    Signup and login to start playing.
-    </p>
-    <p style="text-align:center; font-size:18px">
-    User is given a question and must attempt to answer it and use a pun.
-    If the answer given is close to the spirit of the actual answer, a success message appears, otherwise, a failure message appears.
-    The user must click a button to agree or disagree with the message to load a new question.
-    <p style="text-align:center; font-size:18px">
-    The user views a table of models which compared the user answer with the actual answer and scored their similarity.
-    This table contains the models' current match scores for the evaluated answers.
-    </p>
-    <p style="text-align:center; font-size:18px">
-    Technically, it is a weighted average of all models' scores that is evaluated against a threshold, and if above the threshold, the user's answer is deemed successful.
-    When the user provides feedback on the website's reaction, model weights are updated accordingly, to penalize the models that got it wrong and promote the models that got it right and in time generate a more accurate weighted average.
-    Since there are positive (AGREE) and negative (DISAGREE) forms of feedback and the website's reaction can also be positive (success message) or negative (failure message), this gets a wee bit complex but not too much.
-    [Link to code bit that does this.]
-    </p>
-    <p style="text-align:center; font-size:18px">
-    This means that the users "train" the system by answering and providing feedback.
-    If users train the system in bad faith and provide wrong feedback, the system will not improve.
-    </p>
-    <p style="text-align:center; font-size:18px">
-    The project is found in GitHub.
-    Acknowledge sources of puns.
-    </p>
-    <br><br>
+<style>
+  body {
+    background-color: #fffff3; /* Cream color */
+  }
+</style>
+<div class="container">
+    <h4 style="text-align:justify;">How it works</h4>
+        <p style="text-align:justify; font-size:14px">
+        You're given a question and must answer it, preferably using a pun:
+        <br>
+        <img src="static/images/figure-1.png" alt="Figure 1. Example Q&A" width="540" height="235">
+        <br>
+        If your answer is close to the actual answer, you get a success message and unicorn confetti (not shown becase no spoilers!).
+        <br>
+        Otherwise a failure message appears and, as you'd expect, lobster confetti:
+        <br>
+        <img src="static/images/figure-2.png" alt="Figure 2. Example bad answer" width="911" height="450">
+        <br>
+        To load the next question, you must click on either the AGREE or on the DISAGREE button, to provide feedback on the reaction.
+        <br>
+        Your feedback is needed to train the system to get better over time (more on this below).
+        <br>
+        Also notice the table of models and match scores. This table shows how the system arrived at the reaction (success of failure) it did.
+        <br>
+        The system uses the weighted average score to decide whether your answer was similar enough to the actual answer to warrant success, by comparing it against a threshold.
+        <br>
+        By penalizing the times the system got it wrong, you help modify weights to penalize bad models and reward good models. Keep reading for more details.
+        </p>
+    <h4 style="text-align:justify;">How it really works</h4>
+        <p style="text-align:justify; font-size:14px">
+        Below is a comparison of the state of the "Models" and "Answer" tables before and after the user gives feedback, in our case to AGREE that their answer 
+        was dissimilar to the actual answer and the lobster confetti reaction was indeed appropriate.
+        <br>
+        <img src="static/images/figure-3.png" alt="Figure 3. Models and Answer tables before and after user feedback." width="1145" height="279">
+        <br>
+        In the "Models" table the weights are initalized at 1 vote per model, a simple mean of scores to begin the scoring process, but after one round 
+        of interactions, the model which most appropriately identified the situation (that the answer was wrong) gets an extra vote.
+        <br>
+        The "Answer" table has more details, it has the five scores (for models 1 through 5, in order) for how each model rated the similarity of the two answers.
+        The scores are all normalized from 0 to 1 so they can be compared, and the higher the score the higher the model rated the answers' similarity.
+        Since the average score was lower than the threshold, the correct guess was set to false (0) and lobster confetti were thrown, but the system did not know if this was the correct reaction.
+        It was only after the user AGREED that this was the correct reaction that the system learned from the user and updated both tables.
+        The system has to integrate the four possibilities (success/failure, AGREE/DISAGREE) and compute the best model by selecting either the higher or the lowest score.
+        I'll spare you all the details here but suffice to say this is not trivial because there can many lowest or highest scores so the system at that point has to choose 
+        randomly from the set of lowest or highest scores.
+        In the case at hand, the evaluation was simple, since the user provided an answer that was too dissimilar and the user AGREED with this assessment, 
+        the best model is the one with the lowest similarity score (0.164) and so this model 4 gets an extra vote. 
+        This updates the model weights to [0.167 0.167 0.167 0.333 0.167] and the next time the system will compute a weighted average score that favors this model.
+        <br>
+        This all means that the users "train" the system by answering and providing feedback.
+        Of course if users train the system in bad faith and provide wrong feedback, the system will not improve.
+        <br>
+        The project is found in GitHub link.
+        Acknowledge sources of puns.
+        </p>
+</div>
 {% endblock %}
