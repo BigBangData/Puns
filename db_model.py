@@ -51,8 +51,6 @@ class Models(db.Model):
     short_name = db.Column(db.String(255), nullable=False)
     long_name = db.Column(db.String(255), nullable=False)
     num_votes = db.Column(db.Integer)
-    # define relationship to the "answers" table
-    answers = db.relationship('Answer', backref='models', lazy=True)
 
 class Answer(db.Model):
     """Dynamic: filled as users answer questions and select models"""
@@ -60,7 +58,6 @@ class Answer(db.Model):
     # Foreign Keys
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     pun_id = db.Column(db.Integer, db.ForeignKey('puns.id'), nullable=False)
-    model_id = db.Column(db.Integer, db.ForeignKey('models.id'))
     # user answer & score compared to pun answer
     user_answer = db.Column(db.String(100), nullable=False)
     # store scores as a JSON-encoded string

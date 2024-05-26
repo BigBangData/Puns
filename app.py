@@ -93,17 +93,21 @@ def select_best_model():
         # get max / min scores
         scores_list = ast.literal_eval(last_answer.scores)
         scores_array = np.array(scores_list)
+        logging.info(f"Scores array: {scores_array}")
         max_score = np.max(scores_array)
         min_score = np.min(scores_array)
+        logging.info(f"Max score: {max_score}; Min score: {min_score}")
         # select best model given feedback and guess
-        def get_best_ix_given_score(score, score_str):
+        # first need to get the best model ID given the score and a "max" or "min" goal
+        def get_best_ix_given_score(score, max_or_min):
             # helper function to get model ix for best / worst scores
             # account for possibility of more than one model having the max or min score
-            logging.info(f"{score_str} score: {score}")
-            ix_list = [ix for ix, score in enumerate(scores_array) if score == score]
+            logging.info(f"{max_or_min} score: {score}")
+            ix_list = [ix for ix, s in enumerate(scores_array) if s == score]
+            logging.info(f"List of model(s) that match the {max_or_min} score: {ix_list}")
             # chose randomly out of candidates
             random_ix = random.randint(0, len(ix_list)-1)
-            logging.info(f"Random index: {random_ix}")
+            logging.info(f"Random index chosen: {random_ix}")
             # adjust index from python zero-base to database one-base numbering
             best_model_ix = ix_list[random_ix] +1
             logging.info(f"Best model index: {best_model_ix}")
