@@ -6,9 +6,10 @@
   body {
     background-color: #fffff3; /* Cream color */
   }
+  
 </style>
 <div class="container">
-    <h4 style="text-align:justify;">How it works</h4>
+    <h4 style="text-align:justify;color:rgb(71, 105, 75)">How it works</h4>
         <p style="text-align:justify; font-size:14px">
         You're given a question and must answer it, preferably using a pun:
         <br>
@@ -16,46 +17,65 @@
         <br>
         If your answer is close to the actual answer, you get a success message and unicorn confetti (not shown becase no spoilers!).
         <br>
-        Otherwise a failure message appears and, as you'd expect, lobster confetti:
+        Otherwise a failure message appears along with lobster confetti:
         <br>
         <img src="static/images/figure-2.png" alt="Figure 2. Example bad answer" width="911" height="450">
         <br>
-        To load the next question, you must click on either the AGREE or on the DISAGREE button, to provide feedback on the reaction.
+        On the right-side panel you see how each model scored the similarity between the two answers and the weighted average score used to determine success.
+        <br><br>
+        To load the next question, you must click on either the AGREE or on the DISAGREE button, and this feedback trains the system to get better over time.
         <br>
-        Your feedback is needed to train the system to get better over time (more on this below).
-        <br>
-        Also notice the table of models and match scores. This table shows how the system arrived at the reaction (success of failure) it did.
-        <br>
-        The system uses the weighted average score to decide whether your answer was similar enough to the actual answer to warrant success, by comparing it against a threshold.
-        <br>
-        By penalizing the times the system got it wrong, you help modify weights to penalize bad models and reward good models. Keep reading for more details.
         </p>
-    <h4 style="text-align:justify;">How it really works</h4>
+    <h4 style="text-align:justify;color:rgb(71, 105, 75)">How it reaaallly works</h4>
         <p style="text-align:justify; font-size:14px">
-        Below is a comparison of the state of the "Models" and "Answer" tables before and after the user gives feedback, in our case to AGREE that their answer 
-        was dissimilar to the actual answer and the lobster confetti reaction was indeed appropriate.
+        Let's follow what happens in the example above, right after submitting "Bumble Bees!" (a wrong answer) yet before clicking to AGREE, and right after clicking AGREE.
         <br>
-        <img src="static/images/figure-3.png" alt="Figure 3. Models and Answer tables before and after user feedback." width="1145" height="279">
-        <br>
-        In the "Models" table the weights are initalized at 1 vote per model, a simple mean of scores to begin the scoring process, but after one round 
-        of interactions, the model which most appropriately identified the situation (that the answer was wrong) gets an extra vote.
-        <br>
-        The "Answer" table has more details, it has the five scores (for models 1 through 5, in order) for how each model rated the similarity of the two answers.
-        The scores are all normalized from 0 to 1 so they can be compared, and the higher the score the higher the model rated the answers' similarity.
-        Since the average score was lower than the threshold, the correct guess was set to false (0) and lobster confetti were thrown, but the system did not know if this was the correct reaction.
-        It was only after the user AGREED that this was the correct reaction that the system learned from the user and updated both tables.
-        The system has to integrate the four possibilities (success/failure, AGREE/DISAGREE) and compute the best model by selecting either the higher or the lowest score.
-        I'll spare you all the details here but suffice to say this is not trivial because there can many lowest or highest scores so the system at that point has to choose 
-        randomly from the set of lowest or highest scores.
-        In the case at hand, the evaluation was simple, since the user provided an answer that was too dissimilar and the user AGREED with this assessment, 
-        the best model is the one with the lowest similarity score (0.164) and so this model 4 gets an extra vote. 
-        This updates the model weights to [0.167 0.167 0.167 0.333 0.167] and the next time the system will compute a weighted average score that favors this model.
-        <br>
-        This all means that the users "train" the system by answering and providing feedback.
-        Of course if users train the system in bad faith and provide wrong feedback, the system will not improve.
-        <br>
-        The project is found in GitHub link.
-        Acknowledge sources of puns.
+        Below is a comparison of the state of two tables in the backend given the two situations above, right before and after that feedback (AGREE button):
+        <br><br>
+        <img src="static/images/figure-3.png" alt="Figure 3. Tables before feedback." width="1290" height="180">
+        <br><br>
+        Before feeback, in the Models table, weights are initalized at 1 vote per model, which is equivalent to a normal average (the "mean"),
+         and while there's no info about user feeback in the Answer table, the wrong answer given produced a low average score, which was compared to a threshold 
+         and produced the estimate that it was an incorrect guess, which in turn threw lobster confetti and the failure message.
+         <br><br>
+         <img src="static/images/figure-4.png" alt="Figure 4. Tables after feedback." width="1290" height="180">
+         <br><br>
+        After feedback, in the Models table, model 4 gets a bump in votes because it was the model which performed the best. This can be seen in the Answer table,
+         since it had the lowest score and the user agreed that the guess was incorrect, so the models with higher scores were too confident in the answer similarity.
+        <br><br>
+        After this one round of interactions between the system and the user, the model weights are now 1, 1, 1, 2, 1 (normalized as 
+         [0.167 0.167 0.167 0.333 0.167]), and with these weights subsequent weighted averages are computed, thus improving the ensemble of models' estimates as to 
+         the similarity of user answers and actual answers over time by rewarding the best models.
+        <br><br>
+        Of course if users train the system in bad faith and provide wrong feedback, the system will not improve. Another caveat is that the system might not improve 
+         if models perform with enough variance to be good at some answers and bad at others in ways that over time do not mean the ensemble learns, but rather converges 
+         back to using the original, unweighted average. There are theoretical reasons why this might occur, but this page tests this hypothetical convergence in practice.
+        <br><br>
+        Please visit the project's homebase in <a href="https://github.com/BigBangData/Puns">GitHub</a> for a list of acknowledgements.
+        <br><br>
+        Thank you for reading!
         </p>
+        <button onclick="topFunction()" id="myBtn" title="Go to top">Back to the top</button> 
 </div>
+<script>
+  // Get the button:
+let mybutton = document.getElementById("myBtn");
+
+// When the user scrolls down 20px from the top of the document, show the button
+window.onscroll = function() {scrollFunction()};
+
+function scrollFunction() {
+  if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+    mybutton.style.display = "block";
+  } else {
+    mybutton.style.display = "none";
+  }
+}
+
+// When the user clicks on the button, scroll to the top of the document
+function topFunction() {
+  document.body.scrollTop = 0; // For Safari
+  document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE and Opera
+} 
+</script>
 {% endblock %}
