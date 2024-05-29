@@ -1,65 +1,67 @@
 # Puns
 
-__Credits__
-- sourced puns from https://wstyler.ucsd.edu/puns/, among other random from memory
-- tutorials (link to end)
+![License](https://img.shields.io/github/license/BigBangData/Puns)
+![File Count](https://img.shields.io/github/directory-file-count/BigBangData/Puns)
+![Last Commit](https://img.shields.io/github/last-commit/BigBangData/Puns?color=blueviolet)
+![Stars](https://img.shields.io/github/stars/BigBangData/Puns?style=social)
+![Forks](https://img.shields.io/github/forks/BigBangData/Puns?style=social)
+![Watchers](https://img.shields.io/github/watchers/BigBangData/Puns?style=social)
 
-__Notes__
-- any user can create an account at any time, only usernames and passwords
-- use SQL to manage users, in `instance/`, issue:
-```
-$ sqlite3 database.db
-sqlite> .tables
-sqlite> select * from user;
-sqlite> .exit
-```
-- [DEPRECATED] after launching app, populate the puns table via `python populate_puns.py`
-  + app auto-populate puns in `static/files/puns_hints.csv` which is saved from the `.xlsx` file
-  + the initial flow was `raw_puns.txt >> curated_puns.txt >> puns.csv`
+## Story
 
-__Functionality__
-- signup: only possible when logged out, throws message and redirects to play, fails if username exists
-- login: only possible when logged out, throws message and redirects to play
-- login: fails back to login when password is wrong, fails to signup when username doesn't exist
-- play: goal of signing up and logging in, where the action happens, and only place logging out is possible
-  + after logging in, signup/login redirect to play
-- play:
+I created this little website of puns because my wife loves puns and I wanted to learn how to create a website using mostly python. In the beginning, there was just a "next pun" button and it was very silly, so I thought I'd create a Q&A format to get more user interaction and apply some data science skills like comparing user answers with actual answers and ranking the performance of models in an online system.
+
+The final result is a website hosted [here](<insert_link>).
+
+## Demo
+
+Add a demo gif
+
+## Features
+
+Below are some features or behaviors of the site:
+
+- __signup__: only possible when logged out, throws message and redirects to `play`, fails if username exists
+- __login__: only possible when logged out, throws message and redirects to `play`
+- __login__: fails back to login when password is wrong, fails to signup when username doesn't exist
+- __play__: goal of signing up and logging in, where the action happens, and only place logging out is possible (after `login`, either `signup` or `login` redirect to `play`)
+- __play__:
   + goes through questions in order for every user
   + persist questions asked beyond single session
   + starts over when all questions have been asked for a given user
-  + does matching in two ways: spacy text (looks to be semantic?) and phonetic
-- view answer:
-  + view answer and own answer
-  + see a message that reflects whether answer was correct or not
-  + if answer is correct, unicorn confetti are thrown, if not, crab confetti
-  + click on an AGREE / DISAGREE button
+  + does matching using various models
+- __view answer__:
+  + view actual answer and own answer
+  + see a message that reflects whether own answer was correct or not
+  + if own answer is correct, unicorn confetti are thrown; if not, lobster confetti are thrown
+  + click on an `AGREE` or a `DISAGREE` button to provide feedback
     - this action is the only way to load the next question
-      + technically, it increments the selected model's num_votes in the models table
-      + which in turn increases the weight for that model in the final weighted avg score
-      + also adds correct/wrong to answer table to keep user's selection
-    - side note: clicking on Play again reloads the same question
+      + technically, it increments the selected model's `num_votes` in a Models table
+      + which in turn increases the weight for that model in the final _weighted avg score_ used to determine success (similarity)
+      + also adds entries (i.e. a `correct_guess` boolean) into an Answer table to keep user's selection
+    - side note: clicking on `play` again reloads the same question
   + view model "leaderboard" with scores
 
-__Backlog__
-- Add brief explanation of how it all works in homepage instead of a dog face
-- Figure out security for app.config's secret_key
-- Setup so that only a few chosen usernames can signup, password up to them of course
-- Add LICENSE and copyright notices to all files, mention use of chatGPT for help
-- Deploy (follow Tim's last tutorial)
+## Backlog
 
-__Extra Features__
-- Add a "view your answers" button that redirects to a page with your stats
-- Add a "suggest a hint" button for users to suggest
-- Escape user input for security reasons (read https://benhoyt.com/writings/dont-sanitize-do-escape/)
-- Handle explanation of "he was a little horse" vs "he was a little hoarse"
-  + Which is the "correct pun"?
-  + User must know ahead of time what is the preferred answer, if there is one
+- Security for app.config's `secret_key`
+- Setup for a few beta testers
+- Deploy
 
-__Discarded__
-- Word embeddings in `word2vec` were cumbersome, slowed down the app, and yielded dubious results
-- Spacy's `en_core_web_trf` yielded 0.0 similarity scores; mostly for longer texts
+## Idealog
 
----
+- Add a "view your answers" button that redirects to a page with user stats
+- Add a "suggest a hint" button for disgruntled users
+- Handle explanation of "he was a little horse" vs "he was a little hoarse" (which is the "correct pun"?)
+
+## Credits
+
+- Originally sourced many of the puns (the `raw_puns.txt`) from https://wstyler.ucsd.edu/puns/
+  + I'd populate the puns table via `python populate_puns.py` (flow was `raw_puns.txt >> curated_puns.txt >> puns.csv`)
+- Started adding my own as time went by, also reformatted original puns to fit the Q&A format and added hints
+  + a `Puns` table is created using `puns_hints.csv` (saved as CSV-BOM-8 from `puns_hints.xlsx`)
+- The point of origin for some of the app's code was Tim Ruscica's tutorials below, and Arpan Neupane's turotial for authentication
+- I also made use of chatGPT (free tier of https://chat.openai.com/) to help with some coding challenges 
 
 ## Tutorials
 
@@ -75,30 +77,16 @@ Tutorial from Arpan Neupane:
 More Links:
 - [Bootstrap Intro](https://getbootstrap.com/docs/5.3/getting-started/introduction/)
 
-Blueprint tutorial notes:
-- a way to structure entire project and package it so it's usable in other projects
-- so for example could create admin folder and in it add templates, static, etc.,
-- then could import from admin by packaging folder (create __init__.py empty file inside folder)
+__Note__
 
----
+I did not follow the blueprint tutorial but might one day. It's a way to structure an entire project and package it so it's usable in other projects. For example, one could create an `admin` folder and add add templates, static, etc. to it and simply `import admin` by packaging the folder with an empty `__init__.py` file.
 
 ## Discarded Methods
 
-__Word Embeddings__
+- I thought that the semantic relationships in word embeddings like `Word2Vec`, `GloVe`, or `fastText` might be more suitable for understanding the nuanced similarities in puns. Turns out word embeddings in `Word2Vec` were cumbersome, slowed down the app, and yielded dubious results. 
 
-One popular method is to use word embeddings such as Word2Vec, GloVe, or fastText. These embeddings capture semantic relationships between words and might be more suitable for understanding the nuanced similarities in puns. Here's a brief overview of Word2Vec:
 
-1. Word Embeddings Preparation:
-    - Download pre-trained Word2Vec embeddings or train your own on a corpus that includes puns.
-    - Convert each word in your user's answer and actual answer to its corresponding vector representation.
+- Spacy's `en_core_web_trf` yielded 0.0 similarity scores. It seems to be mostly useful for longer texts.
 
-2. Vector Comparison:
-    - Calculate the similarity score between the user's answer and the actual answer by comparing the vectors of individual words.
-    - Aggregate these scores to get an overall similarity measure.
-
-3. Threshold Adjustment:
-    - Set a threshold based on your observations. Adjust it to find a balance that works for your specific case.
-
-See https://github.com/piskvorky/gensim-data for a list of pre-trained models.
 
 ---
