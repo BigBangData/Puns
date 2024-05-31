@@ -21,7 +21,8 @@ from sentence_transformers import SentenceTransformer, util
 from flask_login import current_user
 
 # custom
-from .db_model import db, Answer, Models
+from . import db
+from .db_model import Answer, Models
 
 # Spacy
 # -----

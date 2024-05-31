@@ -49,7 +49,7 @@ Below are some features or behaviors of the frontend:
 
 ## Backlog
 
-- Security for app.config's `secret_key`
+- Address CSFR
 - Setup for a few beta testers
 - Deploy
 

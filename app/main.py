@@ -21,7 +21,8 @@ from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_required, current_user
 
 # custom
-from .db_model import app, db, Answer, Puns, Models
+from . import app, db
+from .db_model import Answer, Puns, Models
 from .db_insert import insert_into_puns, insert_into_models
 from .login import login_bp, start_logs
 from .answer import get_web_sm_similarity, get_web_md_similarity \

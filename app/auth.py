@@ -20,7 +20,8 @@ from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
 
 # custom
-from .db_model import app, User
+from . import app
+from .db_model import User
 
 # security & login
 ph = PasswordHasher()

@@ -12,34 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import json
-from datetime import timedelta
-from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from flask import Flask
 #from flask_wtf.csrf import CSRFProtect
 from jsonschema import validate
 
-# setup flask app
-app = Flask(__name__)
-#csrf = CSRFProtect()
-#csrf.init_app(app)
-
-# store session data for 5 min; works even if browser is open
-app.permanent_session_lifetime = timedelta(minutes=5)
-
-# setup database
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
-
-# uncomment for creating new database from scratch
-if 'sqlalchemy' in app.extensions:
-    del app.extensions['sqlalchemy']
-
-# instantiate database
-db = SQLAlchemy(app)
+# custom
+from . import db
 
 # table models
 class User(db.Model, UserMixin):
