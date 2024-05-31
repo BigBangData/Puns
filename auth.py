@@ -18,6 +18,7 @@ from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
+
 # custom
 from db_model import app, User
 
@@ -26,6 +27,16 @@ ph = PasswordHasher()
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+# functions for hashing and checking passwords
+def hash_password(password):
+    return ph.hash(password)
+
+def check_password_hash(hashed_password, plain_password):
+    try:
+        return ph.verify(hashed_password, plain_password)
+    except VerifyMismatchError:
+        return False
 
 # reload user object from user_id stored in session
 @login_manager.user_loader
@@ -77,13 +88,3 @@ class LoginForm(FlaskForm):
         render_kw={"placeholder": "Password"}
     )
     submit = SubmitField("Login")
-
-# Utility functions for hashing and checking passwords
-def hash_password(password):
-    return ph.hash(password)
-
-def check_password_hash(hashed_password, plain_password):
-    try:
-        return ph.verify(hashed_password, plain_password)
-    except VerifyMismatchError:
-        return False

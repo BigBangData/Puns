@@ -16,6 +16,7 @@ import os
 import csv
 import logging
 
+# custom
 from db_model import db, Puns, Models
 
 def insert_into_puns():

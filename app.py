@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import ast
 import re
-import logging
+import ast
 import random
+import logging
 import numpy as np
 from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_required, current_user
-# custom imports
+
+# custom
 from db_model import app, db, Answer, Puns, Models
 from db_insert import insert_into_puns, insert_into_models
 from login import login_bp, start_logs
