@@ -5,8 +5,8 @@ from flask import Blueprint, redirect, url_for, render_template, flash, request,
 from flask_login import login_user, login_required, logout_user, current_user
 
 # custom
-from db_model import app, db, User
-from auth import RegisterForm, LoginForm, hash_password, check_password_hash
+from .db_model import app, db, User
+from .auth import RegisterForm, LoginForm, hash_password, check_password_hash
 
 # define blueprint for login.py
 login_bp = Blueprint('login', __name__)

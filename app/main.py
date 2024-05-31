@@ -21,10 +21,10 @@ from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_required, current_user
 
 # custom
-from db_model import app, db, Answer, Puns, Models
-from db_insert import insert_into_puns, insert_into_models
-from login import login_bp, start_logs
-from answer import get_web_sm_similarity, get_web_md_similarity \
+from .db_model import app, db, Answer, Puns, Models
+from .db_insert import insert_into_puns, insert_into_models
+from .login import login_bp, start_logs
+from .answer import get_web_sm_similarity, get_web_md_similarity \
     , get_all_st_similarity, get_par_st_similarity \
     , get_phonetic_fuzzy_similarity, get_model_weights \
     , store_answer, store_answer_update
@@ -258,8 +258,7 @@ def view_answer():
     else:
         return redirect(url_for('play'))
 
-
-if __name__ == '__main__':
+def run_app():
     # start logs
     console_handler = start_logs()
     # add the console handler to the root logger

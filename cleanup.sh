@@ -1,3 +1,3 @@
 #!/bin/bash
 # destroy database, logs, and pycache
-rm -r __pycache__/ instance/ logs/
+rm -r instance/ logs/ app/__pycache__/

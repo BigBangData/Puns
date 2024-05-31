@@ -18,10 +18,10 @@ from typing import List
 from fuzzywuzzy import fuzz
 from metaphone import doublemetaphone
 from sentence_transformers import SentenceTransformer, util
+from flask_login import current_user
 
 # custom
-from flask_login import current_user
-from db_model import db, Answer, Models
+from .db_model import db, Answer, Models
 
 # Spacy
 # -----

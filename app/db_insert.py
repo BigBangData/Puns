@@ -17,13 +17,13 @@ import csv
 import logging
 
 # custom
-from db_model import db, Puns, Models
+from .db_model import db, Puns, Models
 
 def insert_into_puns():
     try:
         existing_records = Puns.query.first()
         if existing_records is None:
-            csv_path = os.path.join('static', 'files', 'puns_hints.csv')
+            csv_path = os.path.join('app', 'static', 'files', 'puns_hints.csv')
             with open(csv_path, mode='r', encoding='utf-8-sig') as csv_file:
                 csv_reader = csv.DictReader(csv_file)
                 row_count = 0
@@ -46,7 +46,7 @@ def insert_into_models():
     try:
         existing_records = Models.query.first()
         if existing_records is None:
-            csv_path = os.path.join('static', 'files', 'models.csv')
+            csv_path = os.path.join('app', 'static', 'files', 'models.csv')
             with open(csv_path, 'r', encoding='utf-8') as csv_file:
                 csv_reader = csv.DictReader(csv_file)
                 row_count = 0
