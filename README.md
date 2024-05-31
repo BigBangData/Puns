@@ -9,9 +9,9 @@
 
 ## Story
 
-I created this little website of puns because my wife loves puns and I wanted to learn how to create a website using mostly python. In the beginning, there was just a "next pun" button and it was very silly, so I thought I'd create a Q&A format to get more user interaction and apply some data science skills like comparing user answers with actual answers and ranking the performance of models in an online system.
+I created this little puns game on a whim but also because I wanted to learn how to deploy a site using Python and Flask. At first the game was just showing puns plus a "next pun" button, then it evolved into a question-and-answer format to get more user interaction and apply some data science tooling to compute similarity scores for user answers and actual answers. Finally I realized I could get user feeback to help train an online system, which is the current version.
 
-The final result is a website hosted [here](<insert_link>).
+The site is hosted [INSERT_LINK](INSERT_LINK).
 
 ## Demo
 
@@ -19,28 +19,33 @@ Add a demo gif
 
 ## Features
 
-Below are some features or behaviors of the site:
+Below are some features or behaviors of the frontend:
 
-- __signup__: only possible when logged out, throws message and redirects to `play`, fails if username exists
-- __login__: only possible when logged out, throws message and redirects to `play`
-- __login__: fails back to login when password is wrong, fails to signup when username doesn't exist
-- __play__: goal of signing up and logging in, where the action happens, and only place logging out is possible (after `login`, either `signup` or `login` redirect to `play`)
-- __play__:
+- __signup__: 
+  + only possible when logged out, throws message and redirects to `play`, fails if username exists
+- __login__: 
+  + only possible when logged out, throws message and redirects to `play`
+  + fails to `login` when password is wrong, fails to `signup` when username doesn't exist
+  + session `logout` user after inactivity
+- __play__: 
+  + goal of `signup` and `login`
+  + only place `logout` is possible
+  + after `login`, either `signup` or `login` will redirect to `play`
   + goes through questions in order for every user
-  + persist questions asked beyond single session
+  + persist questions asked beyond single session so user can come back where she left off
   + starts over when all questions have been asked for a given user
-  + does matching using various models
 - __view answer__:
   + view actual answer and own answer
   + see a message that reflects whether own answer was correct or not
   + if own answer is correct, unicorn confetti are thrown; if not, lobster confetti are thrown
-  + click on an `AGREE` or a `DISAGREE` button to provide feedback
-    - this action is the only way to load the next question
-      + technically, it increments the selected model's `num_votes` in a Models table
-      + which in turn increases the weight for that model in the final _weighted avg score_ used to determine success (similarity)
-      + also adds entries (i.e. a `correct_guess` boolean) into an Answer table to keep user's selection
-    - side note: clicking on `play` again reloads the same question
-  + view model "leaderboard" with scores
+  + user can click on an `AGREE` or a `DISAGREE` button to provide feedback
+    - this action is the only way to load the next question (redirecting to `play`)
+      + in the backend, this user feedback increments the weights for the model which performed the best
+      + over time, that should improve the accuracy of the system, which uses weighted averages and a threshold to determine success
+      + user input is stored in a table with all the answers, including success or failure, etc.
+    - fun fact: clicking on `play` again without providing feedback reloads the same question
+  + view model "leaderboard" with match scores (similarity scores for the current user and actual answers)
+    - challenge: since the weighted avg score is provided, can the user compute the weights from the information given?
 
 ## Backlog
 
