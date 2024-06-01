@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import logging
 from flask import Blueprint, redirect, url_for, render_template, flash, request, session
 from flask_login import login_user, login_required, logout_user, current_user
@@ -34,8 +35,8 @@ def signup():
             if existing_user:
                 flash(f"Username '{form.username.data}' exists. Please try another.", "warning")
                 return render_template("signup.html", form=form)
-            valid_user = ['spica', 'huzzah', 'wifi']
-            if form.username.data not in valid_user:
+            beta_users = os.environ.get('BETA_USERS')
+            if form.username.data not in beta_users:
                 flash(f"Username '{form.username.data}' is not valid. Are you an approved beta user?", "warning")
                 return render_template("signup.html", form=form)
             hashed_password = hash_password(form.password.data)

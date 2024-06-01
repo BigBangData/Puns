@@ -14,9 +14,9 @@ csrf.init_app(app)
 app.permanent_session_lifetime = timedelta(minutes=5)
 
 # setup database
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'sqlite:///database.db')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'default_secret_key')
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY')
 
 # uncomment for creating new database from scratch
 if 'sqlalchemy' in app.extensions:
