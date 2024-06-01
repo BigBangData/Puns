@@ -11,6 +11,7 @@
     {% endwith %}
     <div class="container">
         <form action="{{url_for('view_answer')}}" method="POST">
+            {{ form.hidden_tag() }}
             <br>
             {% for item in values %}
             {% if loop.index == 1 %}
@@ -20,8 +21,8 @@
             {% endif %}
             {% endfor %}
             <br>
-                <center>
-                    <button type="button" class="btn-info" id="view-hint-btn">VIEW HINT</button>
+            <div class="text-center">
+                <button type="button" class="btn-info" id="view-hint-btn">VIEW HINT</button>
                     <p id="hint-text" style="display: none;">
                         {% for item in values %}
                             {% if loop.index == 3 %}
@@ -29,16 +30,12 @@
                             {% endif %}
                         {% endfor %}
                     </p>
-                </center>
-            <br>
-                <center>
-                    <textarea name="user_answer" rows="2" cols="80" maxlength = "100"></textarea>
-                </center>
-            <br>
-                <center>
-                    <input type="submit" class="btn-info" value="VIEW ANSWER">
-                </center>
-            <br>
+                <br>
+                    {{ form.user_answer(class_='large-textarea') }}
+                <br><br>
+                    {{ form.submit() }}
+                <br>
+            </div>
         </form>
     </div>
     <hr>
