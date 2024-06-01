@@ -14,7 +14,6 @@
 
 import json
 from flask_login import UserMixin
-#from flask_wtf.csrf import CSRFProtect
 from jsonschema import validate
 
 # custom
