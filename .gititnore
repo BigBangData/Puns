@@ -154,4 +154,5 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-*.xlsx
+# local env files
+app/local.env
