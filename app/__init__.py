@@ -2,11 +2,12 @@ import os
 from datetime import timedelta
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
+from flask_wtf.csrf import CSRFProtect
 
 # setup flask app
 app = Flask(__name__)
-#csrf = CSRFProtect()
-#csrf.init_app(app)
+csrf = CSRFProtect()
+csrf.init_app(app)
 
 # store session data for 5 min; works even if browser is open
 app.permanent_session_lifetime = timedelta(minutes=5)

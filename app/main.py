@@ -19,6 +19,8 @@ import logging
 import numpy as np
 from flask import redirect, url_for, render_template, flash, request, session
 from flask_login import login_required, current_user
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField
 
 # custom
 from . import app, db
@@ -32,6 +34,12 @@ from .answer import get_web_sm_similarity, get_web_md_similarity \
 
 # register the login blueprint
 app.register_blueprint(login_bp)
+
+class GetUserAnswer(FlaskForm):
+    """Defines fields for flask forms; used to help avoid CSRF.
+    """
+    user_answer = StringField('Your Answer', render_kw={"rows": 2, "cols": 80, "maxlength": 100})
+    submit = SubmitField('VIEW ANSWER', render_kw={"class": "btn-info"})
 
 # threshold for success based on avg_score
 THRESH = 0.6
@@ -158,7 +166,8 @@ def play():
         1. Users login, or
         2. Users answer a question ("POST" method below)
     """
-    if request.method == "POST":
+    form = GetUserAnswer()
+    if request.method == "POST" and form.validate_on_submit():
         # get best model given feedback and guess
         feedback, best_model_ix = select_best_model()
         # query models to get the id
@@ -177,12 +186,13 @@ def play():
         session.pop('pun_id', None)
         session.pop('question', None)
         session.pop('answer', None)
-        return redirect(url_for('view_answer'))
+        return redirect(url_for('view_answer', form=form))
     else:
         _, question, answer, hint = get_next_pun()
         num_words = len(answer.split(" "))
         num_words_msg = f"[{num_words} words]"
-        return render_template('play.html', values=[question, num_words_msg, hint])
+        return render_template('play.html', form=form, values=[question, num_words_msg, hint])
+
 
 
 # view asnwer
@@ -193,6 +203,7 @@ def view_answer():
     Uses get_next_pun(), which checks for session data.
     Compares user answer with pun answer given methods; returns scores.
     """
+    form = GetUserAnswer()
     # get session answer
     pun_id, question, answer, _ = get_next_pun()
     if request.method == "POST":
@@ -255,9 +266,11 @@ def view_answer():
                 , values=values
                 , data=sorted_data
                 , correct_guess=correct_guess
+                , form=form
             )
     else:
         return redirect(url_for('play'))
+    
 
 def run_app():
     # start logs
