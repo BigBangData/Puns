@@ -1,5 +1,6 @@
 import os
-from datetime import timedelta
+import logging
+from datetime import datetime, timedelta
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
@@ -23,3 +24,16 @@ if 'sqlalchemy' in app.extensions:
 
 # instantiate database
 db = SQLAlchemy(app)
+
+# logging for file and console
+def logs():
+    if not os.path.exists('logs'):
+        os.makedirs('logs')
+    log_file = os.path.join('logs', f"{datetime.now().strftime('%Y%m%d_%H%M%SMT')}.log")
+    log_format = '%(asctime)s - %(levelname)s - %(message)s'
+    logging.basicConfig(filename=log_file, level=logging.INFO, format=log_format)
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    formatter = logging.Formatter(log_format)
+    console_handler.setFormatter(formatter)
+    return console_handler

@@ -49,7 +49,7 @@ class RegisterForm(FlaskForm):
         "Username",
         validators=[
             InputRequired(message="Username is required."),
-            Length(min=6, max=20, message="Username must be between 6 and 20 characters.")
+            Length(min=4, max=20, message="Username must be between 4 and 20 characters.")
         ],
         render_kw={"placeholder": "Username"}
     )
@@ -64,7 +64,7 @@ class RegisterForm(FlaskForm):
     submit = SubmitField("Signup")
 
     def validate_username(self, username):
-        if len(username.data) < 6 or len(username.data) > 20:
+        if len(username.data) < 4 or len(username.data) > 20:
             return  # Skip checking existing user if length is invalid
 
         existing_user = User.query.filter_by(username=username.data).first()
@@ -76,7 +76,7 @@ class LoginForm(FlaskForm):
         "Username",
         validators=[
             InputRequired(message="Username is required."),
-            Length(min=6, max=20, message="Username must be between 6 and 20 characters.")
+            Length(min=4, max=20, message="Username must be between 4 and 20 characters.")
         ],
         render_kw={"placeholder": "Username"}
     )

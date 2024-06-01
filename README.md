@@ -49,8 +49,7 @@ Below are some features or behaviors of the frontend:
 
 ## Backlog
 
-- Address CSFR
-- Setup for a few beta testers
+- Rethink hard-coding beta users...
 - Deploy
 
 ## Idealog

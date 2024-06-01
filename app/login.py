@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import logging
-from datetime import datetime
 from flask import Blueprint, redirect, url_for, render_template, flash, request, session
 from flask_login import login_user, login_required, logout_user, current_user
 
@@ -26,19 +24,6 @@ from .auth import RegisterForm, LoginForm, hash_password, check_password_hash
 # define blueprint for login.py
 login_bp = Blueprint('login', __name__)
 
-# logging for file and console
-def start_logs():
-    if not os.path.exists('logs'):
-        os.makedirs('logs')
-    log_file = os.path.join('logs', f"{datetime.now().strftime('%Y%m%d_%H%M%SMT')}.log")
-    log_format = '%(asctime)s - %(levelname)s - %(message)s'
-    logging.basicConfig(filename=log_file, level=logging.INFO, format=log_format)
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    formatter = logging.Formatter(log_format)
-    console_handler.setFormatter(formatter)
-    return console_handler
-
 # signup
 @app.route("/signup", methods=["POST", "GET"])
 def signup():
@@ -48,6 +33,10 @@ def signup():
             existing_user = User.query.filter_by(username=form.username.data).first()
             if existing_user:
                 flash(f"Username '{form.username.data}' exists. Please try another.", "warning")
+                return render_template("signup.html", form=form)
+            valid_user = ['spica', 'huzzah', 'wifi']
+            if form.username.data not in valid_user:
+                flash(f"Username '{form.username.data}' is not valid. Are you an approved beta user?", "warning")
                 return render_template("signup.html", form=form)
             hashed_password = hash_password(form.password.data)
             new_user = User(username=form.username.data, password=hashed_password)

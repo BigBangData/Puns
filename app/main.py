@@ -23,10 +23,10 @@ from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField
 
 # custom
-from . import app, db
+from . import app, db, logs
 from .db_model import Answer, Puns, Models
 from .db_insert import insert_into_puns, insert_into_models
-from .login import login_bp, start_logs
+from .login import login_bp
 from .answer import get_web_sm_similarity, get_web_md_similarity \
     , get_all_st_similarity, get_par_st_similarity \
     , get_phonetic_fuzzy_similarity, get_model_weights \
@@ -150,6 +150,26 @@ def select_best_model():
             best_model_ix = get_best_ix_given_score(min_score, 'min')
         return feedback, best_model_ix
 
+def run_app():
+    # start logs
+    console_handler = logs()
+    # add the console handler to the root logger
+    logging.getLogger('').addHandler(console_handler)
+    # initialize app with SQLAlchemy instance
+    # db.init_app(app)
+    # Create database tables given defined models
+    with app.app_context():
+        db.create_all()
+        insert_into_puns()
+        insert_into_models()
+    # Run the app
+    app.run(debug=True)
+    # app.run(host='0.0.0.0', port=5000) # to run in prod
+    # close the console handler to avoid resource leaks
+    console_handler.close()
+    logging.getLogger('').removeHandler(console_handler)
+
+
 # Routes
 # home
 @app.route('/')
@@ -192,8 +212,6 @@ def play():
         num_words = len(answer.split(" "))
         num_words_msg = f"[{num_words} words]"
         return render_template('play.html', form=form, values=[question, num_words_msg, hint])
-
-
 
 # view asnwer
 @app.route('/view_answer', methods=["POST", "GET"])
@@ -270,23 +288,3 @@ def view_answer():
             )
     else:
         return redirect(url_for('play'))
-    
-
-def run_app():
-    # start logs
-    console_handler = start_logs()
-    # add the console handler to the root logger
-    logging.getLogger('').addHandler(console_handler)
-    # initialize app with SQLAlchemy instance
-    # db.init_app(app)
-    # Create database tables given defined models
-    with app.app_context():
-        db.create_all()
-        insert_into_puns()
-        insert_into_models()
-    # Run the app
-    app.run(debug=True)
-    # app.run(host='0.0.0.0', port=5000) # to run in prod
-    # close the console handler to avoid resource leaks
-    console_handler.close()
-    logging.getLogger('').removeHandler(console_handler)
