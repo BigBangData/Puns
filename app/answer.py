@@ -17,7 +17,6 @@ import numpy as np
 from typing import List
 from fuzzywuzzy import fuzz
 from metaphone import doublemetaphone
-from sentence_transformers import SentenceTransformer, util
 from flask_login import current_user
 
 # custom
@@ -30,22 +29,12 @@ from .db_model import Answer, Models
 web_sm = spacy.load("en_core_web_sm")
 web_md = spacy.load("en_core_web_md")
 
-# Sentence Transformers
-# ---------------------
-all_st = SentenceTransformer("all-MiniLM-L6-v2")
-par_st = SentenceTransformer('paraphrase-MiniLM-L6-v2')
-
-def get_similarity_score(text1, text2, model, transf: bool=False):
+def get_similarity_score(text1, text2, model):
     """Get cosine similarity score given two texts and a model.
     """
-    if transf:
-        embeddings1 = model.encode(text1, convert_to_tensor=True)
-        embeddings2 = model.encode(text2, convert_to_tensor=True)
-        similarity_score = util.pytorch_cos_sim(embeddings1, embeddings2).item()
-    else:
-        document1 = model(text1)
-        document2 = model(text2)
-        similarity_score = document1.similarity(document2)
+    document1 = model(text1)
+    document2 = model(text2)
+    similarity_score = document1.similarity(document2)
     return similarity_score
 
 def get_web_sm_similarity(text1, text2, model=web_sm):
@@ -53,12 +42,6 @@ def get_web_sm_similarity(text1, text2, model=web_sm):
 
 def get_web_md_similarity(text1, text2, model=web_md):
     return get_similarity_score(text1, text2, model)
-
-def get_all_st_similarity(text1, text2, model=all_st):
-    return get_similarity_score(text1, text2, model, transf=True)
-
-def get_par_st_similarity(text1, text2, model=par_st):
-    return get_similarity_score(text1, text2, model, transf=True)
 
 
 # Phonetic Matching

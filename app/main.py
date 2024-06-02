@@ -28,7 +28,6 @@ from .db_model import Answer, Puns, Models
 from .db_insert import insert_into_puns, insert_into_models
 from .login import login_bp
 from .answer import get_web_sm_similarity, get_web_md_similarity \
-    , get_all_st_similarity, get_par_st_similarity \
     , get_phonetic_fuzzy_similarity, get_model_weights \
     , store_answer, store_answer_update
 
@@ -42,7 +41,7 @@ class GetUserAnswer(FlaskForm):
     submit = SubmitField('VIEW ANSWER', render_kw={"class": "btn-info"})
 
 # threshold for success based on avg_score
-THRESH = 0.6
+THRESH = 0.5
 
 # Play.html
 def get_users_latest_answer():
@@ -238,11 +237,9 @@ def view_answer():
             # get score for text comparison using Spacy
             score1 = get_web_sm_similarity(user_answer, answer)
             score2 = get_web_md_similarity(user_answer, answer)
-            score3 = get_all_st_similarity(user_answer, answer)
-            score4 = get_par_st_similarity(user_answer, answer)
-            score5 = get_phonetic_fuzzy_similarity(user_answer, answer)
+            score3 = get_phonetic_fuzzy_similarity(user_answer, answer)
             # gather scores
-            scores = [score1, score2, score3, score4, score5]
+            scores = [score1, score2, score3]
             rounded_scores = [float(np.round(score, 6)) for score in scores]
             # calculate weighted avg score
             logging.info(f"Model scores: {rounded_scores}")

@@ -47,9 +47,17 @@ Below are some features or behaviors of the frontend:
   + view model "leaderboard" with match scores (similarity scores for the current user and actual answers)
     - challenge: since the weighted avg score is provided, can the user compute the weights from the information given?
 
+
+## Local Dev
+
+```
+source activate pyenv
+source app/local.env
+python -u run.py
+```
+
 ## Backlog
 
-- Rethink hard-coding beta users...
 - Deploy
 
 ## Idealog
