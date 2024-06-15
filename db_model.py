@@ -1,9 +1,10 @@
-import json
-from flask_login import UserMixin
-from jsonschema import validate
+import os
+import csv
+import logging
+from flask_login import UserMixin, current_user
 
 # custom
-from . import db
+from __init__ import db
 
 # table models
 class User(db.Model, UserMixin):
@@ -11,8 +12,8 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), nullable=False, unique=True)
     password = db.Column(db.String(128), nullable=False)
-    # define relationship to the "answers" table
-    answers = db.relationship('Answer', backref='user', lazy=True)
+    # define relationship to the "Ratings" table
+    ratings = db.relationship('Ratings', backref='user', lazy=True)
 
     def __init__(self, username, password):
         self.username = username
@@ -23,60 +24,66 @@ class Puns(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.String(255), nullable=False)
     answer = db.Column(db.String(255), nullable=False)
-    hint = db.Column(db.String(255))
-    # define relationship to the "answers" table
-    answers = db.relationship('Answer', backref='puns', lazy=True)
+    # define relationship to the "Ratings" table
+    ratings = db.relationship('Ratings', backref='puns', lazy=True)
 
-class Models(db.Model):
-    """Static: initial fill by insert_into_models()
-        Dynamic: votes filled as users select best models
-    """
-    id = db.Column(db.Integer, primary_key=True)
-    short_name = db.Column(db.String(255), nullable=False)
-    long_name = db.Column(db.String(255), nullable=False)
-    num_votes = db.Column(db.Integer)
 
-score_schema = {
-    "type": "array",
-    "items": {"type": "number"}
-}
+def insert_puns():
+    try:
+        existing_records = Puns.query.first()
+        if existing_records is None:
+            csv_path = os.path.join('static', 'files', 'puns.csv')
+            with open(csv_path, mode='r', encoding='utf-8-sig') as csv_file:
+                csv_reader = csv.DictReader(csv_file)
+                row_count = 0
+                for row in csv_reader:
+                    new_pun = Puns(
+                        question=row['question']
+                        , answer=row['answer']
+                    )
+                    db.session.add(new_pun)
+                    row_count += 1
+                logging.info(f"Inserted {row_count} rows into Puns.")
+            db.session.commit()
+        else:
+            logging.info("Skipped Insert - table Puns already exists.")
+    except FileNotFoundError:
+        logging.error(f"CSV file '{csv_path}' not found.")
 
-class Answer(db.Model):
-    """Dynamic: filled as users answer questions and select models"""
+class Ratings(db.Model):
+    """Dynamic: filled as users rate puns"""
     id = db.Column(db.Integer, primary_key=True)
     # Foreign Keys
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     pun_id = db.Column(db.Integer, db.ForeignKey('puns.id'), nullable=False)
-    # user answer & score compared to pun answer
-    user_answer = db.Column(db.String(100), nullable=False)
-    # store scores as a JSON-encoded string
-    scores = db.Column(db.String, nullable=False)
-    # weighted avg score (based on previous weights in models & scores)
-    avg_score = db.Column(db.Float)
-    # T/F for whether user guessed correctly or not
-    correct_guess = db.Column(db.Boolean)
-    # user response confirming Y/N for the reaction (the deemed 'correct' guess)
-    user_confirmed_as = db.Column(db.String)
-    # id of selected model (best model, to be incremented in Models.num_votes)
-    selected_model = db.Column(db.Integer)
+    # user rating on a 1-3 scale for a given pun
+    rating = db.Column(db.Integer, nullable=False)
+    # avg pun rating for a given user
+    avg_user_rating = db.Column(db.Float)
+    # avg pun rating for the pun across all users
+    avg_pun_rating = db.Column(db.Float)
 
-    def __init__(
-            self
-            , user_id
-            , pun_id
-            , user_answer
-            , scores
-            , avg_score
-            , correct_guess
-            , user_confirmed_as
-            , selected_model
-        ):
-        validate(instance=scores, schema=score_schema)
+    def __init__(self, user_id, pun_id, rating, avg_user_rating, avg_pun_rating):
         self.user_id = user_id
         self.pun_id = pun_id
-        self.user_answer = user_answer
-        self.scores = json.dumps(scores)
-        self.avg_score = avg_score
-        self.correct_guess = correct_guess
-        self.user_confirmed_as = user_confirmed_as
-        self.selected_model = selected_model
+        self.rating = rating
+        self.avg_user_rating = avg_user_rating
+        self.avg_pun_rating = avg_pun_rating
+
+    def store_ratings(
+            user_id: int
+            , pun_id: int
+            , rating: int
+            , avg_user_rating: float
+            , avg_pun_rating: float
+        ):
+        new_rating = Ratings(
+            user_id=user_id
+            , pun_id=pun_id
+            , rating=rating
+            , avg_user_rating=avg_user_rating
+            , avg_pun_rating=avg_pun_rating
+        )
+        current_user.ratings.append(new_rating)
+        db.session.add(new_rating)
+        db.session.commit()
