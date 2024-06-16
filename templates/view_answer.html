@@ -1,64 +1,47 @@
 {% extends "base.html" %}
 {% block title %}View Answer{% endblock %}
 {% block header %}
-    <!-- Confetti script for success/failure reactions -->
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-    <script>
-        var scalar = 2;
-        var unicorn = confetti.shapeFromText({ text: '🦄', scalar });
-        var lobster = confetti.shapeFromText({ text: '🦞', scalar });
-    
-        var defaults = {
-            spread: 360,
-            ticks: 140,
-            gravity: 0.8,
-            decay: 0.9,
-            startVelocity: 35,
+<!-- Confetti script -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+<script>
+    var scalar = 2;
+    var unicorn = confetti.shapeFromText({ text: '🦄', scalar });
+    var defaults = {
+        spread: 360,
+        ticks: 140,
+        gravity: 0.8,
+        decay: 0.9,
+        startVelocity: 35,
+        shapes: [unicorn],
+        scalar
+    };
+    function shootUnicorns() {
+        confetti({
+            ...defaults,
             shapes: [unicorn],
-            scalar
-        };
-    
-        function shootUnicorns() {
-            confetti({
-                ...defaults,
-                shapes: [unicorn],
-                particleCount: 300
-            });
-            confetti({
-                ...defaults,
-                shapes: [unicorn],
-                particleCount: 150,
-                startVelocity: 55,
-                flat: true
-            });
-            confetti({
-                ...defaults,
-                particleCount: 100,
-                scalar: scalar / 2,
-                shapes: ['square']
-            });
-        }
-    
-        function shootLobsters() {
-            confetti({
-                ...defaults,
-                shapes: [lobster],
-                particleCount: 100,
-                flat: true,
-                gravity: 0.1,
-                startVelocity: 20,
-                scalar: 3
-            });
-        }
-        // If user guesses correctly according to weighted avg score
-        var correctGuess = {{ correct_guess | safe }};
-        if (correctGuess) {
-            setTimeout(shootUnicorns, 0);
-            setTimeout(shootUnicorns, 100)
-        } else {
-            setTimeout(shootLobsters, 0)
-        }
-    </script>
+            particleCount: 300
+        });
+        confetti({
+            ...defaults,
+            shapes: [unicorn],
+            particleCount: 150,
+            startVelocity: 55,
+            flat: true
+        });
+        confetti({
+            ...defaults,
+            particleCount: 100,
+            scalar: scalar / 2,
+            shapes: ['square']
+        });
+    }
+    // If user guesses correctly according to weighted avg score
+    var multiple_of_ten = {{ multiple_of_ten | safe }};
+    if (multiple_of_ten) {
+        setTimeout(shootUnicorns, 0);
+        setTimeout(shootUnicorns, 100)
+    }
+</script>
 {% endblock %}
 {% block content %}
     <!-- flash messages before content -->
@@ -91,7 +74,7 @@
                         {% else %}
                             <h3 class="h3-red text-center">Better luck next time...</h3>
                         {% endif %}
-                        {% for feedback in ["AGREE", "DISAGREE"] %}
+                        {% for feedback in ["Sigh", "Eyeroll", "Groan"] %}
                             <button type="submit" class="btn-info" name="feedback" value="{{ feedback }}">{{ feedback }}</button>
                         {% endfor %}
                     </h4>
@@ -102,15 +85,15 @@
                     <table class="table table-bordered">
                         <thead>
                             <tr>
-                                <th>Model</th>
-                                <th>Match Score</th>
+                                <th>Groan Scale</th>
+                                <th>Votes</th>
                             </tr>
                         </thead>
                         <tbody>
-                        {% for model_name, score in data %}
+                        {% for groan_scale, n_votes in data %}
                             <tr>
-                                <td>{{ model_name }}</td>
-                                <td>{{ score }}</td>
+                                <td>{{ groan_scale }}</td>
+                                <td>{{ n_votes }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>

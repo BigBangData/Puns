@@ -121,7 +121,6 @@ def view_answer():
             # remove newlines and 2+ spaces and html chars
             rating = rating.replace('\n', '').replace('\r', '')
             rating = re.sub(r'\s+', ' ', rating).strip()
-    
             # store known 'play' data in Ratings table
             Ratings.store_ratings(
                 user_id=user_id
@@ -133,10 +132,15 @@ def view_answer():
             # return user answer for ease of comparison
             your_rating = f"Your rating: {rating}"
             values = [question, answer, your_rating]
+            # fake data for now
+            groan_scale = ['Sigh', 'Eyeroll', 'Groan']
+            n_votes = [2, 1, 0]
+            data = list(zip(groan_scale, n_votes))
             # return view answer
             return render_template(
                 'view_answer.html'
                 , values=values
+                , data=data
                 , form=form
             )
     else:
