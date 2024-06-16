@@ -354,12 +354,28 @@ def play():
         2. Users answer a question ("POST" method below)
     """
     if request.method == "POST":
+        # get rating
+        rating = request.form.get("feedback")
+        logging.info(f"Received rating: {rating}")
+        # get current session data
+        pun_id, question, answer = get_next_pun()
+        user_id = current_user.id
+        # store known 'rating' data in Ratings table
+        Ratings.store_ratings(
+            user_id=user_id
+            , pun_id=pun_id
+            , rating=rating
+            , avg_user_rating=1 # FINISH LATER
+            , avg_pun_rating=2 # FINISH LATER
+        )
         # clear session pun data
         session.pop('pun_id', None)
         session.pop('question', None)
         session.pop('answer', None)
-        return redirect(url_for('view_answer'))
+        # reload page for GET method
+        return redirect(url_for('play'))
     else:
+        # GET: get next pun question and answer
         _, question, answer = get_next_pun()
         num_words = len(answer.split(" "))
         num_words_msg = f"[{num_words} words]"
@@ -372,32 +388,16 @@ def view_answer():
     """Delivers pun answer and results.
     Uses get_next_pun(), which checks for session data.
     """
-    # get rating
-    rating = request.form.get("feedback")
-    logging.info(f"Received rating: {rating}")
-    # get session rating
-    pun_id, question, answer = get_next_pun()
     if request.method == "POST":
-        user_id = current_user.id
-        # store known 'rating' data in Ratings table
-        Ratings.store_ratings(
-            user_id=user_id
-            , pun_id=pun_id
-            , rating=rating
-            , avg_user_rating=1 # FINISH LATER
-            , avg_pun_rating=2 # FINISH LATER
-        )
+        # get session data
+        _, question, answer = get_next_pun()
         values = [question, answer]
         # fake data for now
         groan_scale = ['Sigh', 'Eyeroll', 'Groan']
         n_votes = [2, 1, 0]
         data = list(zip(groan_scale, n_votes))
         # return view answer
-        return render_template(
-            'view_answer.html'
-            , values=values
-            , data=data
-        )
+        return render_template('view_answer.html', values=values, data=data)
     else:
         return redirect(url_for('play'))
 
@@ -418,4 +418,3 @@ if __name__ == "__main__":
     # close the console handler to avoid resource leaks
     console_handler.close()
     logging.getLogger('').removeHandler(console_handler)
-
