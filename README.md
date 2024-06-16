@@ -51,13 +51,18 @@ Below are some features or behaviors of the frontend:
 ## Local Dev
 
 ```
-source activate pyenv
-source app/local.env
+source ~/usr/local/venv/py3/Scripts/activate
+source local.env
 python -u run.py
 ```
 
 ## Backlog
 
+- Test deployment AS IS!
+- Change buttons from play to view_answer
+- Change buttons to cute images
+- Add confetti every 10 answers
+- Display correct stats
 - Deploy
 
 ## Idealog
