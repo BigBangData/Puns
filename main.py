@@ -13,11 +13,6 @@ from login import login_bp
 # register the login blueprint
 app.register_blueprint(login_bp)
 
-class GetUserRating(FlaskForm):
-    """Defines fields for flask forms; used to help avoid CSRF."""
-    rating = StringField('Your Answer', render_kw={"rows": 2, "cols": 80, "maxlength": 100})
-    submit = SubmitField('VIEW ANSWER', render_kw={"class": "btn-info"})
-
 # Play.html
 def get_user_latest_pun_id():
     """Helper function for get_next_pun()"""
@@ -87,18 +82,17 @@ def play():
         1. Users login, or
         2. Users answer a question ("POST" method below)
     """
-    form = GetUserRating()
-    if request.method == "POST" and form.validate_on_submit():
+    if request.method == "POST":
         # clear session pun data
         session.pop('pun_id', None)
         session.pop('question', None)
         session.pop('answer', None)
-        return redirect(url_for('view_answer', form=form))
+        return redirect(url_for('view_answer'))
     else:
         _, question, answer = get_next_pun()
         num_words = len(answer.split(" "))
         num_words_msg = f"[{num_words} words]"
-        return render_template('play.html', form=form, values=[question, num_words_msg])
+        return render_template('play.html', values=[question, num_words_msg])
 
 # view asnwer
 @app.route('/view_answer', methods=["POST", "GET"])
@@ -107,42 +101,32 @@ def view_answer():
     """Delivers pun answer and results.
     Uses get_next_pun(), which checks for session data.
     """
-    form = GetUserRating()
+    # get rating
+    rating = request.form.get("feedback")
+    logging.info(f"Received rating: {rating}")
     # get session rating
     pun_id, question, answer = get_next_pun()
     if request.method == "POST":
-        # make sure text area is completed
         user_id = current_user.id
-        rating = request.form.get('rating')
-        if not rating.strip():
-            flash("Text area cannot be empty.", "info")
-            return redirect(url_for('play'))
-        else:
-            # remove newlines and 2+ spaces and html chars
-            rating = rating.replace('\n', '').replace('\r', '')
-            rating = re.sub(r'\s+', ' ', rating).strip()
-            # store known 'play' data in Ratings table
-            Ratings.store_ratings(
-                user_id=user_id
-                , pun_id=pun_id
-                , rating=rating
-                , avg_user_rating=1 # FINISH LATER
-                , avg_pun_rating=2 # FINISH LATER
-            )
-            # return user answer for ease of comparison
-            your_rating = f"Your rating: {rating}"
-            values = [question, answer, your_rating]
-            # fake data for now
-            groan_scale = ['Sigh', 'Eyeroll', 'Groan']
-            n_votes = [2, 1, 0]
-            data = list(zip(groan_scale, n_votes))
-            # return view answer
-            return render_template(
-                'view_answer.html'
-                , values=values
-                , data=data
-                , form=form
-            )
+        # store known 'rating' data in Ratings table
+        Ratings.store_ratings(
+            user_id=user_id
+            , pun_id=pun_id
+            , rating=rating
+            , avg_user_rating=1 # FINISH LATER
+            , avg_pun_rating=2 # FINISH LATER
+        )
+        values = [question, answer]
+        # fake data for now
+        groan_scale = ['Sigh', 'Eyeroll', 'Groan']
+        n_votes = [2, 1, 0]
+        data = list(zip(groan_scale, n_votes))
+        # return view answer
+        return render_template(
+            'view_answer.html'
+            , values=values
+            , data=data
+        )
     else:
         return redirect(url_for('play'))
 

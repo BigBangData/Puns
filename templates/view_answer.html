@@ -70,25 +70,25 @@
             </div>
             <div class="col-md-4">
                 <!-- Right section -->
-                    <table class="table table-bordered">
-                        <thead>
-                            <tr>
-                                <th>Groan Scale</th>
-                                <th>Votes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                        {% for groan_scale, n_votes in data %}
-                            <tr>
-                                <td>{{ groan_scale }}</td>
-                                <td>{{ n_votes }}</td>
-                            </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Groan Scale</th>
+                            <th>Votes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for groan_scale, n_votes in data %}
+                        <tr>
+                            <td>{{ groan_scale }}</td>
+                            <td>{{ n_votes }}</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
     <hr>
-    <p style="text-align: center;"><a href="{{url_for('logout')}}">Logout</a></p>
+    <p style="text-align: center;"><a href="{{ url_for('logout') }}">Logout</a></p>
 {% endblock %}

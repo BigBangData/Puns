@@ -11,7 +11,7 @@
     {% endwith %}
     <div class="container">
         <form action="{{url_for('view_answer')}}" method="POST">
-            {{ form.hidden_tag() }}
+            <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
             <br>
             {% for item in values %}
                 {% if loop.index == 1 %}
@@ -28,13 +28,14 @@
                      {% endif %}
                  {% endfor %}
                 <br>
-                    {{ form.rating(class_='large-textarea') }}
-                <br>
-                    {{ form.submit() }}
+                {% for feedback in ["Sigh", "Eyeroll", "Groan"] %}
+                <button type="submit" class="btn-info" name="feedback" value="{{ feedback }}">{{ feedback }}</button>
+                {% endfor %}
                 <br>
             </div>
         </form>
     </div>
     <hr>
     <p style="text-align: center;"><a href="{{url_for('logout')}}">Logout</a></p>
+
 {% endblock %}
