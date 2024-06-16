@@ -24,9 +24,12 @@
                     {% endif %}
                 {% endfor %}
                 <hr><br>
+            <form action="{{ url_for('play') }}" method="POST">
+                    <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
                 {% for feedback in ["Sigh", "Eyeroll", "Groan"] %}
                 <button type="submit" class="btn-info" name="feedback" value="{{ feedback }}">{{ feedback }}</button>
                 {% endfor %}
+            </form>
             </div>
             <div class="col-md-4">
                 <!-- Right section -->
