@@ -24,6 +24,9 @@
                     {% endif %}
                 {% endfor %}
                 <hr><br>
+                {% for feedback in ["Sigh", "Eyeroll", "Groan"] %}
+                <button type="submit" class="btn-info" name="feedback" value="{{ feedback }}">{{ feedback }}</button>
+                {% endfor %}
             </div>
             <div class="col-md-4">
                 <!-- Right section -->
