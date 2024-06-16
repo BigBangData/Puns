@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block header %}<h3 class="h3-blue">Welcome to Puns!</h1>{% endblock %}
+{% block content %}
+<style>
+  body {
+    background-color: #fffff3; /* Cream color */
+  }
+</style>
+<div class="container">
+  <h4 style="text-align:justify;color:rgb(71, 105, 75)">How it works</h4>
+  <p style="text-align:justify; font-size:14px">
+      You're given a question and must at least make an effort to imagine what a pun answer would be.
+      <br>
+      <img src="static/img/fig-1.png" alt="Fig. 1 - Question" width="600" height="200">
+      <br>
+      You press any key and an pun answer pops up. You must rate it on a growing appreciation scale from sigh to eyeroll to groan.
+      <br>
+      This rating populates the next question and the punishment continues.
+      <br>
+      <img src="static/img/fig-2.png" alt="Fig. 2 - Answer & Rating" width="600" height="200">
+      <br>
+      Every ten puns you get unicorn confetti for your accomplishments.
+      <br><br><hr><br>
+      Please visit the project's homebase in <a href="https://github.com/BigBangData/Puns">GitHub</a> for a list of acknowledgements.
+      <br>
+  </p>
+</div>
+{% endblock %}

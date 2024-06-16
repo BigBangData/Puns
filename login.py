@@ -1,26 +1,12 @@
-# Copyright 2024 Marcelo Sanches
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import os
 import logging
 from flask import Blueprint, redirect, url_for, render_template, flash, request, session
 from flask_login import login_user, login_required, logout_user, current_user
 
 # custom
-from . import app, db
-from .db_model import User
-from .auth import RegisterForm, LoginForm, hash_password, check_password_hash
+from __init__ import app, db
+from db_model import User
+from auth import RegisterForm, LoginForm, hash_password, check_password_hash
 
 # define blueprint for login.py
 login_bp = Blueprint('login', __name__)

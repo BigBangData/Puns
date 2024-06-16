@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Play{% endblock %}
+{% block content %}
+    <!-- flash messages before content -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <p>{{ msg }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="container">
+        <form action="{{url_for('view_answer')}}" method="POST">
+            <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+            <br>
+            {% for item in values %}
+                {% if loop.index == 1 %}
+                    <h3 class="h3-blue text-center">{{ item }}</h3>
+                {% elif loop.index == 2 %}
+                    <h3 class="h3-red text-center">{{ item }}</h3>
+                {% endif %}
+            {% endfor %}
+            <br>
+            <div class="text-center">
+                 {% for item in values %}
+                     {% if loop.index == 3 %}
+                         {{ item }}
+                     {% endif %}
+                 {% endfor %}
+                <br>
+                {% for feedback in ["Sigh", "Eyeroll", "Groan"] %}
+                <button type="submit" class="btn-info" name="feedback" value="{{ feedback }}">{{ feedback }}</button>
+                {% endfor %}
+                <br>
+            </div>
+        </form>
+    </div>
+    <hr>
+    <p style="text-align: center;"><a href="{{url_for('logout')}}">Logout</a></p>
+
+{% endblock %}
