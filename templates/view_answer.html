@@ -66,19 +66,7 @@
                         <h4 class="text-center">{{ item }}</h4>
                     {% endif %}
                 {% endfor %}
-                <hr><br>          
-                <form action="{{url_for('play')}}" method="POST">
-                    {{ form.hidden_tag() }}
-                    <h4>{% if correct_guess %}
-                            <h3 class="h3-blue text-center">Great punning!</h3>
-                        {% else %}
-                            <h3 class="h3-red text-center">Better luck next time...</h3>
-                        {% endif %}
-                        {% for feedback in ["Sigh", "Eyeroll", "Groan"] %}
-                            <button type="submit" class="btn-info" name="feedback" value="{{ feedback }}">{{ feedback }}</button>
-                        {% endfor %}
-                    </h4>
-                </form>
+                <hr><br>
             </div>
             <div class="col-md-4">
                 <!-- Right section -->
