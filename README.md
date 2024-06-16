@@ -31,21 +31,11 @@ Below are some features or behaviors of the frontend:
   + goal of `signup` and `login`
   + only place `logout` is possible
   + after `login`, either `signup` or `login` will redirect to `play`
-  + goes through questions in order for every user
-  + persist questions asked beyond single session so user can come back where she left off
-  + starts over when all questions have been asked for a given user
+  + goes through puns in order for every user
+  + persist puns asked beyond single session so user can come back where she left off
+  + starts over when all puns have been shown
 - __view answer__:
-  + view actual answer and own answer
-  + see a message that reflects whether own answer was correct or not
-  + if own answer is correct, unicorn confetti are thrown; if not, lobster confetti are thrown
-  + user can click on an `AGREE` or a `DISAGREE` button to provide feedback
-    - this action is the only way to load the next question (redirecting to `play`)
-      + in the backend, this user feedback increments the weights for the model which performed the best
-      + over time, that should improve the accuracy of the system, which uses weighted averages and a threshold to determine success
-      + user input is stored in a table with all the answers, including success or failure, etc.
-    - fun fact: clicking on `play` again without providing feedback reloads the same question
-  + view model "leaderboard" with match scores (similarity scores for the current user and actual answers)
-    - challenge: since the weighted avg score is provided, can the user compute the weights from the information given?
+
 
 
 ## Local Dev
@@ -65,22 +55,19 @@ python -u run.py
 - Display correct stats
 - Deploy
 
-## Idealog
+## Reproducibility
 
-- Add a "view your answers" button that redirects to a page with user stats
-- Add a "suggest a hint" button for disgruntled users
-- Handle explanation of "he was a little horse" vs "he was a little hoarse" (which is the "correct pun"?)
+- `static/files/raw_puns.txt` has original puns drawn from life or the web (see credits)
+- `static/files/curated_puns.txt` has puns curated into Q&A form (original intent of the site)
+- `python populate_puns.py` creates `statis/files/puns.csv` which is used by the backend to populate a `Puns` table
 
 ## Credits
 
-- Originally sourced many of the puns (the `raw_puns.txt`) from https://wstyler.ucsd.edu/puns/
-  + I'd populate the puns table via `python populate_puns.py` (flow was `raw_puns.txt >> curated_puns.txt >> puns.csv`)
-- Started adding my own as time went by, also reformatted original puns to fit the Q&A format and added hints
-  + a `Puns` table is created using `puns_hints.csv` (saved as CSV-BOM-8 from `puns_hints.xlsx`)
-- The point of origin for some of the app's code was Tim Ruscica's tutorials below, and Arpan Neupane's turotial for authentication
-- I also made use of chatGPT (free tier of https://chat.openai.com/) to help with some coding challenges 
+- many of the puns were originally sourced from Will Styler's collection at: https://wstyler.ucsd.edu/puns/
+- the point of origin for some of the app's code was Tim Ruscica's tutorials below, and Arpan Neupane's turotial for authentication
+- I also made regular use of chatGPT (free tier of https://chat.openai.com/) to help speed up coding
 
-## Tutorials
+## Tutorials Consulted
 
 Tutorials from Tim Ruscica: 
 - [Flask Series on YouTube](https://www.youtube.com/@TechWithTim)
