@@ -217,18 +217,19 @@ def signup():
             if existing_user:
                 flash(f"Username '{form.username.data}' exists. Please try another.", "warning")
                 return render_template("signup.html", form=form)
-            #if form.username.data not in beta_users:
-            else:
+            beta_users = ['huzzah']
+            if form.username.data not in beta_users:
                 flash(f"Username '{form.username.data}' is not valid. Are you an approved beta user?", "warning")
                 return render_template("signup.html", form=form)
-            # hashed_password = hash_password(form.password.data)
-            # new_user = User(username=form.username.data, password=hashed_password)
-            # db.session.add(new_user)
-            # db.session.commit()
-            # msg = f"Created new account for {form.username.data}. Please login."
-            # logging.info(msg=msg)
-            # flash(msg, "info")
-            # return redirect(url_for('login'))
+            else:
+                hashed_password = hash_password(form.password.data)
+                new_user = User(username=form.username.data, password=hashed_password)
+                db.session.add(new_user)
+                db.session.commit()
+                msg = f"Created new account for {form.username.data}. Please login."
+                logging.info(msg=msg)
+                flash(msg, "info")
+                return redirect(url_for('login'))
         else:
             for field, errors in form.errors.items():
                 for error in errors:
