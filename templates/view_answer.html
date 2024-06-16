@@ -1,48 +1,5 @@
 {% extends "base.html" %}
 {% block title %}View Answer{% endblock %}
-{% block header %}
-<!-- Confetti script -->
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-<script>
-    var scalar = 2;
-    var unicorn = confetti.shapeFromText({ text: '🦄', scalar });
-    var defaults = {
-        spread: 360,
-        ticks: 140,
-        gravity: 0.8,
-        decay: 0.9,
-        startVelocity: 35,
-        shapes: [unicorn],
-        scalar
-    };
-    function shootUnicorns() {
-        confetti({
-            ...defaults,
-            shapes: [unicorn],
-            particleCount: 300
-        });
-        confetti({
-            ...defaults,
-            shapes: [unicorn],
-            particleCount: 150,
-            startVelocity: 55,
-            flat: true
-        });
-        confetti({
-            ...defaults,
-            particleCount: 100,
-            scalar: scalar / 2,
-            shapes: ['square']
-        });
-    }
-    // If user guesses correctly according to weighted avg score
-    var multiple_of_ten = {{ multiple_of_ten | safe }};
-    if (multiple_of_ten) {
-        setTimeout(shootUnicorns, 0);
-        setTimeout(shootUnicorns, 100)
-    }
-</script>
-{% endblock %}
 {% block content %}
     <!-- flash messages before content -->
     {% with messages = get_flashed_messages() %}

@@ -17,6 +17,32 @@
 
 ## Troubleshooting
 - Homepage is found but Signup doesn't work because there are no tables in the database
-    + attempt to create database locally and move it to the server with a couple approved users
-    + restructure code since beta users portion won't work
+    + attempt to create database locally and scp it to the server
+    + restructure code to avoid signup altogether (beta users exposed in code)
+    + database users: spicamia, huzzah, pass: courageous
+
+- scp file transfer with private key to move files (database)
+- change permissions because I got an error that the database was read-only
+- changed permissions only to the apache database user, www-data:
+    `sudo chown www-data:www-data /var/www/webApp/instance/database.db`
+    `sudo chmod 664 /var/www/webApp/instance/database.db`
+- to both file and folder:
+    `sudo chown www-data:www-data /var/www/webApp/instance`
+    `sudo chmod 775 /var/www/webApp/instance`
+- this presumes in `webApp.conf` the user is `www-data`:
+    `WSGIDaemonProcess flaskapp user=www-data group=www-data threads=5`
+
+- got this error because of the javascript to throw confetti: 
+    `UnicodeDecodeError: 'utf-8' codec can't decode byte 0xed in position 296: invalid continuation byte`
+- solved by removing the javascript from the `view_answer.html` page
+- knew it was the script upon inspecing using UTF-8 (button lower right) to reload the file and inspect errors
+- could also use Notepad++:
+    + Open the file in Notepad++. Go to Encoding in the menu.
+    + Ensure Encode in UTF-8 is selected. If not, select Convert to UTF-8.
+- could open in binary:
+```
+with open('/path/to/your/view_answer.html', 'rb') as file:
+    content = file.read()
+    print(content)
+```
 
