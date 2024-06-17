@@ -32,10 +32,15 @@ Below are some features or behaviors of the frontend:
   + only place `logout` is possible
   + after `login`, either `signup` or `login` will redirect to `play`
   + goes through puns in order for every user
+  + shows only question and word count so user can try to guess
+  + any key redirects to `view_answer.html`
   + persist puns asked beyond single session so user can come back where she left off
   + starts over when all puns have been shown
 - __view answer__:
-
+  + reveals answer and pun
+  + user must click on one of three buttons for feedback: sigh, eyeroll, groan
+  + feedback get recorded in the backend table of ratings, and triggers new `play` (POST)
+  + page also shows user stats (how many of each feedback)
 
 
 ## Local Dev
@@ -46,14 +51,18 @@ source local.env
 python -u run.py
 ```
 
-## Backlog
+## Server-Side
 
-- Test deployment AS IS!
-- Change buttons from play to view_answer
+```
+systemctl start apache2
+```
+
+## Backlog (always check deployment)
+
 - Change buttons to cute images
+- Compute and display correct stats
 - Add confetti every 10 answers
-- Display correct stats
-- Deploy
+- Redo homepage
 
 ## Reproducibility
 
