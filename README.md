@@ -51,16 +51,18 @@ source local.env
 python -u run.py
 ```
 
-## Server-Side
+__Dev Flow__
+- Change `app.py` (for example) and commit
+- Copy-pasta changes into `server-new/app.py` to see diff
+- Revert changes that aren't needed in the server (i.e. secret key, signup, db init)
+- Copy-pasta changes into deployed server's `app.py` and re-test deployment
 
-```
-systemctl start apache2
-```
 
 ## Backlog (always check deployment)
 
+- Figure out proper permissions for www-data and learn chmod
+- Compute and display totals and avg ratings
 - Change buttons to cute images
-- Compute and display correct stats
 - Add confetti every 10 answers
 - Redo homepage
 

@@ -203,8 +203,12 @@ class LoginForm(FlaskForm):
     submit = SubmitField("Login")
 
 
-
 ## Define Routes
+
+# Home
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 # Signup
 @app.route("/signup", methods=["POST", "GET"])
@@ -284,7 +288,7 @@ def logout():
     flash("You've logged out.", "info")
     return redirect(url_for('login'))
 
-# Play.html
+# Helper funcs for Play
 def get_user_latest_pun_id():
     """Helper function for get_next_pun()"""
     last_play = (
@@ -337,13 +341,7 @@ def get_next_pun():
         answer = session['answer']
     return pun_id, question, answer
 
-# Routes
-# home
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-# play
+# Play
 @app.route('/play', methods=["POST", "GET"])
 @login_required
 def play():
@@ -381,7 +379,7 @@ def play():
         num_words_msg = f"[{num_words} words]"
         return render_template('play.html', values=[question, num_words_msg])
 
-# view asnwer
+# View Answer
 @app.route('/view_answer', methods=["POST", "GET"])
 @login_required
 def view_answer():
@@ -392,29 +390,39 @@ def view_answer():
         # get session data
         _, question, answer = get_next_pun()
         values = [question, answer]
-        # fake data for now
+        # query Ratings to get vote counts
+        user_id = current_user.id
+        # query Ratings and count votes per groan scale rating
+        vote_counts = db.session.query(
+                Ratings.user_id,
+                Ratings.rating,
+                db.func.count(Ratings.rating)
+        ).filter_by(user_id=user_id).group_by(Ratings.user_id, Ratings.rating).all()
+        # Create a dictionary to hold the counts
+        vote_count_dict = {rating: count for _, rating, count in vote_counts}
+        # Define the (complete set of possible ratings for the) groan scale
         groan_scale = ['Sigh', 'Eyeroll', 'Groan']
-        n_votes = [2, 1, 0]
+        # Create an `n_votes` list by mapping the actual counts to the possible groan scale ratings
+        n_votes = [vote_count_dict.get(groan, 0) for groan in groan_scale]
+        # Combine the groan_scale and n_votes into data, notice previous default to 0 if not mapped
         data = list(zip(groan_scale, n_votes))
         # return view answer
         return render_template('view_answer.html', values=values, data=data)
     else:
         return redirect(url_for('play'))
 
+
 if __name__ == "__main__":
     # start logs
     console_handler = logs()
     # add the console handler to the root logger
     logging.getLogger('').addHandler(console_handler)
-    # initialize app with SQLAlchemy instance
-    # db.init_app(app)
     # Create database tables given defined models
-    with app.app_context():
-        db.create_all()
-        insert_puns()
-    # Run the app
+    # with app.app_context():
+    #     db.create_all()
+    #     insert_puns()
+    # # Run the app
     app.run()
-    # app.run(host='0.0.0.0', port=5000)
     # close the console handler to avoid resource leaks
     console_handler.close()
     logging.getLogger('').removeHandler(console_handler)
