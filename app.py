@@ -396,9 +396,9 @@ def view_answer():
         user_id = current_user.id
         # query Ratings and count votes per groan scale rating
         vote_counts = db.session.query(
-                Ratings.user_id,
-                Ratings.rating,
-                db.func.count(Ratings.rating)
+            Ratings.user_id,
+            Ratings.rating,
+            db.func.count(Ratings.rating)
         ).filter_by(user_id=user_id).group_by(Ratings.user_id, Ratings.rating).all()
         # Create a dictionary to hold the counts
         vote_count_dict = {rating: count for _, rating, count in vote_counts}
