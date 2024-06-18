@@ -51,16 +51,11 @@ source local.env
 python -u run.py
 ```
 
-## Server-Side
-
-```
-systemctl start apache2
-```
-
 ## Backlog (always check deployment)
 
+- Figure out proper permissions for www-data and learn chmod
+- Compute and display totals and avg ratings
 - Change buttons to cute images
-- Compute and display correct stats
 - Add confetti every 10 answers
 - Redo homepage
 
