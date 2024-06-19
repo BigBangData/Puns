@@ -1,6 +1,7 @@
 import os
 import csv
 import logging
+import numpy as np
 from datetime import datetime, timedelta
 
 from flask import Flask, redirect, url_for, render_template, flash, request, session
@@ -102,36 +103,25 @@ class Ratings(db.Model):
     pun_id = db.Column(db.Integer, db.ForeignKey('puns.id'), nullable=False)
     # user rating on a 1-3 scale for a given pun
     rating = db.Column(db.Integer, nullable=False)
-    # avg pun rating for a given user
-    avg_user_rating = db.Column(db.Float)
-    # avg pun rating for the pun across all users
-    avg_pun_rating = db.Column(db.Float)
 
-    def __init__(self, user_id, pun_id, rating, avg_user_rating, avg_pun_rating):
+    def __init__(self, user_id, pun_id, rating):
         self.user_id = user_id
         self.pun_id = pun_id
         self.rating = rating
-        self.avg_user_rating = avg_user_rating
-        self.avg_pun_rating = avg_pun_rating
 
     def store_ratings(
             user_id: int
             , pun_id: int
             , rating: int
-            , avg_user_rating: float
-            , avg_pun_rating: float
         ):
         new_rating = Ratings(
             user_id=user_id
             , pun_id=pun_id
             , rating=rating
-            , avg_user_rating=avg_user_rating
-            , avg_pun_rating=avg_pun_rating
         )
         current_user.ratings.append(new_rating)
         db.session.add(new_rating)
         db.session.commit()
-
 
 ## Authentication for Signup and Login
 
@@ -320,7 +310,6 @@ def get_next_pun():
         logging.info(f"Next pun id: {next_pun_id}")
         # use filter query to get the pun row
         pun = Puns.query.filter_by(id=next_pun_id).first()
-        logging.info(f"Pun object: {pun}")
         # None when next pun_id isn't in the puns table
         if pun is None:
             logging.info(f"User {current_user} answered all puns.")
@@ -363,8 +352,6 @@ def play():
             user_id=user_id
             , pun_id=pun_id
             , rating=rating
-            , avg_user_rating=1 # FINISH LATER
-            , avg_pun_rating=2 # FINISH LATER
         )
         # clear session pun data
         session.pop('pun_id', None)
@@ -394,18 +381,29 @@ def view_answer():
         user_id = current_user.id
         # query Ratings and count votes per groan scale rating
         vote_counts = db.session.query(
-                Ratings.user_id,
-                Ratings.rating,
-                db.func.count(Ratings.rating)
+            Ratings.user_id,
+            Ratings.rating,
+            db.func.count(Ratings.rating)
         ).filter_by(user_id=user_id).group_by(Ratings.user_id, Ratings.rating).all()
         # Create a dictionary to hold the counts
         vote_count_dict = {rating: count for _, rating, count in vote_counts}
         # Define the (complete set of possible ratings for the) groan scale
         groan_scale = ['Sigh', 'Eyeroll', 'Groan']
+        groan_scale_rating = np.array([1, 2, 3])
         # Create an `n_votes` list by mapping the actual counts to the possible groan scale ratings
         n_votes = [vote_count_dict.get(groan, 0) for groan in groan_scale]
         # Combine the groan_scale and n_votes into data, notice previous default to 0 if not mapped
-        data = list(zip(groan_scale, n_votes))
+        data = list(zip(groan_scale, n_votes, groan_scale_rating))
+        # Compute avg rating
+        tot_votes = np.sum(n_votes)
+        ratings_array = groan_scale_rating * np.array(n_votes)
+        avg_rating = np.round(np.sum(ratings_array) / tot_votes, 4)
+        # Ensure 0 instead of nan for the first computation (for a given user)
+        if np.isnan(avg_rating):
+            avg_rating = 0
+        # Append average score
+        average_rating_row = ("", "Avg. Rating:", avg_rating)
+        data.append(average_rating_row)
         # return view answer
         return render_template('view_answer.html', values=values, data=data)
     else:
