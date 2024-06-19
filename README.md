@@ -61,7 +61,6 @@ __Dev Flow__
 ## Backlog (always check deployment)
 
 - Figure out proper permissions for www-data and learn chmod
-- Compute and display totals and avg ratings
 - Change buttons to cute images
 - Add confetti every 10 answers
 - Redo homepage

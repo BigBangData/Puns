@@ -36,15 +36,17 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Groan Scale</th>
-                            <th>Votes</th>
+                            <th>Pun Factor</th>
+                            <th>Your Selections</th>
+                            <th>Rating Scale</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for groan_scale, n_votes in data %}
+                    {% for groan_scale, n_votes, rating in data %}
                         <tr>
                             <td>{{ groan_scale }}</td>
                             <td>{{ n_votes }}</td>
+                            <td>{{ rating }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
