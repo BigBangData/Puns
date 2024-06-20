@@ -369,12 +369,12 @@ def play():
         return render_template('play.html', values=[question, num_words_msg])
 
 pun_factor_dict = {
-    'no': '😶',
-    'wut': '🧐',
-    'sigh': '😤',
-    'eyeroll': '🙄',
-    'groan': '😬',
-    'panic': '🫨'
+    'no': '\U0001F636',       # 😶
+    'wut': '\U0001F9D0',      # 🧐
+    'sigh': '\U0001F624',     # 😤
+    'eyeroll': '\U0001F644',  # 🙄
+    'groan': '\U0001F62C',    # 😬
+    'panic': '\U0001FAE8'     # 🫨
 }
 
 # View Answer
