@@ -366,6 +366,15 @@ def play():
         num_words_msg = f"[{num_words} words]"
         return render_template('play.html', values=[question, num_words_msg])
 
+pun_factor_dict = {
+    'no': '😶',
+    'wut': '🧐',
+    'sigh': '😤',
+    'eyeroll': '🙄',
+    'groan': '😬',
+    'panic': '🫨'
+}
+
 # View Answer
 @app.route('/view_answer', methods=["POST", "GET"])
 @login_required
@@ -387,17 +396,16 @@ def view_answer():
         ).filter_by(user_id=user_id).group_by(Ratings.user_id, Ratings.rating).all()
         # Create a dictionary to hold the counts
         vote_count_dict = {rating: count for _, rating, count in vote_counts}
-        # Define the (complete set of possible ratings for the) groan scale
-        groan_scale = ['Sigh', 'Eyeroll', 'Groan']
-        groan_scale_rating = np.array([1, 2, 3])
-        # Create an `n_votes` list by mapping the actual counts to the possible groan scale ratings
-        n_votes = [vote_count_dict.get(groan, 0) for groan in groan_scale]
+        # List panic scale and ratings array
+        panic_scale = list(pun_factor_dict.keys())
+        panic_scale_rating = np.array([1, 2, 3, 4, 5, 6])
+        # Create an `n_votes` list by mapping the actual counts to the possible ratings
+        n_votes = [vote_count_dict.get(deg, 0) for deg in panic_scale]
         # Combine the groan_scale and n_votes into data, notice previous default to 0 if not mapped
-        data = list(zip(groan_scale, n_votes, groan_scale_rating))
+        data = list(zip(panic_scale, n_votes, panic_scale_rating))
         # Compute avg rating
-        tot_votes = np.sum(n_votes)
-        ratings_array = groan_scale_rating * np.array(n_votes)
-        avg_rating = np.round(np.sum(ratings_array) / tot_votes, 4)
+        ratings_array = panic_scale_rating * np.array(n_votes)
+        avg_rating = np.round(np.sum(ratings_array) / np.sum(n_votes), 4)
         # Ensure 0 instead of nan for the first computation (for a given user)
         if np.isnan(avg_rating):
             avg_rating = 0
@@ -405,7 +413,13 @@ def view_answer():
         average_rating_row = ("", "Avg. Rating:", avg_rating)
         data.append(average_rating_row)
         # return view answer
-        return render_template('view_answer.html', values=values, data=data)
+        return render_template(
+            'view_answer.html'
+            , values=values
+            , n_votes=n_votes
+            , data=data
+            , pun_factor_dict=pun_factor_dict
+        )
     else:
         return redirect(url_for('play'))
 

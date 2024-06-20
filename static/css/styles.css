@@ -6,3 +6,10 @@
     text-align: left;
     vertical-align: top;
 }
+
+.emoji-button {
+    font-size: 3em;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
