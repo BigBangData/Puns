@@ -27,6 +27,7 @@
                 <br><br><br>
             <form action="{{ url_for('play') }}" method="POST">
             <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+                <h5>Rate the pun ~</h5>
                 {% for feedback, emoji in pun_factor_dict.items() %}
                     <button type="submit" class="emoji-button" name="feedback" value="{{ feedback }}">{{ emoji }}</button>
                 {% endfor %}
@@ -34,12 +35,12 @@
             </div>
             <div class="col-md-4">
                 <!-- Right section -->
-                <table class="table table-bordered">
+                <table class="table table-dark">
                     <thead>
                         <tr>
-                            <th>Punishment</th>
-                            <th>Count</th>
-                            <th>Rating</th>
+                            <th></th>
+                            <th>Your Rating</th>
+                            <th>Pun Scale</th>
                         </tr>
                     </thead>
                     <tbody>
