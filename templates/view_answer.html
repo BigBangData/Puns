@@ -17,17 +17,18 @@
                     {% if loop.index == 1 %}
                         <h3 class="h3-blue text-center">{{ item }}</h3>
                     {% elif loop.index == 2 %}
+                        <br>
                         <h3 class="h3-red text-center">{{ item }}</h3>
                     {% else %}
                         <br>
                         <h4 class="text-center">{{ item }}</h4>
                     {% endif %}
                 {% endfor %}
-                <hr><br>
+                <br><br><br>
             <form action="{{ url_for('play') }}" method="POST">
-                    <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
-                {% for feedback in ["Sigh", "Eyeroll", "Groan"] %}
-                <button type="submit" class="btn-info" name="feedback" value="{{ feedback }}">{{ feedback }}</button>
+            <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+                {% for feedback, emoji in pun_factor_dict.items() %}
+                    <button type="submit" class="emoji-button" name="feedback" value="{{ feedback }}">{{ emoji }}</button>
                 {% endfor %}
             </form>
             </div>
@@ -36,16 +37,16 @@
                 <table class="table table-bordered">
                     <thead>
                         <tr>
-                            <th>Pun Factor</th>
-                            <th>Your Selections</th>
-                            <th>Rating Scale</th>
+                            <th>Punishment</th>
+                            <th>Count</th>
+                            <th>Rating</th>
                         </tr>
                     </thead>
                     <tbody>
-                    {% for groan_scale, n_votes, rating in data %}
+                    {% for scale, vote, rating in data %}
                         <tr>
-                            <td>{{ groan_scale }}</td>
-                            <td>{{ n_votes }}</td>
+                            <td>{{ scale }}</td>
+                            <td>{{ vote }}</td>
                             <td>{{ rating }}</td>
                         </tr>
                     {% endfor %}
