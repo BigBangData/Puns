@@ -407,7 +407,8 @@ def view_answer():
         data = list(zip(panic_scale, n_votes, panic_scale_rating))
         # Compute avg rating
         ratings_array = panic_scale_rating * np.array(n_votes)
-        avg_rating = np.round(np.sum(ratings_array) / np.sum(n_votes), 4)
+        tot_votes = np.sum(n_votes)
+        avg_rating = np.round(np.sum(ratings_array) / tot_votes, 4)
         # Ensure 0 instead of nan for the first computation (for a given user)
         if np.isnan(avg_rating):
             avg_rating = 0
@@ -415,11 +416,11 @@ def view_answer():
         average_rating_row = ("", "Avg. Rating:", avg_rating)
         data.append(average_rating_row)
         # calculate multiple of answers clicked for confetti
-        if np.sum(n_votes) % 10 == 0:
+        if tot_votes % 10 == 0 and tot_votes > 1:
             multiple_of_10 = 1
         else:
             multiple_of_10 = 0
-        if np.sum(n_votes) % 6 == 0:
+        if tot_votes % 6 == 0 and tot_votes > 1:
             multiple_of_6 = 1
         else:
             multiple_of_6 = 0
