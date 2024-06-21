@@ -60,7 +60,6 @@ __Dev Flow__
 
 ## Backlog (always check deployment)
 
-- Add confetti every 10 answers
 - Redo homepage
 
 ## Reproducibility
@@ -73,7 +72,7 @@ __Dev Flow__
 
 - many of the puns were originally sourced from Will Styler's collection at: https://wstyler.ucsd.edu/puns/
 - the point of origin for some of the app's code was Tim Ruscica's tutorials below, and Arpan Neupane's turotial for authentication
-- I also made regular use of chatGPT (free tier of https://chat.openai.com/) to help speed up coding
+- I also made regular use of chatGPT (free tier of https://chat.openai.com/) to help speed up and troubleshoot code and deployment
 
 ## Tutorials Consulted
 

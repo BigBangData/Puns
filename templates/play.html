@@ -5,7 +5,7 @@
     {% with messages = get_flashed_messages() %}
         {% if messages %}
             {% for msg in messages %}
-                <p>{{ msg }}</p>
+                <p><h5>{{ msg }}</h5></p>
             {% endfor %}
         {% endif %}
     {% endwith %}
@@ -28,10 +28,12 @@
                          {{ item }}
                      {% endif %}
                  {% endfor %}
+                 <br><br>
+                 <p><h5>Press any key ~</h5></p>
             </div>
         </form>
     </div>
-    <hr>
+    <br><br><br><br><br><hr>
     <p style="text-align: center;"><a href="{{url_for('logout')}}">Logout</a></p>
     <script>
         document.addEventListener('keydown', function(event) {

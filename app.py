@@ -414,6 +414,15 @@ def view_answer():
         # Append average score
         average_rating_row = ("", "Avg. Rating:", avg_rating)
         data.append(average_rating_row)
+        # calculate multiple of answers clicked for confetti
+        if np.sum(n_votes) % 10 == 0:
+            multiple_of_10 = 1
+        else:
+            multiple_of_10 = 0
+        if np.sum(n_votes) % 6 == 0:
+            multiple_of_6 = 1
+        else:
+            multiple_of_6 = 0
         # return view answer
         return render_template(
             'view_answer.html'
@@ -421,6 +430,8 @@ def view_answer():
             , n_votes=n_votes
             , data=data
             , pun_factor_dict=pun_factor_dict
+            , multiple_of_10=multiple_of_10
+            , multiple_of_6=multiple_of_6
         )
     else:
         return redirect(url_for('play'))
