@@ -11,12 +11,6 @@
 
 I created this little puns game on a whim but also because I wanted to learn how to deploy a site using Python and Flask. At first the game was just showing puns plus a "next pun" button, then it evolved into a question-and-answer format to get more user interaction and apply some data science tooling to compute similarity scores for user answers and actual answers. Finally I realized I could get user feeback to help train an online system, which is the current version.
 
-The site is hosted [INSERT_LINK](INSERT_LINK).
-
-## Demo
-
-Add a demo gif
-
 ## Features
 
 Below are some features or behaviors of the frontend:
@@ -52,14 +46,11 @@ python -u run.py
 ```
 
 __Dev Flow__
-- Change files and commit
-- Copy-paste or scp changes into `server/` to see diff
-- Revert changes that aren't needed in the server
-- Scp changes into server, ssh in and restart apache2
-
-## Backlog (always check deployment)
-
-- Redo homepage
+- commit changes
+- copy changes into `server/` to see diff
+- revert changes that aren't needed in the server
+- scp changes into server
+- ssh in and restart apache
 
 ## Reproducibility
 
