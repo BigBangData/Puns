@@ -50,7 +50,7 @@ __Dev Flow__
 - copy changes into `server/` to see diff
 - revert changes that aren't needed in the server
 - scp changes into server
-- ssh in and restart apache
+- ssh, modify user and permissions and restart apache
 
 ## Reproducibility
 
@@ -86,8 +86,6 @@ I did not follow the blueprint tutorial but might one day. It's a way to structu
 
 - I thought that the semantic relationships in word embeddings like `Word2Vec`, `GloVe`, or `fastText` might be more suitable for understanding the nuanced similarities in puns. Turns out word embeddings in `Word2Vec` were cumbersome, slowed down the app, and yielded dubious results. 
 
-
 - Spacy's `en_core_web_trf` yielded 0.0 similarity scores. It seems to be mostly useful for longer texts.
-
 
 ---
