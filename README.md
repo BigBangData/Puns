@@ -52,6 +52,11 @@ __Dev Flow__
 - scp changes into server
 - ssh, modify user and permissions and restart apache
 
+## Backlog
+- Slow confetti for better visibility
+- Ensure mobile compatibility
+- Finalize README
+
 ## Reproducibility
 
 - `static/files/raw_puns.txt` has original puns drawn from life or the web (see credits)

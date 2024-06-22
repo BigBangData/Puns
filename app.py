@@ -312,7 +312,7 @@ def get_next_pun():
         logging.info(f"Next pun id: {next_pun_id}")
         # use filter query to get the pun row
         pun = Puns.query.filter_by(id=next_pun_id).first()
-        # None when next pun_id isn't in the puns table
+        # 'None' when next pun_id isn't in the puns table
         if pun is None:
             logging.info(f"User {current_user} answered all puns.")
             # No more puns for the user, start back at first pun
@@ -331,6 +331,35 @@ def get_next_pun():
         question = session['question']
         answer = session['answer']
     return pun_id, question, answer
+
+
+pun_factor_dict = {
+    'no': '\U0001F636',       # 😶
+    'wut': '\U0001F9D0',      # 🧐
+    'sigh': '\U0001F624',     # 😤
+    'eyeroll': '\U0001F644',  # 🙄
+    'groan': '\U0001F62C',    # 😬
+    'panic': '\U0001FAE8'     # 🫨
+}
+
+def query_voting_stats():
+    # query Ratings and count user selections
+    vote_counts = db.session.query(
+        Ratings.user_id,
+        Ratings.rating,
+        db.func.count(Ratings.rating)
+    ).filter_by(user_id=current_user.id).group_by(Ratings.user_id, Ratings.rating).all()
+    # create a dictionary to hold the counts
+    vote_count_dict = {rating: count for _, rating, count in vote_counts}
+    # list panic scale and ratings array
+    panic_scale = list(pun_factor_dict.keys())
+    panic_scale_rating = np.array([1, 2, 3, 4, 5, 6])
+    # create a votes_list by mapping the actual counts to the possible ratings
+    # default to 0 if not mapped
+    votes_list = [vote_count_dict.get(deg, 0) for deg in panic_scale]
+    # combine the panic scale and votes_list into data to be passed to view_answer
+    data = list(zip(panic_scale, votes_list, panic_scale_rating))
+    return data
 
 # Play
 @app.route('/play', methods=["POST", "GET"])
@@ -366,16 +395,28 @@ def play():
         _, question, answer = get_next_pun()
         num_words = len(answer.split(" "))
         num_words_msg = f"[{num_words} words]"
-        return render_template('play.html', values=[question, num_words_msg])
-
-pun_factor_dict = {
-    'no': '\U0001F636',       # 😶
-    'wut': '\U0001F9D0',      # 🧐
-    'sigh': '\U0001F624',     # 😤
-    'eyeroll': '\U0001F644',  # 🙄
-    'groan': '\U0001F62C',    # 😬
-    'panic': '\U0001FAE8'     # 🫨
-}
+        # query voting stats
+        data = query_voting_stats()
+        # unpack votest list
+        votes_list = [item[1] for item in data]
+        # sum votes
+        tot_votes = np.sum(votes_list)
+        # calculate multiple of answers clicked for confetti
+        if tot_votes % 10 == 0 and tot_votes > 1:
+            multiple_of_10 = 1
+        else:
+            multiple_of_10 = 0
+        if tot_votes % 6 == 0 and tot_votes > 1:
+            multiple_of_6 = 1
+        else:
+            multiple_of_6 = 0
+        # return play
+        return render_template(
+            'play.html'
+            , values=[question, num_words_msg]
+            , multiple_of_10=multiple_of_10
+            , multiple_of_6=multiple_of_6
+        )
 
 # View Answer
 @app.route('/view_answer', methods=["POST", "GET"])
@@ -388,51 +429,28 @@ def view_answer():
         # get session data
         _, question, answer = get_next_pun()
         values = [question, answer]
-        # query Ratings to get vote counts
-        user_id = current_user.id
-        # query Ratings and count votes per groan scale rating
-        vote_counts = db.session.query(
-            Ratings.user_id,
-            Ratings.rating,
-            db.func.count(Ratings.rating)
-        ).filter_by(user_id=user_id).group_by(Ratings.user_id, Ratings.rating).all()
-        # Create a dictionary to hold the counts
-        vote_count_dict = {rating: count for _, rating, count in vote_counts}
-        # List panic scale and ratings array
-        panic_scale = list(pun_factor_dict.keys())
-        panic_scale_rating = np.array([1, 2, 3, 4, 5, 6])
-        # Create an `n_votes` list by mapping the actual counts to the possible ratings
-        n_votes = [vote_count_dict.get(deg, 0) for deg in panic_scale]
-        # Combine the groan_scale and n_votes into data, notice previous default to 0 if not mapped
-        data = list(zip(panic_scale, n_votes, panic_scale_rating))
-        # Compute avg rating
-        ratings_array = panic_scale_rating * np.array(n_votes)
-        tot_votes = np.sum(n_votes)
+        # query voting stats
+        data = query_voting_stats()
+        # unpack data
+        votes_list = [item[1] for item in data]
+        panic_scale_rating = [item[2] for item in data]
+        # sum votes
+        tot_votes = np.sum(votes_list)
+        # compute avg rating
+        ratings_array = panic_scale_rating * np.array(votes_list)
         avg_rating = np.round(np.sum(ratings_array) / tot_votes, 4)
-        # Ensure 0 instead of nan for the first computation (for a given user)
+        # ensure 0 instead of nan for the first computation (for a given user)
         if np.isnan(avg_rating):
             avg_rating = 0
-        # Append average score
+        # append average score
         average_rating_row = ("", "Avg. Rating:", avg_rating)
         data.append(average_rating_row)
-        # calculate multiple of answers clicked for confetti
-        if tot_votes % 10 == 0 and tot_votes > 1:
-            multiple_of_10 = 1
-        else:
-            multiple_of_10 = 0
-        if tot_votes % 6 == 0 and tot_votes > 1:
-            multiple_of_6 = 1
-        else:
-            multiple_of_6 = 0
         # return view answer
         return render_template(
             'view_answer.html'
             , values=values
-            , n_votes=n_votes
             , data=data
             , pun_factor_dict=pun_factor_dict
-            , multiple_of_10=multiple_of_10
-            , multiple_of_6=multiple_of_6
         )
     else:
         return redirect(url_for('play'))
@@ -443,11 +461,11 @@ if __name__ == "__main__":
     console_handler = logs()
     # add the console handler to the root logger
     logging.getLogger('').addHandler(console_handler)
-    # Create database tables given defined models (comment out in production)
+    # create database tables given defined models (comment out in production)
     with app.app_context():
         db.create_all()
         insert_puns()
-    # Run the app
+    # run the app
     app.run(debug=True)
     # app.run(host='0.0.0.0', port=5000) # in production, or just app.run()
     # close the console handler to avoid resource leaks
