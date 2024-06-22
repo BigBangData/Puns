@@ -310,7 +310,7 @@ def get_next_pun():
         logging.info(f"Next pun id: {next_pun_id}")
         # use filter query to get the pun row
         pun = Puns.query.filter_by(id=next_pun_id).first()
-        # None when next pun_id isn't in the puns table
+        # 'None' when next pun_id isn't in the puns table
         if pun is None:
             logging.info(f"User {current_user} answered all puns.")
             # No more puns for the user, start back at first pun
@@ -329,6 +329,35 @@ def get_next_pun():
         question = session['question']
         answer = session['answer']
     return pun_id, question, answer
+
+
+pun_factor_dict = {
+    'no': '\U0001F636',       # 😶
+    'wut': '\U0001F9D0',      # 🧐
+    'sigh': '\U0001F624',     # 😤
+    'eyeroll': '\U0001F644',  # 🙄
+    'groan': '\U0001F62C',    # 😬
+    'panic': '\U0001FAE8'     # 🫨
+}
+
+def query_voting_stats():
+    # query Ratings and count user selections
+    vote_counts = db.session.query(
+        Ratings.user_id,
+        Ratings.rating,
+        db.func.count(Ratings.rating)
+    ).filter_by(user_id=current_user.id).group_by(Ratings.user_id, Ratings.rating).all()
+    # create a dictionary to hold the counts
+    vote_count_dict = {rating: count for _, rating, count in vote_counts}
+    # list panic scale and ratings array
+    panic_scale = list(pun_factor_dict.keys())
+    panic_scale_rating = np.array([1, 2, 3, 4, 5, 6])
+    # create a votes_list by mapping the actual counts to the possible ratings
+    # default to 0 if not mapped
+    votes_list = [vote_count_dict.get(deg, 0) for deg in panic_scale]
+    # combine the panic scale and votes_list into data to be passed to view_answer
+    data = list(zip(panic_scale, votes_list, panic_scale_rating))
+    return data
 
 # Play
 @app.route('/play', methods=["POST", "GET"])
@@ -364,16 +393,41 @@ def play():
         _, question, answer = get_next_pun()
         num_words = len(answer.split(" "))
         num_words_msg = f"[{num_words} words]"
-        return render_template('play.html', values=[question, num_words_msg])
-
-pun_factor_dict = {
-    'no': '\U0001F636',       # 😶
-    'wut': '\U0001F9D0',      # 🧐
-    'sigh': '\U0001F624',     # 😤
-    'eyeroll': '\U0001F644',  # 🙄
-    'groan': '\U0001F62C',    # 😬
-    'panic': '\U0001FAE8'     # 🫨
-}
+        # query voting stats
+        data = query_voting_stats()
+        # unpack votest list
+        votes_list = [item[1] for item in data]
+        # sum votes
+        tot_votes = np.sum(votes_list)
+        # custom-made lists for confetti     
+        dragons = [32, 50, 68, 88]
+        unicorns = [17, 35, 56, 75, 95]
+        owls = [9, 21, 37, 54, 66, 84, 99]
+        zebras = [13, 28, 40, 59, 72, 90]
+        ladybugs = [25, 44, 61, 81, 97]
+        jellyfishes = [47, 77, 100]
+        # return 1 if animal throw is a go
+        def throw_animal(animal_list):
+            if tot_votes in animal_list:
+                return 1
+        # get go_nogo for each animal
+        dragons_go = throw_animal(dragons)
+        unicorns_go = throw_animal(unicorns)
+        owls_go = throw_animal(owls)
+        zebras_go = throw_animal(zebras)
+        ladybugs_go = throw_animal(ladybugs)
+        jellyfishes_go = throw_animal(jellyfishes)
+        # return play
+        return render_template(
+            'play.html'
+            , values=[question, num_words_msg]
+            , dragons_go=dragons_go
+            , unicorns_go=unicorns_go
+            , owls_go=owls_go
+            , zebras_go=zebras_go
+            , ladybugs_go=ladybugs_go
+            , jellyfishes_go=jellyfishes_go
+        )
 
 # View Answer
 @app.route('/view_answer', methods=["POST", "GET"])
@@ -386,50 +440,28 @@ def view_answer():
         # get session data
         _, question, answer = get_next_pun()
         values = [question, answer]
-        # query Ratings to get vote counts
-        user_id = current_user.id
-        # query Ratings and count votes per groan scale rating
-        vote_counts = db.session.query(
-            Ratings.user_id,
-            Ratings.rating,
-            db.func.count(Ratings.rating)
-        ).filter_by(user_id=user_id).group_by(Ratings.user_id, Ratings.rating).all()
-        # Create a dictionary to hold the counts
-        vote_count_dict = {rating: count for _, rating, count in vote_counts}
-        # List panic scale and ratings array
-        panic_scale = list(pun_factor_dict.keys())
-        panic_scale_rating = np.array([1, 2, 3, 4, 5, 6])
-        # Create an `n_votes` list by mapping the actual counts to the possible ratings
-        n_votes = [vote_count_dict.get(deg, 0) for deg in panic_scale]
-        # Combine the groan_scale and n_votes into data, notice previous default to 0 if not mapped
-        data = list(zip(panic_scale, n_votes, panic_scale_rating))
-        # Compute avg rating
-        ratings_array = panic_scale_rating * np.array(n_votes)
-        avg_rating = np.round(np.sum(ratings_array) / np.sum(n_votes), 4)
-        # Ensure 0 instead of nan for the first computation (for a given user)
+        # query voting stats
+        data = query_voting_stats()
+        # unpack data
+        votes_list = [item[1] for item in data]
+        panic_scale_rating = [item[2] for item in data]
+        # sum votes
+        tot_votes = np.sum(votes_list)
+        # compute avg rating
+        ratings_array = panic_scale_rating * np.array(votes_list)
+        avg_rating = np.round(np.sum(ratings_array) / tot_votes, 4)
+        # ensure 0 instead of nan for the first computation (for a given user)
         if np.isnan(avg_rating):
             avg_rating = 0
-        # Append average score
+        # append average score
         average_rating_row = ("", "Avg. Rating:", avg_rating)
         data.append(average_rating_row)
-        # calculate multiple of answers clicked for confetti
-        if np.sum(n_votes) % 10 == 0:
-            multiple_of_10 = 1
-        else:
-            multiple_of_10 = 0
-        if np.sum(n_votes) % 6 == 0:
-            multiple_of_6 = 1
-        else:
-            multiple_of_6 = 0
         # return view answer
         return render_template(
             'view_answer.html'
             , values=values
-            , n_votes=n_votes
             , data=data
             , pun_factor_dict=pun_factor_dict
-            , multiple_of_10=multiple_of_10
-            , multiple_of_6=multiple_of_6
         )
     else:
         return redirect(url_for('play'))
