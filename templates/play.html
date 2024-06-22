@@ -1,9 +1,11 @@
 {% extends "base.html" %}
 {% block title %}Play{% endblock %}
 {% block header %}
-<!-- Confetti script -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
-<script>
+{% endblock %}
+{% block content %}
+    <!-- Confetti script -->
+    <script>
     var scalar = 4;
     var dragon = confetti.shapeFromText({ text: '\u{1F409}', scalar: scalar });
     var unicorn = confetti.shapeFromText({ text: '\u{1F984}', scalar: scalar });
@@ -11,6 +13,7 @@
     var zebra = confetti.shapeFromText({ text: '\u{1F993}', scalar: scalar });
     var ladybug = confetti.shapeFromText({ text: '\u{1F41E}', scalar: scalar });
     var jellyfish = confetti.shapeFromText({ text: '\u{1FABC}', scalar: scalar });
+    
     var defaults = {
         spread: 360,
         ticks: 140,
@@ -20,38 +23,41 @@
         shapes: [unicorn],
         scalar: scalar
     };
+
     function shootDragons() {
         confetti({
             ...defaults,
             shapes: [dragon],
             particleCount: 17,
-            gravity: 0.05,
-            flat: true,
-            startVelocity: 30,
-            scalar: 8
-        });
+                gravity: 0.05,
+                flat: true,
+                startVelocity: 30,
+                scalar: 8
+            });
     }
+
     function shootUnicorns() {
         confetti({
             ...defaults,
             particleCount: 100,
-            scalar: 3
-        });
+                scalar: 3
+            });
         confetti({
             ...defaults,
             particleCount: 100,
-            startVelocity: 40,
-            scalar: 3,
-            flat: true
-        });
-        confetti({
+                startVelocity: 40,
+                scalar: 3,
+                flat: true
+            });
+            confetti({
             ...defaults,
             particleCount: 150,
             startVelocity: 50,
             scalar: 1,
             shapes: ['square']
-        });
+            });
     }
+
     function shootOwls() {
         confetti({
             ...defaults,
@@ -63,6 +69,7 @@
             scalar: 4
         });
     }
+
     function shootZebras() {
         confetti({
             ...defaults,
@@ -80,6 +87,7 @@
             startVelocity: 15
         });
     }
+
     function shootLadybugs() {
         confetti({
             ...defaults,
@@ -88,9 +96,10 @@
             gravity: 0.5,
             flat: true,
             startVelocity: 35,
-            scalar: 3
-        });
+                scalar: 3
+            });
     }
+
     function shootJellyfishes() {
         confetti({
             ...defaults,
@@ -100,8 +109,8 @@
             flat: true,
             startVelocity: 25,
             scalar: 4
-        });
-        confetti({
+            });
+            confetti({
             ...defaults,
             shapes: [jellyfish],
             particleCount: 150,
@@ -110,41 +119,46 @@
             scalar: 4
         });
     }
+
     var dragons_go = "{{ dragons_go | safe }}";
     dragons_go = parseInt(dragons_go);
     if (dragons_go) {
         setTimeout(shootDragons, 0);
     }
+
     var unicorns_go = "{{ unicorns_go | safe }}";
     unicorns_go = parseInt(unicorns_go);
     if (unicorns_go) {
         setTimeout(shootUnicorns, 0);
         setTimeout(shootUnicorns, 150);
     }
+
     var owls_go = "{{ owls_go | safe }}";
     owls_go = parseInt(owls_go);
     if (owls_go) {
         setTimeout(shootOwls, 0);
     }
+
     var zebras_go = "{{ zebras_go | safe }}";
     zebras_go = parseInt(zebras_go);
     if (zebras_go) {
         setTimeout(shootZebras, 0);
     }
+
     var ladybugs_go = "{{ ladybugs_go | safe }}";
     ladybugs_go = parseInt(ladybugs_go);
     if (ladybugs_go) {
         setTimeout(shootLadybugs, 0);
     }
+
     var jellyfishes_go = "{{ jellyfishes_go | safe }}";
     jellyfishes_go = parseInt(jellyfishes_go);
     if (jellyfishes_go) {
         setTimeout(shootJellyfishes, 0);
         setTimeout(shootJellyfishes, 50);
     }
-</script>
-{% endblock %}
-{% block content %}
+    </script>
+
     <!-- flash messages before content -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -153,6 +167,7 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
+
     <div class="container">
         <form id="playForm" action="{{url_for('view_answer')}}" method="POST">
             <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
@@ -177,9 +192,21 @@
             </div>
         </form>
     </div>
+
     <script>
-        document.addEventListener('keydown', function(event) {
+        function handleFormSubmission(event) {
             document.getElementById('playForm').submit();
+        }
+    
+        // event listener for key presses (desktop and some mobile devices)
+        document.addEventListener('keydown', function(event) {
+            handleFormSubmission(event);
+        });
+    
+        // event listener for touch (mobile and tablets)
+        document.addEventListener('touchstart', function(event) {
+            handleFormSubmission(event);
         });
     </script>
+
 {% endblock %}
