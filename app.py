@@ -401,21 +401,34 @@ def play():
         votes_list = [item[1] for item in data]
         # sum votes
         tot_votes = np.sum(votes_list)
-        # calculate multiple of answers clicked for confetti
-        if tot_votes % 10 == 0 and tot_votes > 1:
-            multiple_of_10 = 1
-        else:
-            multiple_of_10 = 0
-        if tot_votes % 6 == 0 and tot_votes > 1:
-            multiple_of_6 = 1
-        else:
-            multiple_of_6 = 0
+        # custom-made lists for confetti     
+        dragons = [32, 50, 68, 88]
+        unicorns = [17, 35, 56, 75, 95]
+        owls = [9, 21, 37, 54, 66, 84, 99]
+        zebras = [13, 28, 40, 59, 72, 90]
+        ladybugs = [25, 44, 61, 81, 97]
+        jellyfishes = [47, 77, 100]
+        # return 1 if animal throw is a go
+        def throw_animal(animal_list):
+            if tot_votes in animal_list:
+                return 1
+        # get go_nogo for each animal
+        dragons_go = throw_animal(dragons)
+        unicorns_go = throw_animal(unicorns)
+        owls_go = throw_animal(owls)
+        zebras_go = throw_animal(zebras)
+        ladybugs_go = throw_animal(ladybugs)
+        jellyfishes_go = throw_animal(jellyfishes)
         # return play
         return render_template(
             'play.html'
             , values=[question, num_words_msg]
-            , multiple_of_10=multiple_of_10
-            , multiple_of_6=multiple_of_6
+            , dragons_go=dragons_go
+            , unicorns_go=unicorns_go
+            , owls_go=owls_go
+            , zebras_go=zebras_go
+            , ladybugs_go=ladybugs_go
+            , jellyfishes_go=jellyfishes_go
         )
 
 # View Answer

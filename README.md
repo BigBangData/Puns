@@ -53,7 +53,7 @@ __Dev Flow__
 - ssh, modify user and permissions and restart apache
 
 ## Backlog
-- Slow confetti for better visibility
+- Add a "chuff" sound
 - Ensure mobile compatibility
 - Finalize README
 

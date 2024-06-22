@@ -4,34 +4,63 @@
 <!-- Confetti script -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 <script>
-    var scalar = 2;
+    var scalar = 4;
+    var dragon = confetti.shapeFromText({ text: '\u{1F409}', scalar: scalar });
     var unicorn = confetti.shapeFromText({ text: '\u{1F984}', scalar: scalar });
+    var owl = confetti.shapeFromText({ text: '\u{1F989}', scalar: scalar });
     var zebra = confetti.shapeFromText({ text: '\u{1F993}', scalar: scalar });
+    var ladybug = confetti.shapeFromText({ text: '\u{1F41E}', scalar: scalar });
+    var jellyfish = confetti.shapeFromText({ text: '\u{1FABC}', scalar: scalar });
     var defaults = {
         spread: 360,
         ticks: 140,
         gravity: 0.8,
         decay: 0.9,
-        startVelocity: 35,
+        startVelocity: 20,
         shapes: [unicorn],
         scalar: scalar
     };
+    function shootDragons() {
+        confetti({
+            ...defaults,
+            shapes: [dragon],
+            particleCount: 17,
+            gravity: 0.05,
+            flat: true,
+            startVelocity: 30,
+            scalar: 8
+        });
+    }
     function shootUnicorns() {
         confetti({
             ...defaults,
-            particleCount: 300
-        });
-        confetti({
-            ...defaults,
-            particleCount: 150,
-            startVelocity: 55,
-            flat: true
+            particleCount: 100,
+            scalar: 3
         });
         confetti({
             ...defaults,
             particleCount: 100,
-            scalar: scalar / 2,
+            startVelocity: 40,
+            scalar: 3,
+            flat: true
+        });
+        confetti({
+            ...defaults,
+            particleCount: 150,
+            startVelocity: 50,
+            scalar: 1,
             shapes: ['square']
+        });
+    }
+    function shootOwls() {
+        confetti({
+            ...defaults,
+            shapes: [owl],
+            particleCount: 100,
+            gravity: 0.05,
+            flat: true,
+            startVelocity: 35,
+            scalar: 4
         });
     }
     function shootZebras() {
@@ -40,22 +69,78 @@
             shapes: [zebra],
             particleCount: 100,
             flat: true,
-            gravity: 0.15,
-            startVelocity: 30,
+            gravity: 1,
+            startVelocity: 30
+        });
+        confetti({
+            ...defaults,
+            shapes: [zebra],
+            particleCount: 20,
+            flat: true,
+            startVelocity: 15
+        });
+    }
+    function shootLadybugs() {
+        confetti({
+            ...defaults,
+            shapes: [ladybug],
+            particleCount: 250,
+            gravity: 0.5,
+            flat: true,
+            startVelocity: 35,
             scalar: 3
         });
     }
-    // If user reaches a multiple of 10 answers, shoot unicorns
-    var multiple_of_10 = "{{ multiple_of_10 | safe }}";
-    multiple_of_10_int = parseInt(multiple_of_10);
-    if (multiple_of_10_int) {
-        setTimeout(shootUnicorns, 0);
-        setTimeout(shootUnicorns, 100);
+    function shootJellyfishes() {
+        confetti({
+            ...defaults,
+            shapes: [jellyfish],
+            particleCount: 50,
+            gravity: 0.1,
+            flat: true,
+            startVelocity: 25,
+            scalar: 4
+        });
+        confetti({
+            ...defaults,
+            shapes: [jellyfish],
+            particleCount: 150,
+            gravity: 0.4,
+            startVelocity: 45,
+            scalar: 4
+        });
     }
-    var multiple_of_6 = "{{ multiple_of_6 | safe }}";
-    multiple_of_6_int = parseInt(multiple_of_6);
-    if (multiple_of_6_int) {
+    var dragons_go = "{{ dragons_go | safe }}";
+    dragons_go = parseInt(dragons_go);
+    if (dragons_go) {
+        setTimeout(shootDragons, 0);
+    }
+    var unicorns_go = "{{ unicorns_go | safe }}";
+    unicorns_go = parseInt(unicorns_go);
+    if (unicorns_go) {
+        setTimeout(shootUnicorns, 0);
+        setTimeout(shootUnicorns, 150);
+    }
+    var owls_go = "{{ owls_go | safe }}";
+    owls_go = parseInt(owls_go);
+    if (owls_go) {
+        setTimeout(shootOwls, 0);
+    }
+    var zebras_go = "{{ zebras_go | safe }}";
+    zebras_go = parseInt(zebras_go);
+    if (zebras_go) {
         setTimeout(shootZebras, 0);
+    }
+    var ladybugs_go = "{{ ladybugs_go | safe }}";
+    ladybugs_go = parseInt(ladybugs_go);
+    if (ladybugs_go) {
+        setTimeout(shootLadybugs, 0);
+    }
+    var jellyfishes_go = "{{ jellyfishes_go | safe }}";
+    jellyfishes_go = parseInt(jellyfishes_go);
+    if (jellyfishes_go) {
+        setTimeout(shootJellyfishes, 0);
+        setTimeout(shootJellyfishes, 50);
     }
 </script>
 {% endblock %}
