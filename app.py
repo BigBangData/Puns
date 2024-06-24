@@ -481,9 +481,9 @@ def stats():
        avg_rating = 0
 
     # create a simple bar plot with custom size and background color
-    fig, ax = plt.subplots(figsize=(10, 5))
-    fig.patch.set_facecolor('#2c2c2c')
-    ax.set_facecolor('#2c2c2c')
+    fig, ax = plt.subplots(figsize=(12, 6))
+    fig.patch.set_facecolor('#4e505b')
+    ax.set_facecolor('#4e505b')
 
     bar_width = 0.95
     ax.bar(scales, votes, color='#629cd5', width=bar_width)

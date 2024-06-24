@@ -1,16 +1,17 @@
+import io
 import os
 import csv
+import base64
 import logging
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.ticker import MaxNLocator
 from datetime import datetime, timedelta
-
 from flask import Flask, redirect, url_for, render_template, flash, request, session
 from flask_sqlalchemy import SQLAlchemy
-
 from flask_wtf import FlaskForm
 from flask_wtf.csrf import CSRFProtect
 from flask_login import LoginManager, UserMixin, current_user, login_required, login_user, logout_user
-
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
 from argon2 import PasswordHasher
@@ -455,31 +456,60 @@ def view_answer():
         return redirect(url_for('play'))
 
 # Stats
-@app.route('/stats', methods=["POST", "GET"])
+@app.route('/stats', methods=["GET"])
 @login_required
 def stats():
-    """Display user-level stats (for now).
-    """
-    if request.method == "GET":
-        # query voting stats
-        data = query_voting_stats()
-        # unpack data
-        votes_list = [item[1] for item in data]
-        panic_scale_rating = [item[2] for item in data]
-        # sum votes
-        tot_votes = np.sum(votes_list)
-        # compute avg rating
-        ratings_array = panic_scale_rating * np.array(votes_list)
-        avg_rating = np.round(np.sum(ratings_array) / tot_votes, 4)
-        # ensure 0 instead of nan for the first computation (for a given user)
-        if np.isnan(avg_rating):
-            avg_rating = 0
-        # append average score
-        average_rating_row = ("", "Avg. Rating:", avg_rating)
-        data.append(average_rating_row)
-        return render_template('stats.html', data=data)
-    else:
-        return redirect(url_for('play'))
+    """Display user-level stats (for now)."""
+    # query voting stats
+    data = query_voting_stats()
+
+    # extract data for the plot
+    scales = [item[0] for item in data]
+    votes = [item[1] for item in data]
+    rating_scale = [item[2] for item in data]
+
+    # get total votes
+    tot_votes = np.sum(votes)
+
+    # calculate avg rating across votes
+    ratings_array = rating_scale * np.array(votes)
+    avg_rating = np.sum(ratings_array) / tot_votes
+    
+    # ensure 0 instead of nan for first calculation
+    if np.isnan(avg_rating):
+       avg_rating = 0
+
+    # create a simple bar plot with custom size and background color
+    fig, ax = plt.subplots(figsize=(12, 6))
+    fig.patch.set_facecolor('#4e505b')
+    ax.set_facecolor('#4e505b')
+
+    bar_width = 0.95
+    ax.bar(scales, votes, color='#629cd5', width=bar_width)
+
+    ax.set_ylabel('Num Votes', color='white')
+    ax.set_title('Your Ratings', color='white')
+
+    # set color for tick labels
+    ax.tick_params(axis='x', colors='white')
+    ax.tick_params(axis='y', colors='white')
+
+    # ensure y-axis has integer ticks
+    ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+
+    # add vertical dashed red line for avg rating
+    avg_rating_x = avg_rating - 1
+    ax.axvline(avg_rating_x, color='#b34a4a', linestyle='--', linewidth=3, label=f'Avg rating: {avg_rating:.2f}')
+    ax.legend(facecolor='white', edgecolor='white', labelcolor='#2c2c2c', title=f'# Votes: {tot_votes}')
+
+    # save the plot to a string buffer
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png', bbox_inches='tight')
+    buf.seek(0)
+    img_data = base64.b64encode(buf.read()).decode('utf-8')
+    buf.close()
+
+    return render_template('stats.html', img_data=img_data)
 
 
 if __name__ == "__main__":
