@@ -10,30 +10,12 @@
         {% endif %}
     {% endwith %}
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-2"></div>
+        <div class="col-md-8 text-center">
+            <br><br>
+            <img src="data:image/png;base64,{{ img_data }}" alt="Bar Plot">
+            <br><br>
         </div>
-        <div class="col-md-4">
-        <table class="table table-dark">
-            <br><br><br><br>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>Your Rating</th>
-                    <th>Pun Scale</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for scale, vote, rating in data %}
-                <tr>
-                    <td>{{ scale }}</td>
-                    <td>{{ vote }}</td>
-                    <td>{{ rating }}</td>
-                </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-        </div>
-        <div class="col-md-4">
-        </div>
+        <div class="col-md-2"></div>
     </div>
 {% endblock %}
