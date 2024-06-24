@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}Stats{% endblock %}
+{% block content %}
+    <!-- flash messages before content -->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            {% for msg in messages %}
+                <p>{{ msg }}</p>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="row">
+        <div class="col-md-4">
+        </div>
+        <div class="col-md-4">
+        <table class="table table-dark">
+            <br><br><br><br>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Your Rating</th>
+                    <th>Pun Scale</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for scale, vote, rating in data %}
+                <tr>
+                    <td>{{ scale }}</td>
+                    <td>{{ vote }}</td>
+                    <td>{{ rating }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        </div>
+        <div class="col-md-4">
+        </div>
+    </div>
+{% endblock %}

@@ -447,6 +447,22 @@ def view_answer():
         # get session data
         _, question, answer = get_next_pun()
         values = [question, answer]
+        # return view answer
+        return render_template(
+            'view_answer.html'
+            , values=values
+            , pun_factor_dict=pun_factor_dict
+        )
+    else:
+        return redirect(url_for('play'))
+
+# Stats
+@app.route('/stats', methods=["POST", "GET"])
+@login_required
+def stats():
+    """Display user-level stats (for now).
+    """
+    if request.method == "GET":
         # query voting stats
         data = query_voting_stats()
         # unpack data
@@ -463,13 +479,7 @@ def view_answer():
         # append average score
         average_rating_row = ("", "Avg. Rating:", avg_rating)
         data.append(average_rating_row)
-        # return view answer
-        return render_template(
-            'view_answer.html'
-            , values=values
-            , data=data
-            , pun_factor_dict=pun_factor_dict
-        )
+        return render_template('stats.html', data=data)
     else:
         return redirect(url_for('play'))
 

@@ -10,52 +10,28 @@
         {% endif %}
     {% endwith %}
     <div class="container">
-        <div class="row">
-            <div class="col-md-8">
-                <br><br><br>
-                <!-- Left section -->
-                {% for item in values %}
-                    {% if loop.index == 1 %}
-                        <h3 class="h3-blue text-center">{{ item }}</h3>
-                    {% elif loop.index == 2 %}
-                        <br>
-                        <h3 class="h3-red text-center">{{ item }}</h3>
-                    {% else %}
-                        <br>
-                        <h4 class="text-center">{{ item }}</h4>
-                    {% endif %}
-                {% endfor %}
-                <br><br><br>
+        <div>
+            <br><br><br>
+            <!-- Left section -->
+            {% for item in values %}
+                {% if loop.index == 1 %}
+                    <h3 class="h3-blue text-center">{{ item }}</h3>
+                {% elif loop.index == 2 %}
+                    <br>
+                    <h3 class="h3-red text-center">{{ item }}</h3>
+                {% else %}
+                    <br>
+                    <h4 class="text-center">{{ item }}</h4>
+                {% endif %}
+            {% endfor %}
+            <br><br><br>
             <form action="{{ url_for('play') }}" method="POST">
-            <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+                <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
                 <h5>Rate the pun ~</h5>
                 {% for feedback, emoji in pun_factor_dict.items() %}
                     <button type="submit" class="emoji-button" name="feedback" value="{{ feedback }}">{{ emoji }}</button>
                 {% endfor %}
             </form>
-            </div>
-            <div class="col-md-4">
-                <!-- Right section -->
-                <table class="table table-dark">
-                    <br><br>
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Your Rating</th>
-                            <th>Pun Scale</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for scale, vote, rating in data %}
-                        <tr>
-                            <td>{{ scale }}</td>
-                            <td>{{ vote }}</td>
-                            <td>{{ rating }}</td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-            </div>
         </div>
     </div>
 {% endblock %}
