@@ -54,7 +54,7 @@ __Dev Flow__
 
 ## Backlog
 
-- Move table to Stats route
+- Create better stats UX (barplot)
 - Add more puns
 - Finalize README
 - Redeploy (keep SpicaMia's history)

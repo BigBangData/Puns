@@ -213,7 +213,6 @@ def signup():
                 return render_template("signup.html", form=form)
             try:
                 beta_users = os.getenv('BETA_USERS').split(',')
-                logging.info(f'Beta users: {beta_users}')
             except AttributeError as e:
                 logging.debug(F"AttributeError: {e}")
                 flash(f"An error ocurred.", "warning")
@@ -406,7 +405,7 @@ def play():
         votes_list = [item[1] for item in data]
         # sum votes
         tot_votes = np.sum(votes_list)
-        # custom-made lists for confetti     
+        # custom-made lists for confetti
         dragons = [32, 50, 68, 88]
         unicorns = [17, 35, 56, 75, 95]
         owls = [9, 21, 37, 54, 66, 84, 99]
