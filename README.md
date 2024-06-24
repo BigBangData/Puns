@@ -53,9 +53,11 @@ __Dev Flow__
 - ssh, modify user and permissions and restart apache
 
 ## Backlog
-- Add a "chuff" sound
-- Ensure mobile compatibility
+
+- Move table to Stats route
+- Add more puns
 - Finalize README
+- Redeploy (keep SpicaMia's history)
 
 ## Reproducibility
 
