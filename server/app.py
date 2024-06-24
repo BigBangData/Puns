@@ -210,18 +210,23 @@ def signup():
             if existing_user:
                 flash(f"Username '{form.username.data}' exists. Please try another.", "warning")
                 return render_template("signup.html", form=form)
-            #if form.username.data not in beta_users:
-            else:
+            try:
+                beta_users = os.getenv('BETA_USERS').split(',')
+            except AttributeError as e:
+                logging.debug(F"AttributeError: {e}")
+                flash(f"An error ocurred.", "warning")
+            if form.username.data not in beta_users:
                 flash(f"Username '{form.username.data}' is not valid. Are you an approved beta user?", "warning")
                 return render_template("signup.html", form=form)
-            # hashed_password = hash_password(form.password.data)
-            # new_user = User(username=form.username.data, password=hashed_password)
-            # db.session.add(new_user)
-            # db.session.commit()
-            # msg = f"Created new account for {form.username.data}. Please login."
-            # logging.info(msg=msg)
-            # flash(msg, "info")
-            # return redirect(url_for('login'))
+            else:
+                hashed_password = hash_password(form.password.data)
+                new_user = User(username=form.username.data, password=hashed_password)
+                db.session.add(new_user)
+                db.session.commit()
+                msg = f"Created new account for {form.username.data}. Please login."
+                logging.info(msg=msg)
+                flash(msg, "info")
+                return redirect(url_for('login'))
         else:
             for field, errors in form.errors.items():
                 for error in errors:
@@ -399,7 +404,7 @@ def play():
         votes_list = [item[1] for item in data]
         # sum votes
         tot_votes = np.sum(votes_list)
-        # custom-made lists for confetti     
+        # custom-made lists for confetti
         dragons = [32, 50, 68, 88]
         unicorns = [17, 35, 56, 75, 95]
         owls = [9, 21, 37, 54, 66, 84, 99]

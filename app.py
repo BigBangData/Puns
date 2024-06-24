@@ -211,7 +211,12 @@ def signup():
             if existing_user:
                 flash(f"Username '{form.username.data}' exists. Please try another.", "warning")
                 return render_template("signup.html", form=form)
-            beta_users = os.environ.get('BETA_USERS')
+            try:
+                beta_users = os.getenv('BETA_USERS').split(',')
+                logging.info(f'Beta users: {beta_users}')
+            except AttributeError as e:
+                logging.debug(F"AttributeError: {e}")
+                flash(f"An error ocurred.", "warning")
             if form.username.data not in beta_users:
                 flash(f"Username '{form.username.data}' is not valid. Are you an approved beta user?", "warning")
                 return render_template("signup.html", form=form)
