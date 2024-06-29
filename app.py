@@ -104,23 +104,15 @@ class Ratings(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     pun_id = db.Column(db.Integer, db.ForeignKey('puns.id'), nullable=False)
     # user rating on a 1-3 scale for a given pun
-    rating = db.Column(db.Integer, nullable=False)
+    rating = db.Column(db.String, nullable=False)
 
     def __init__(self, user_id, pun_id, rating):
         self.user_id = user_id
         self.pun_id = pun_id
         self.rating = rating
 
-    def store_ratings(
-            user_id: int
-            , pun_id: int
-            , rating: int
-        ):
-        new_rating = Ratings(
-            user_id=user_id
-            , pun_id=pun_id
-            , rating=rating
-        )
+    def store_ratings(user_id: int, pun_id: int, rating: str):
+        new_rating = Ratings(user_id=user_id, pun_id=pun_id, rating=rating)
         current_user.ratings.append(new_rating)
         db.session.add(new_rating)
         db.session.commit()
