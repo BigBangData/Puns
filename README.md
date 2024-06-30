@@ -58,8 +58,9 @@ Below are some behaviors of the frontend:
   + redirects to login on success
 - __login__:
   + only possible when logged out
-    - - flashes msg otherwise and redirects to `play`
+    - flashes msg otherwise and redirects to `play`
   + fails when password is wrong
+    - security implemented so only user knows password
   + fails when username doesn't exist and redirects to `signup`
   + session inactivity will `logout` user
 - __logout__:

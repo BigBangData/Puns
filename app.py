@@ -339,6 +339,26 @@ pun_factor_dict = {
     'panic': '\U0001FAE8'     # 🫨
 }
 
+animal_dict = {
+    'dragon': [32, 50, 68, 88, 103, 132, 152, 176, 200, 232, 250, 268, 288]
+    , 'unicorn': [17, 35, 56, 75, 95, 116, 135, 147, 158, 175, 195, 217, 235]
+    , 'owl': [9, 21, 37, 54, 66, 84, 99, 106, 121, 137, 162, 171, 184]
+    , 'zebra': [13, 28, 40, 59, 72, 90, 124, 128, 156, 166, 179, 190, 213]
+    , 'ladybug': [25, 44, 61, 81, 97, 109, 125, 144, 154, 181, 197, 225, 244]
+    , 'jellyfish': [47, 77, 100, 113, 120, 148, 164, 187, 199, 247, 277, 300, 313]
+}
+
+# throw confetti given tot_votes which is actual votes (clicks) not based on pun_id
+def get_confetti_go_list(tot_votes, animal_dict):
+    go_list = []
+    for animal in animal_dict.keys():
+        # seq of numbers (n votes) when confetti should happen
+        animal_seq = animal_dict.get(animal)
+        # get whether animal is a go           
+        animal_go = 1 if tot_votes in animal_seq else 0
+        go_list.append(animal_go)
+    return go_list
+
 def query_voting_stats():
     # query Ratings and count user selections
     vote_counts = db.session.query(
@@ -398,34 +418,19 @@ def play():
         votes_list = [item[1] for item in data]
         # sum votes
         tot_votes = np.sum(votes_list)
-        # custom-made lists for confetti
-        dragons = [32, 50, 68, 88]
-        unicorns = [17, 35, 56, 75, 95]
-        owls = [9, 21, 37, 54, 66, 84, 99]
-        zebras = [13, 28, 40, 59, 72, 90]
-        ladybugs = [25, 44, 61, 81, 97]
-        jellyfishes = [47, 77, 100]
-        # return 1 if animal throw is a go
-        def throw_animal(animal_list):
-            if tot_votes in animal_list:
-                return 1
-        # get go_nogo for each animal
-        dragons_go = throw_animal(dragons)
-        unicorns_go = throw_animal(unicorns)
-        owls_go = throw_animal(owls)
-        zebras_go = throw_animal(zebras)
-        ladybugs_go = throw_animal(ladybugs)
-        jellyfishes_go = throw_animal(jellyfishes)
+        # get go nogo for each animal
+        go_list = get_confetti_go_list(tot_votes=tot_votes, animal_dict=animal_dict)
+        drag_go, unic_go, owls_go, zebr_go, lady_go, jell_go = go_list
         # return play
         return render_template(
             'play.html'
             , values=[question, num_words_msg]
-            , dragons_go=dragons_go
-            , unicorns_go=unicorns_go
+            , dragons_go=drag_go
+            , unicorns_go=unic_go
             , owls_go=owls_go
-            , zebras_go=zebras_go
-            , ladybugs_go=ladybugs_go
-            , jellyfishes_go=jellyfishes_go
+            , zebras_go=zebr_go
+            , ladybugs_go=lady_go
+            , jellyfishes_go=jell_go
         )
 
 # View Answer
