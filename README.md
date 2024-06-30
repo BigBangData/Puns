@@ -44,7 +44,7 @@ Initially I'd throw the confetti every fifth or tenth answer but as I added anim
 The site is deployed at an invite-only ip address for a select group of beta users since it costs to host the server and I'm at near capacity for that small server. The code here can serve as a bootstrap to deploying your own website with Python and Flask if you so desire.
 
 <p align="center">
-  <img src="static/img/index.png" alt="homepage" width="582" height="308"/>
+  <img src="static/img/index.png" width="582" height="308"/>
 </p>
 
 ## Site Behavior
@@ -77,12 +77,15 @@ Below are some behaviors of the frontend:
   + reveals answer and pun
   + user must click on one of six "emoji buttons" to rate the pun
   + feedback get recorded in the backend table `ratings`, and triggers new `play`
+<p align="center">
+  <img src="static/img/confetti.gif" width="582" height="308"/>
+</p>
 - __stats__:
   + display user stats in a simple column graph with counts for each rating + avg rating line
   + displayed separately from `view_answer` so as not to influence user ratings too much
 
 <p align="center">
-  <img src="static/img/stats.png" alt="homepage" width="582" height="308"/>
+  <img src="static/img/stats.png" width="582" height="308"/>
 </p>
 
 ## Credits <img src=static/img/thankyou.gif width="24" height="24"/>
