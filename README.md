@@ -81,6 +81,10 @@ Below are some behaviors of the frontend:
   + display user stats in a simple column graph with counts for each rating + avg rating line
   + displayed separately from `view_answer` so as not to influence user ratings too much
 
+<p align="center">
+  <img src="static/img/stats.png" alt="homepage" width="582" height="308"/>
+</p>
+
 ## Credits <img src=static/img/thankyou.gif width="24" height="24"/>
 
 - many of the puns were originally sourced from Will Styler's collection at: https://wstyler.ucsd.edu/puns/ <img src=static/img/clapclap.gif width="20" height="20"/>
