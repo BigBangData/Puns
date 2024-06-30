@@ -43,7 +43,7 @@ Initially I'd throw the confetti every fifth or tenth answer but as I added anim
 
 The site is deployed at an invite-only ip address for a select group of beta users since it costs to host the server and I'm at near capacity for that small server. The code here can serve as a bootstrap to deploying your own website with Python and Flask if you so desire.
 
-<center><img src=static/img/index.png alt="homepage" width="437" height="231"/></center>
+<div style="text-align:center"><img src=static/img/index.png alt="homepage" width="582" height="308"/></div>
 
 ## Site Behavior
 
