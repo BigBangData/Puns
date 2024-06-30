@@ -28,12 +28,12 @@ The problem with all this wasn't the data science - it was the user experience. 
 
 __Let The Content Shine__ <img src=static/img/content.gif width="24" height="24"/>
 
-Given the bad UX, I decided to "rollback the site"... (fine, I didn't practice agile and deployed a more complex experience first, so it's more like a roll forward) to its current form:
+Given the bad UX, I decided to "rollback the site"... (fine, I didn't practice agile and deployed a more complex experience first so there was no rollback) to its current form:
 1. user sees a question and can press any key to see the answer
-2. user sees the answer and then 6 emoji buttons that user clicks to "rate the pun"
+2. user sees the answer and several emoji buttons the user use to "rate the pun"
 3. the pun rating reloads the next question
 
-Not only is the flow a lot simpler and clearer, it's more fun to interact with, and makes a ton more sense. Instead of rating the performance of an ensemble of statistical models, the user is just rating the pun, interacting more with the actual content. The site is about puns, not "text similarity models"! <img src=static/img/punk.gif width="20" height="20"/>
+Not only is the flow a lot simpler and clearer, it's also just more fun. Instead of rating the performance of an ensemble of statistical models, the user is just rating the pun, interacting more with the actual content. The site is about puns - not "text similarity models"! <img src=static/img/punk.gif width="20" height="20"/>
 
 As for the confetti.... they went from two animals to a whole zoo.  <img src=static/img/ladybug.gif width="20" height="20"/>  <img src=static/img/jellyfish.gif width="20" height="20"/> <img src=static/img/dragon.gif width="20" height="20"/>
 
