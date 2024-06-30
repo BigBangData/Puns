@@ -77,6 +77,8 @@ Below are some behaviors of the frontend:
   + reveals answer and pun
   + user must click on one of six "emoji buttons" to rate the pun
   + feedback get recorded in the backend table `ratings`, and triggers new `play`
+  + new `play` might or might throw animal confetti depending on mysterious rules
+
 <p align="center">
   <img src="static/img/confetti.gif" width="582" height="308"/>
 </p>
