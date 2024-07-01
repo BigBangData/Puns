@@ -411,7 +411,10 @@ def play():
         # GET: get next pun question and answer
         _, question, answer = get_next_pun()
         num_words = len(answer.split(" "))
-        num_words_msg = f"[{num_words} words]"
+        if num_words == 1:
+            num_words_msg = f"[{num_words} word]"
+        else:
+            num_words_msg = f"[{num_words} words]"
         # query voting stats
         data = query_voting_stats()
         # unpack votest list
