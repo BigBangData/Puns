@@ -95,7 +95,7 @@ Below are some behaviors of the frontend:
 
 - many of the puns were originally sourced from Will Styler's collection at: https://wstyler.ucsd.edu/puns/ <img src=static/img/clapclap.gif width="20" height="20"/>
   + many of them were changed substantially to fit the question-and-answer format and in an attempt to make them more humorous
-- the point of origin for some of the app's code was Tim Ruscica's tutorials below, and Arpan Neupane's turotial for authentication
+- the point of origin for some of the app's code was Tim Ruscica's tutorials below, and Arpan Neupane's tutorial for authentication
 - I also made regular use of chatGPT (free tier of https://chat.openai.com/) to help speed up and troubleshoot code and deployment
 
 ## Tutorials Consulted <img src=static/img/books.gif width="24" height="24"/>
