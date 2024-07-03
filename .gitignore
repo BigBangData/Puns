@@ -2,4 +2,4 @@ local.env
 extra
 instance
 logs
-static/files/raw.txt
+static/files/*
