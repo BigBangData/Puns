@@ -414,7 +414,7 @@ def play():
         return redirect(url_for('play'))
     else:
         # GET: get next pun question and answer
-        _, question, answer, _ = get_next_pun()
+        _, question, answer, blame = get_next_pun()
         num_words = len(answer.split(" "))
         if num_words == 1:
             num_words_msg = f"[{num_words} word]"
