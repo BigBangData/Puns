@@ -71,6 +71,7 @@ class Puns(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     question = db.Column(db.String(255), nullable=False)
     answer = db.Column(db.String(255), nullable=False)
+    blame = db.Column(db.String(255), nullable=True)
     # define relationship to the "Ratings" table
     ratings = db.relationship('Ratings', backref='puns', lazy=True)
 
@@ -86,6 +87,7 @@ def insert_puns():
                     new_pun = Puns(
                         question=row['question']
                         , answer=row['answer']
+                        , blame=row['blame']
                     )
                     db.session.add(new_pun)
                     row_count += 1
