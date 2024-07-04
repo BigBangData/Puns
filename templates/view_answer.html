@@ -12,7 +12,6 @@
     <div class="container">
         <div>
             <br><br><br>
-            <!-- Left section -->
             {% for item in values %}
                 {% if loop.index == 1 %}
                     <h3 class="h3-blue text-center">{{ item }}</h3>
@@ -21,7 +20,7 @@
                     <h3 class="h3-red text-center">{{ item }}</h3>
                 {% else %}
                     <br>
-                    <h4 class="text-center">{{ item }}</h4>
+                    <h4>{{ item }}</h4>
                 {% endif %}
             {% endfor %}
             <br><br><br>

@@ -2,5 +2,5 @@ local.env
 extra
 instance
 logs
-static/files/*
-migrate/
+static/files
+migrate

@@ -320,25 +320,27 @@ def get_next_pun():
         pun_id = pun.id
         question = f"{pun.question}?"
         answer = pun.answer
+        blame = pun.blame
         # persist for single answer
         session['pun_id'] = pun_id
         session['question'] = question
         session['answer'] = answer
+        session['blame'] = blame
         #logging.info(f"{session}")
     else:
         pun_id = session['pun_id']
         question = session['question']
         answer = session['answer']
-    return pun_id, question, answer
-
+        blame = session['blame']
+    return pun_id, question, answer, blame
 
 pun_factor_dict = {
-    'no': '\U0001F636',       # 😶
-    'wut': '\U0001F9D0',      # 🧐
-    'sigh': '\U0001F624',     # 😤
-    'eyeroll': '\U0001F644',  # 🙄
-    'groan': '\U0001F62C',    # 😬
-    'panic': '\U0001FAE8'     # 🫨
+    'no': '\U0001F636',
+    'wut': '\U0001F9D0',
+    'sigh': '\U0001F624',
+    'eyeroll': '\U0001F644',
+    'groan': '\U0001F62C',
+    'panic': '\U0001FAE8'
 }
 
 animal_dict = {
@@ -356,7 +358,7 @@ def get_confetti_go_list(tot_votes, animal_dict):
     for animal in animal_dict.keys():
         # seq of numbers (n votes) when confetti should happen
         animal_seq = animal_dict.get(animal)
-        # get whether animal is a go           
+        # get whether animal is a go
         animal_go = 1 if tot_votes in animal_seq else 0
         go_list.append(animal_go)
     return go_list
@@ -395,7 +397,7 @@ def play():
         rating = request.form.get("feedback")
         logging.info(f"Received rating: {rating}")
         # get current session data
-        pun_id, question, answer = get_next_pun()
+        pun_id, question, answer, _ = get_next_pun()
         user_id = current_user.id
         # store known 'rating' data in Ratings table
         Ratings.store_ratings(
@@ -407,11 +409,12 @@ def play():
         session.pop('pun_id', None)
         session.pop('question', None)
         session.pop('answer', None)
+        session.pop('blame', None)
         # reload page for GET method
         return redirect(url_for('play'))
     else:
         # GET: get next pun question and answer
-        _, question, answer = get_next_pun()
+        _, question, answer, _ = get_next_pun()
         num_words = len(answer.split(" "))
         if num_words == 1:
             num_words_msg = f"[{num_words} word]"
@@ -447,8 +450,10 @@ def view_answer():
     """
     if request.method == "POST":
         # get session data
-        _, question, answer = get_next_pun()
-        values = [question, answer]
+        _, question, answer, blame = get_next_pun()
+        if blame:
+            blame = f"~ blame {blame}"
+        values = [question, answer, blame]
         # return view answer
         return render_template(
             'view_answer.html'
@@ -477,7 +482,7 @@ def stats():
     # calculate avg rating across votes
     ratings_array = rating_scale * np.array(votes)
     avg_rating = np.sum(ratings_array) / tot_votes
-    
+
     # ensure 0 instead of nan for first calculation
     if np.isnan(avg_rating):
        avg_rating = 0
