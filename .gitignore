@@ -3,3 +3,4 @@ extra
 instance
 logs
 static/files/*
+migrate/
