@@ -330,14 +330,13 @@ def get_next_pun():
         answer = session['answer']
     return pun_id, question, answer
 
-
 pun_factor_dict = {
-    'no': '\U0001F636',       # 😶
-    'wut': '\U0001F9D0',      # 🧐
-    'sigh': '\U0001F624',     # 😤
-    'eyeroll': '\U0001F644',  # 🙄
-    'groan': '\U0001F62C',    # 😬
-    'panic': '\U0001FAE8'     # 🫨
+    'no': '\U0001F636',
+    'wut': '\U0001F9D0',
+    'sigh': '\U0001F624',
+    'eyeroll': '\U0001F644',
+    'groan': '\U0001F62C',
+    'panic': '\U0001FAE8'
 }
 
 animal_dict = {
@@ -355,7 +354,7 @@ def get_confetti_go_list(tot_votes, animal_dict):
     for animal in animal_dict.keys():
         # seq of numbers (n votes) when confetti should happen
         animal_seq = animal_dict.get(animal)
-        # get whether animal is a go           
+        # get whether animal is a go
         animal_go = 1 if tot_votes in animal_seq else 0
         go_list.append(animal_go)
     return go_list
@@ -476,7 +475,7 @@ def stats():
     # calculate avg rating across votes
     ratings_array = rating_scale * np.array(votes)
     avg_rating = np.sum(ratings_array) / tot_votes
-    
+
     # ensure 0 instead of nan for first calculation
     if np.isnan(avg_rating):
        avg_rating = 0
