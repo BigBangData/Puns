@@ -102,7 +102,9 @@ Below are some behaviors of the frontend:
 __Notes on Blaming__
 - as far as possible and feasible, I attempt to blame the correct source for a pun, even if that person might not be the original, primary source for a pun but just the first trace that I found for it
 - I attempt not to blame collectors, so while I credit Will Styler's collection, since he did not specifically take credit for creating a pun, he does not get blamed
-- I changed many puns, sometimes substantially so, for various purposes: to fit the question-answer format, in an attempt to make them more humorous, to shorten their length, &tc.
+- I changed many puns, sometimes substantially so, for various purposes: to fit the question-answer format; in an attempt to make them more humorous; to shorten their length; &tc.
+- one of the most interesting ways in which I altered many puns was regarding gender. For historical reasons they were heavily biased with a male-centric view of the world, so I often changed it to a female-centric view, not because I think the world needs to "balance out" (and what would that take exactly?) but because it's interesting to see how many times I can surprise myself (and others) based on assumptions still; these "surprises" shed light on our implicit biases
+- I have not attempted to reformulate them to include non-binary genders (yet)
 - I did not blame myself in all these alterations, and since I altered most of them, in a way, you can blame me for it all
 - I welcome any corrections, improvements, requests to include and exclude puns, better blaming, &tc.
 
