@@ -93,8 +93,19 @@ Below are some behaviors of the frontend:
 
 ## Credits <img src=static/img/thankyou.gif width="24" height="24"/>
 
+### Pun Blames
 - many of the puns were originally sourced from Will Styler's collection at: https://wstyler.ucsd.edu/puns/ <img src=static/img/clapclap.gif width="20" height="20"/>
-  + many of them were changed substantially to fit the question-and-answer format and in an attempt to make them more humorous
+- many subsequent puns were colleted from [Jack Rhysider](https://www.youtube.com/c/jackrhysider)'s unique endings in his podcast [Darknet Diaries](https://darknetdiaries.com/), made easily available by this [Darknet Diaries Jokes repo](https://github.com/firozzer/DarknetDiariesJokes).
+- many other puns were sourced from the r/Physics subreddit question [Anyone know any good Physics Jokes?](https://www.reddit.com/r/Physics/comments/791tro/anyone_know_any_good_physics_jokes/)
+
+__Notes on Blaming__
+- as far as possible and feasible, I attempt to blame the correct source for a pun, even if that person might not be the original, primary source for a pun but just the first trace that I found for it
+- I attempt not to blame collectors, so while I credit Will Styler's collection, since he did not specifically take credit for creating a pun, he does not get blamed
+- I changed many puns, sometimes substantially so, for various purposes: to fit the question-answer format, in an attempt to make them more humorous, to shorten their length, &tc.
+- I did not blame myself in all these alterations, and since I altered most of them, in a way, you can blame me for it all
+- I welcome any corrections, improvements, requests to include and exclude puns, better blaming, &tc.
+
+### Code Credits
 - the point of origin for some of the app's code was Tim Ruscica's tutorials below, and Arpan Neupane's tutorial for authentication
 - I also made regular use of chatGPT (free tier of https://chat.openai.com/) to help speed up and troubleshoot code and deployment
 
