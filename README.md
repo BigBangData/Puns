@@ -83,6 +83,7 @@ Below are some behaviors of the frontend:
 <p align="center">
   <img src="static/img/confetti.gif" width="582" height="308"/>
 </p>
+
 - __stats__:
   + display user stats in a simple column graph with counts for each rating + avg rating line
   + displayed separately from `view_answer` so as not to influence user ratings too much
