@@ -1,0 +1,7 @@
+The Syrup pun needs to blame me
+
+select * from puns where answer like '%syrup%';
+
+UPDATE puns
+SET blame = 'Marcelo Sanches'
+WHERE id = 72;
