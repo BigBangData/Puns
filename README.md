@@ -9,7 +9,7 @@
 
 ## Story
 
-I created a little puns website on a whim, but also because I wanted to learn how to deploy a site using [Python](https://www.python.org/) <img src=static/img/python.png width="20" height="20"/> and [Flask](https://flask.palletsprojects.com/en/3.0.x/). <img src=static/img/flask.png width="20" height="20"/>
+I created a little puns website on a whim, but also because I wanted to learn how to deploy a site using [Python](https://www.python.org/) <img src=static/img/python.png width="20" height="20"/> and [Flask](https://flask.palletsprojects.com/en/3.1.x/). <img src=static/img/flask.png width="20" height="20"/>
 
 The website evolved backwards <img src=static/img/pepe-sip-backwards.gif width="20" height="20"/> because my first instinct was to create an experience using data science techniques <img src=static/img/atom.gif width="20" height="20"/> and statistical models but that turned out to be not as user-friendly as simply offering up the content and letting it shine. <img src=static/img/diamond.png width="20" height="20"/>
 
@@ -129,18 +129,23 @@ More Links:
 
 ## Local Dev
 
-To test locally before deployment, reproduce virtual env (see `requirements.txt`) and issue:
+Use the same Python version as in the deployed environment. From the repo root, create a fresh virtual environment and install the versions pinned in `requirements.txt`:
 
-```{bash}
-source ~/usr/local/venv/py3/Scripts/activate
-source local.env
-python -u run.py
+```bash
+py -3.11 -m venv --clear .venv
+.venv/Scripts/python.exe -m pip install --upgrade pip
+.venv/Scripts/python.exe -m pip install -r requirements.txt
+.venv/Scripts/python.exe -m pip check
+.venv/Scripts/python.exe -c "import sys; from importlib.metadata import version; print(sys.executable); print(sys.version)"
 ```
 
-The `local.env` contains export commands (for unix-style shell like Git Bash) used to set environment variables that will be available to any subprocesses or scripts executed from the shell, for example:
+The version check should show Python 3.11 and the executable inside this repository's `.venv`. If you use the Windows Python Launcher and `python3.11` is not on your `PATH`, use `py -3.11`. Re-run the `venv --clear` and install commands when you want to rebuild the environment from scratch; this avoids reusing packages from an older environment.
 
-```{bash}
-export BETA_USERS='<usernam_one>,<username_two>'
+Create a local, untracked `local.env` file in the repo root with shell `export` commands for the app's `DATABASE_URL`, `SECRET_KEY`, and comma-separated `BETA_USERS` settings. Keep local credentials and secrets out of source control. In Git Bash, load those settings and start the current application entry point:
+
+```bash
+source local.env
+.venv/Scripts/python.exe -u app.py
 ```
 
 ## Remote Dev
