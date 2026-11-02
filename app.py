@@ -345,11 +345,12 @@ pun_factor_dict = {
 
 animal_dict = {
     'dragon': [32, 50, 68, 88, 103, 132, 152, 176, 200, 232, 250, 268, 288]
-    , 'unicorn': [17, 35, 56, 75, 95, 116, 135, 147, 158, 175, 195, 217, 235, 256, 275, 295]
+    , 'unicorn': [17, 35, 56, 75, 95, 116, 135, 147, 158, 175, 195, 217, 235, 256, 275]
     , 'owl': [9, 21, 37, 54, 66, 84, 99, 106, 121, 137, 162, 171, 184, 209, 221, 237, 254, 266, 284, 299]
     , 'zebra': [13, 28, 40, 59, 72, 90, 124, 128, 156, 166, 179, 190, 213, 228, 249, 259, 272, 290]
     , 'ladybug': [25, 44, 61, 81, 97, 109, 125, 144, 154, 181, 197, 225, 244, 261, 281, 297]
     , 'jellyfish': [47, 77, 100, 113, 120, 148, 164, 187, 199, 247, 277, 300]
+    , 'axolotl': [295]
 }
 
 # throw confetti given tot_votes which is actual votes (clicks) not based on pun_id
@@ -428,7 +429,7 @@ def play():
         tot_votes = np.sum(votes_list)
         # get go nogo for each animal
         go_list = get_confetti_go_list(tot_votes=tot_votes, animal_dict=animal_dict)
-        drag_go, unic_go, owls_go, zebr_go, lady_go, jell_go = go_list
+        drag_go, unic_go, owls_go, zebr_go, lady_go, jell_go, axol_go = go_list
         # return play
         return render_template(
             'play.html'
@@ -439,6 +440,7 @@ def play():
             , zebras_go=zebr_go
             , ladybugs_go=lady_go
             , jellyfishes_go=jell_go
+            , axolotls_go=axol_go
         )
 
 # View Answer

@@ -4,6 +4,39 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 {% endblock %}
 {% block content %}
+    <style>
+        @keyframes axolotl-confetti {
+            0% {
+                transform: translate3d(-50%, -50%, 0) scale(0.5) rotate(0deg);
+                opacity: 1;
+            }
+            25% {
+                transform: translate3d(calc(-50% + var(--mid-x)), calc(-50% + var(--mid-y)), 0) scale(1) rotate(180deg);
+            }
+            65% {
+                transform: translate3d(calc(-50% + var(--end-x)), calc(-50% + var(--end-y)), 0) rotate(var(--spin));
+                opacity: 1;
+            }
+            88% {
+                transform: translate3d(calc(-50% + var(--end-x)), calc(-50% + var(--end-y)), 0) rotate(var(--spin));
+                opacity: 0.9;
+            }
+            100% {
+                transform: translate3d(calc(-50% + var(--end-x)), calc(-50% + var(--end-y)), 0) rotate(var(--spin));
+                opacity: 0;
+            }
+        }
+
+        .axolotl-confetti {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            z-index: 9999;
+            pointer-events: none;
+            object-fit: contain;
+            animation: axolotl-confetti var(--duration) ease-out forwards;
+        }
+    </style>
     <!-- Confetti script -->
     <script>
     var scalar = 4;
@@ -13,6 +46,7 @@
     var zebra = confetti.shapeFromText({ text: '\u{1F993}', scalar: scalar });
     var ladybug = confetti.shapeFromText({ text: '\u{1F41E}', scalar: scalar });
     var jellyfish = confetti.shapeFromText({ text: '\u{1FABC}', scalar: scalar });
+    var axolotlImage = "{{ url_for('static', filename='img/axolotl.gif') }}";
     
     var defaults = {
         spread: 360,
@@ -120,6 +154,38 @@
         });
     }
 
+    function shootAxolotls() {
+        var particles = document.createDocumentFragment();
+        var particleCount = 55;
+
+        for (var i = 0; i < particleCount; i++) {
+            var particle = document.createElement('img');
+            var endX = (Math.random() - 0.5) * window.innerWidth * 0.9;
+            var endY = (0.2 + Math.random() * 0.65) * window.innerHeight;
+            var midY = -(0.45 + Math.random() * 0.25) * window.innerHeight;
+            var size = 42 + Math.random() * 20;
+
+            particle.src = axolotlImage;
+            particle.alt = '';
+            particle.className = 'axolotl-confetti';
+            particle.setAttribute('aria-hidden', 'true');
+            particle.style.width = size + 'px';
+            particle.style.height = size + 'px';
+            particle.style.setProperty('--mid-x', endX * 0.6 + 'px');
+            particle.style.setProperty('--mid-y', midY + 'px');
+            particle.style.setProperty('--end-x', endX + 'px');
+            particle.style.setProperty('--end-y', endY + 'px');
+            particle.style.setProperty('--spin', (360 + Math.random() * 720) + 'deg');
+            particle.style.setProperty('--duration', (12 + Math.random() * 2) + 's');
+            particle.addEventListener('animationend', function () {
+                this.remove();
+            }, { once: true });
+            particles.appendChild(particle);
+        }
+
+        document.body.appendChild(particles);
+    }
+
     var dragons_go = "{{ dragons_go | safe }}";
     dragons_go = parseInt(dragons_go);
     if (dragons_go) {
@@ -156,6 +222,12 @@
     if (jellyfishes_go) {
         setTimeout(shootJellyfishes, 0);
         setTimeout(shootJellyfishes, 50);
+    }
+
+    var axolotls_go = "{{ axolotls_go | safe }}";
+    axolotls_go = parseInt(axolotls_go);
+    if (axolotls_go) {
+        setTimeout(shootAxolotls, 0);
     }
     </script>
 
