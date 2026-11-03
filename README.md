@@ -150,12 +150,13 @@ source local.env
 
 ## Remote Dev
 
-Deploying to a server is complex and varies depending on the infrastructure, but this is a typical test and deploy flow that I adhered to when making small changes to ensure they deployed correctly:
+For this Apache deployment, use the root application as the only maintained app version and deploy it together with its assets and the WSGI configuration. After copying files, check ownership and permissions as needed, then reload Apache:
 
-1. commit changes
-2. copy changes into the `server/` folder to check diffs
-3. revert changes that aren't needed in the (actual) server
-4. scp `server/` into (the actual) server
-5. ssh into the server; modify user and permissions for files; restart server
+```bash
+sudo apachectl configtest
+sudo systemctl reload apache2
+```
+
+If the app fails, inspect `/var/www/webApp/logs/error.log` and `/var/www/webApp/logs/access.log` on the server. Keep local secrets in the untracked `local.env`; do not copy it to the server or commit it.
 
 ---
