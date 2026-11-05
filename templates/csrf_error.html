@@ -2,8 +2,7 @@
 {% block title %}Session Expired{% endblock %}
 {% block content %}
     <h1>We couldn't verify your session</h1>
-    <p>This can happen if a page has been open for a while or Safari restored an older page.</p>
+    <p>This can happen if a page has been open for a while or your browser restored an older page.</p>
     <p>Nothing was submitted. Continue below to load a fresh page; if prompted, sign in again.</p>
-    <p>You do not need to close Safari.</p>
     <a class="btn btn-primary" href="{{ url_for('login') }}">Continue to Puns / Sign in</a>
 {% endblock %}
