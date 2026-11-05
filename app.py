@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from flask import Flask, redirect, url_for, render_template, flash, request, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf import FlaskForm
-from flask_wtf.csrf import CSRFProtect
+from flask_wtf.csrf import CSRFProtect, CSRFError
 from flask_login import LoginManager, UserMixin, current_user, login_required, login_user, logout_user
 from wtforms import StringField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Length, ValidationError
@@ -23,6 +23,10 @@ from argon2.exceptions import VerifyMismatchError
 app = Flask(__name__)
 csrf = CSRFProtect()
 csrf.init_app(app)
+
+@app.errorhandler(CSRFError)
+def handle_csrf_error(error):
+    return render_template('csrf_error.html'), 400
 
 # store session data for 5 min; works even if browser is open
 app.permanent_session_lifetime = timedelta(minutes=5)
