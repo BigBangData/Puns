@@ -3,6 +3,7 @@ import os
 import csv
 import base64
 import logging
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -347,26 +348,59 @@ pun_factor_dict = {
     'panic': '\U0001FAE8'
 }
 
+CONFETTI_MIN_GAP = 8
+CONFETTI_MAX_GAP = 22
+CONFETTI_SEED = 2025
+
 animal_dict = {
-    'dragon': [32, 50, 68, 88, 103, 132, 152, 176, 200, 232, 250, 268, 288]
-    , 'unicorn': [17, 35, 56, 75, 95, 116, 135, 147, 158, 175, 195, 217, 235, 256, 275]
-    , 'owl': [9, 21, 37, 54, 66, 84, 99, 106, 121, 137, 162, 171, 184, 209, 221, 237, 254, 266, 284, 299]
-    , 'zebra': [13, 28, 40, 59, 72, 90, 124, 128, 156, 166, 179, 190, 213, 228, 249, 259, 272, 290]
-    , 'ladybug': [25, 44, 61, 81, 97, 109, 125, 144, 154, 181, 197, 225, 244, 261, 281, 297]
-    , 'jellyfish': [47, 77, 100, 113, 120, 148, 164, 187, 199, 247, 277, 300]
-    , 'axolotl': [295]
+    'dragon': [],
+    'unicorn': [],
+    'owl': [],
+    'zebra': [],
+    'ladybug': [],
+    'jellyfish': [],
+    'axolotl': []
 }
+
+
+def build_confetti_schedule(max_total_votes):
+    """Build a deterministic, repeating confetti schedule with guardrails.
+
+    The schedule stays stable across refreshes by using a fixed seed, while still
+    varying the gap lengths and animal choices enough to feel unpredictable.
+    """
+    if max_total_votes is None:
+        max_total_votes = 0
+    max_total_votes = max(int(max_total_votes), 0)
+
+    schedule = {}
+    rng = random.Random(CONFETTI_SEED)
+    next_vote = 0
+    previous_animal = None
+
+    while next_vote <= max_total_votes:
+        gap = rng.randint(CONFETTI_MIN_GAP, CONFETTI_MAX_GAP)
+        next_vote += gap
+        animal_pool = list(animal_dict.keys())
+        if previous_animal is not None:
+            animal_pool = [animal for animal in animal_pool if animal != previous_animal]
+        animal = rng.choice(animal_pool)
+        schedule[next_vote] = animal
+        previous_animal = animal
+
+    return schedule
+
 
 # throw confetti given tot_votes which is actual votes (clicks) not based on pun_id
 def get_confetti_go_list(tot_votes, animal_dict):
-    go_list = []
-    for animal in animal_dict.keys():
-        # seq of numbers (n votes) when confetti should happen
-        animal_seq = animal_dict.get(animal)
-        # get whether animal is a go
-        animal_go = 1 if tot_votes in animal_seq else 0
-        go_list.append(animal_go)
-    return go_list
+    tot_votes = max(int(tot_votes), 0)
+    schedule = build_confetti_schedule(tot_votes)
+    active_animal = schedule.get(tot_votes)
+
+    return [
+        1 if active_animal == animal else 0
+        for animal in animal_dict.keys()
+    ]
 
 def query_voting_stats():
     # query Ratings and count user selections
