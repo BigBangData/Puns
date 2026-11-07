@@ -80,6 +80,9 @@ footer {
     gap: 0.6rem;
     transform: translateY(-50%);
 }
+.pun-progress-picker {
+    margin: 0;
+}
 .pun-progress-percent {
     color: #f0d7a2;
     font-size: 1.15rem;
@@ -87,23 +90,50 @@ footer {
 }
 .pun-progress-grid {
     display: grid;
-    grid-auto-flow: column;
-    grid-template-rows: repeat(100, minmax(0, 1fr));
-    grid-auto-columns: 14px;
-    gap: 2px;
-    height: min(72vh, 640px);
-    padding: 5px;
+    grid-template-columns: repeat(10, 22px);
+    grid-auto-rows: 22px;
+    gap: 3px;
+    max-height: min(72vh, 640px);
+    overflow-y: auto;
+    padding: 8px;
     border: 1px solid #87909c;
     border-radius: 5px;
     background: #293743;
 }
 .pun-progress-square {
-    width: 100%;
+    display: flex;
+    width: 22px;
+    height: 22px;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: 0;
     border-radius: 2px;
     background: #465563;
+    color: #fff;
+    cursor: pointer;
+    font-size: 0.6rem;
+    line-height: 1;
+}
+.pun-progress-square:hover {
+    background: #87909c;
+}
+.pun-progress-square:focus-visible {
+    outline: 2px solid #f0d7a2;
+    outline-offset: 2px;
 }
 .pun-progress-square.completed {
     background: #5c9997;
+}
+.pun-progress-square.completed:hover {
+    background: #77b8b5;
+}
+.pun-progress-square.current {
+    outline: 2px solid #f0d7a2;
+    outline-offset: 1px;
+}
+.pun-progress-number-picker {
+    display: none;
 }
 .pun-intro {
     display: flex;
@@ -137,21 +167,56 @@ footer {
     transform: translateY(-2px);
     background: #4b817f;
 }
-@media (max-width: 576px) {
+@media (max-width: 991px) {
     .pun-progress {
-        top: 5.5rem;
-        right: 0.5rem;
+        position: static;
+        flex-direction: row;
+        justify-content: center;
+        gap: 0.5rem;
+        margin: 0.5rem auto 1rem;
         transform: none;
     }
     .pun-progress-percent {
         font-size: 0.9rem;
     }
     .pun-progress-grid {
-        grid-auto-columns: 11px;
-        height: 70vh;
+        display: none;
+    }
+    .pun-progress-picker {
+        display: flex;
+        align-items: center;
+    }
+    .pun-progress-number-picker {
+        display: flex;
+        align-items: center;
+        gap: 0.35rem;
+    }
+    .pun-progress-number-picker input {
+        width: 4.5rem;
+        min-height: 2.5rem;
+        padding: 0.35rem;
+        border: 1px solid #87909c;
+        border-radius: 5px;
+        background: #293743;
+        color: #fff;
+        text-align: center;
+    }
+    .pun-progress-number-picker button {
+        min-height: 2.5rem;
+        padding: 0.35rem 0.7rem;
+        border: 0;
+        border-radius: 5px;
+        background: #5c9997;
+        color: #fff;
+        font-weight: 700;
+    }
+    .pun-progress-number-picker button:focus-visible,
+    .pun-progress-number-picker input:focus-visible {
+        outline: 2px solid #f0d7a2;
+        outline-offset: 2px;
     }
     .pun-intro {
-        padding: 2rem 3.5rem 2rem 1rem;
+        padding: 2rem 1rem;
     }
     .start-game-button {
         padding: 0.8rem 1rem;

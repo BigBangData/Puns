@@ -84,3 +84,24 @@ def test_progress_grid_renders_300_pun_squares(logged_in_client):
     response = logged_in_client.get('/play')
 
     assert response.data.count(b'pun-progress-square') == 300
+    assert b'aria-label="Jump to pun 300"' in response.data
+    assert b'>300</button>' in response.data
+    assert b'Jump to pun number' in response.data
+
+
+def test_jump_to_pun_by_number(logged_in_client):
+    response = logged_in_client.post('/jump', data={'pun_id': '2'}, follow_redirects=True)
+
+    assert b'Second pun' in response.data
+    assert b'data-pun-id="2"' in response.data
+    assert b'aria-current="true"' in response.data
+
+    answer = logged_in_client.post('/view_answer')
+    assert b'Second answer' in answer.data
+
+
+def test_jump_rejects_unknown_pun_number(logged_in_client):
+    response = logged_in_client.post('/jump', data={'pun_id': '999'}, follow_redirects=True)
+
+    assert b'Please choose an available pun number.' in response.data
+    assert b'Click to play a pun game' in response.data

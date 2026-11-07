@@ -296,11 +296,17 @@
     
         // event listener for key presses (desktop and some mobile devices)
         document.addEventListener('keydown', function(event) {
+            if (event.target.closest('.pun-progress')) {
+                return;
+            }
             handleFormSubmission(event);
         });
-    
+
         // event listener for touch (mobile and tablets)
         document.addEventListener('touchstart', function(event) {
+            if (event.target.closest('.pun-progress')) {
+                return;
+            }
             handleFormSubmission(event);
         });
     </script>

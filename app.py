@@ -492,7 +492,8 @@ def play():
                 finished=latest_pun_id >= pun_total and latest_pun_id > 0,
                 progress_percent=progress_percent,
                 pun_ids=pun_ids,
-                completed_pun_ids=completed_pun_ids
+                completed_pun_ids=completed_pun_ids,
+                current_pun_id=None
             )
 
         # GET: get next pun question and answer
@@ -527,7 +528,26 @@ def play():
             , progress_percent=progress_percent
             , pun_ids=pun_ids
             , completed_pun_ids=completed_pun_ids
+            , current_pun_id=session.get('pun_id')
         )
+
+# Select a pun directly from the progress grid or number picker.
+@app.route('/jump', methods=["POST"])
+@login_required
+def jump_to_pun():
+    pun_id = request.form.get("pun_id", type=int)
+    pun = Puns.query.filter_by(id=pun_id).first() if pun_id is not None else None
+    if pun is None:
+        flash("Please choose an available pun number.", "warning")
+        return redirect(url_for('play'))
+
+    for key in ('pun_id', 'question', 'answer', 'blame', 'start_new_game'):
+        session.pop(key, None)
+    session['pun_id'] = pun.id
+    session['question'] = f"{pun.question}?"
+    session['answer'] = pun.answer
+    session['blame'] = pun.blame
+    return redirect(url_for('play'))
 
 # Start or restart a run after the intro screen.
 @app.route('/start', methods=["POST"])
@@ -567,6 +587,7 @@ def view_answer():
             , progress_percent=progress_percent
             , pun_ids=pun_ids
             , completed_pun_ids=completed_pun_ids
+            , current_pun_id=session.get('pun_id')
         )
     else:
         return redirect(url_for('play'))

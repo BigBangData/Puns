@@ -71,7 +71,7 @@ Below are some behaviors of the frontend:
   + when logged in, `signup` or `login` will redirect to `play`
   + goes through puns in order for every user
   + shows only question and word count so user can try to guess
-  + shows a percentage and three-column grid of individual completed-pun squares
+  + shows progress and lets users jump to a pun by number, using clickable tiles on desktop or a number picker on mobile
   + presents an intro before the first pun and a completion screen after the last
   + lets the user intentionally restart the pun cycle from the completion screen
   + any key redirects to `view_answer`
