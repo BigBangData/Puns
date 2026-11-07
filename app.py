@@ -124,6 +124,11 @@ class Ratings(db.Model):
         db.session.add(new_rating)
         db.session.commit()
 
+class UserProgress(db.Model):
+    """Tracks ordered-game progress independently from ratings on selected puns."""
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
+    pun_id = db.Column(db.Integer, nullable=False, default=0)
+
 ## Authentication for Signup and Login
 
 # security
@@ -257,6 +262,7 @@ def login():
                     session.pop('question', None)
                     session.pop('answer', None)
                     session.pop('start_new_game', None)
+                    session.pop('pun_selection_mode', None)
                     login_user(user_id)
                     flash(f"Hello {user_id.username}, you are logged in.", "info")
                     return redirect(url_for('play'))
@@ -287,21 +293,30 @@ def logout():
 
 # Helper funcs for Play
 def get_user_latest_pun_id():
-    """Helper function for get_next_pun()"""
-    last_play = (
-        db.session.query(Ratings)
-            .filter_by(user_id=current_user.id)
-            .order_by(Ratings.id.desc())
-            .first()
-    )
-    if last_play:
-        last_pun_id = last_play.pun_id
-        logging.info(f"User {current_user} - lastest pun id {last_pun_id}")
-    else:
-        logging.info(f"No answers found for user: {current_user}.")
-        last_pun_id = 0
-    # return last pun_id
-    return last_pun_id
+    """Return ordered progress, initializing it from pre-existing ratings once."""
+    progress = UserProgress.query.filter_by(user_id=current_user.id).first()
+    if progress is None:
+        last_rating = (
+            db.session.query(Ratings)
+                .filter_by(user_id=current_user.id)
+                .order_by(Ratings.id.desc())
+                .first()
+        )
+        last_pun_id = last_rating.pun_id if last_rating else 0
+        progress = UserProgress(user_id=current_user.id, pun_id=last_pun_id)
+        db.session.add(progress)
+        db.session.commit()
+        logging.info(f"Initialized ordered progress for {current_user}: {last_pun_id}")
+    return progress.pun_id
+
+def set_user_latest_pun_id(pun_id):
+    """Update ordered progress after rating a pun in the ordered game."""
+    progress = UserProgress.query.filter_by(user_id=current_user.id).first()
+    if progress is None:
+        get_user_latest_pun_id()
+        progress = UserProgress.query.filter_by(user_id=current_user.id).first()
+    progress.pun_id = pun_id
+    db.session.commit()
 
 def get_pun_progress():
     """Return rounded progress and the pun IDs completed in the current run."""
@@ -470,6 +485,9 @@ def play():
             , pun_id=pun_id
             , rating=rating
         )
+        if session.get('pun_selection_mode') != 'random':
+            set_user_latest_pun_id(pun_id)
+        session.pop('pun_selection_mode', None)
         # clear session pun data
         session.pop('pun_id', None)
         session.pop('question', None)
@@ -536,6 +554,8 @@ def play():
 @login_required
 def jump_to_pun():
     pun_id = request.form.get("pun_id", type=int)
+    if pun_id is None:
+        pun_id = request.form.get("pun_number", type=int)
     pun = Puns.query.filter_by(id=pun_id).first() if pun_id is not None else None
     if pun is None:
         flash("Please choose an available pun number.", "warning")
@@ -547,6 +567,7 @@ def jump_to_pun():
     session['question'] = f"{pun.question}?"
     session['answer'] = pun.answer
     session['blame'] = pun.blame
+    session['pun_selection_mode'] = 'random'
     return redirect(url_for('play'))
 
 # Start or restart a run after the intro screen.
@@ -558,7 +579,7 @@ def start_game():
     if latest_pun_id not in (0, pun_total):
         return redirect(url_for('play'))
 
-    for key in ('pun_id', 'question', 'answer', 'blame'):
+    for key in ('pun_id', 'question', 'answer', 'blame', 'pun_selection_mode'):
         session.pop(key, None)
     session['start_new_game'] = True
     return redirect(url_for('play'))

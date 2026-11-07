@@ -99,9 +99,49 @@ def test_jump_to_pun_by_number(logged_in_client):
     answer = logged_in_client.post('/view_answer')
     assert b'Second answer' in answer.data
 
+    number_picker_response = logged_in_client.post(
+        '/jump',
+        data={'pun_number': '1'},
+        follow_redirects=True,
+    )
+    assert b'First pun' in number_picker_response.data
+
 
 def test_jump_rejects_unknown_pun_number(logged_in_client):
     response = logged_in_client.post('/jump', data={'pun_id': '999'}, follow_redirects=True)
 
     assert b'Please choose an available pun number.' in response.data
     assert b'Click to play a pun game' in response.data
+
+
+def test_jump_and_rating_do_not_advance_ordered_progress(logged_in_client):
+    jumped_pun = logged_in_client.post('/jump', data={'pun_id': '2'}, follow_redirects=True)
+    assert b'Second pun' in jumped_pun.data
+
+    answer = logged_in_client.post('/view_answer')
+    assert b'Second answer' in answer.data
+
+    after_rating = rate_current_pun(logged_in_client)
+    assert b'Click to play a pun game' in after_rating.data
+    assert b'aria-valuenow="0"' in after_rating.data
+    assert b'pun-progress-square completed' not in after_rating.data
+
+    ordered_start = logged_in_client.post('/start', follow_redirects=True)
+    assert b'First pun' in ordered_start.data
+
+
+def test_jump_does_not_change_existing_ordered_progress(logged_in_client):
+    first_pun = logged_in_client.post('/start', follow_redirects=True)
+    assert b'First pun' in first_pun.data
+    next_pun = rate_current_pun(logged_in_client)
+    assert b'Second pun' in next_pun.data
+    assert b'aria-valuenow="50"' in next_pun.data
+
+    jumped_pun = logged_in_client.post('/jump', data={'pun_id': '1'}, follow_redirects=True)
+    assert b'First pun' in jumped_pun.data
+    logged_in_client.post('/view_answer')
+
+    after_rating = rate_current_pun(logged_in_client)
+    assert b'Second pun' in after_rating.data
+    assert b'aria-valuenow="50"' in after_rating.data
+    assert after_rating.data.count(b'pun-progress-square completed') == 1

@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block title %}View Answer{% endblock %}
 {% block content %}
-    {% include "_pun_progress.html" %}
     <!-- flash messages before content -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -10,21 +9,17 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-    <div class="container">
-        <div>
-            <br><br><br>
+    <main class="pun-game-layout">
+        <section class="pun-game-content">
             {% for item in values %}
                 {% if loop.index == 1 %}
-                    <h3 class="h3-blue text-center">{{ item }}</h3>
+                    <h3 class="h3-blue">{{ item }}</h3>
                 {% elif loop.index == 2 %}
-                    <br>
-                    <h3 class="h3-red text-center">{{ item }}</h3>
+                    <h3 class="h3-red pun-answer">{{ item }}</h3>
                 {% else %}
-                    <br>
-                    <h4>{{ item }}</h4>
+                    <p class="pun-blame">{{ item }}</p>
                 {% endif %}
             {% endfor %}
-            <br><br><br>
             <form action="{{ url_for('play') }}" method="POST">
                 <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
                 <h5>Rate the pun ~</h5>
@@ -32,6 +27,7 @@
                     <button type="submit" class="emoji-button" name="feedback" value="{{ feedback }}">{{ emoji }}</button>
                 {% endfor %}
             </form>
-        </div>
-    </div>
+        </section>
+        {% include "_pun_progress.html" %}
+    </main>
 {% endblock %}

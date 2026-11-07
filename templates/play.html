@@ -27,7 +27,6 @@
             </form>
         </main>
     {% else %}
-    {% include "_pun_progress.html" %}
     <style>
         @keyframes axolotl-confetti {
             0% {
@@ -264,30 +263,22 @@
         {% endif %}
     {% endwith %}
 
-    <div class="container">
-        <form id="playForm" action="{{url_for('view_answer')}}" method="POST">
-            <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
-            <br><br><br>
-            {% for item in values %}
-                {% if loop.index == 1 %}
-                    <h3 class="h3-blue text-center">{{ item }}</h3>
-                {% elif loop.index == 2 %}
-                    <br>
-                    <h3 class="h3-red text-center">{{ item }}</h3>
-                {% endif %}
-            {% endfor %}
-            <br>
-            <div class="text-center">
-                 {% for item in values %}
-                     {% if loop.index == 3 %}
-                         {{ item }}
-                     {% endif %}
-                 {% endfor %}
-                 <br><br>
-                 <p><h5>Press any key ~</h5></p>
-            </div>
-        </form>
-    </div>
+    <main class="pun-game-layout">
+        <section class="pun-game-content">
+            <form id="playForm" action="{{url_for('view_answer')}}" method="POST">
+                <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+                {% for item in values %}
+                    {% if loop.index == 1 %}
+                        <h3 class="h3-blue">{{ item }}</h3>
+                    {% elif loop.index == 2 %}
+                        <h3 class="h3-red pun-word-count">{{ item }}</h3>
+                    {% endif %}
+                {% endfor %}
+                <h5 class="pun-key-prompt">Press any key ~</h5>
+            </form>
+        </section>
+        {% include "_pun_progress.html" %}
+    </main>
 
     <script>
         function handleFormSubmission(event) {

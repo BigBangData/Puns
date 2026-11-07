@@ -1,8 +1,8 @@
 local.env
 .venv/
-extra
-instance
-logs
-static/files
-migrate
+extra/
+instance/
+logs/
+static/files/
+migrate/
 __pycache__/

@@ -72,6 +72,7 @@ Below are some behaviors of the frontend:
   + goes through puns in order for every user
   + shows only question and word count so user can try to guess
   + shows progress and lets users jump to a pun by number, using clickable tiles on desktop or a number picker on mobile
+  + jumping to a pun plays it as a one-off and does not change ordered-game progress
   + presents an intro before the first pun and a completion screen after the last
   + lets the user intentionally restart the pun cycle from the completion screen
   + any key redirects to `view_answer`
@@ -81,6 +82,8 @@ Below are some behaviors of the frontend:
   + user must click on one of six "emoji buttons" to rate the pun
   + feedback get recorded in the backend table `ratings`, and triggers new `play`
   + new `play` might or might not throw animal confetti depending on mysterious rules
+
+The ordered progress tracker is stored separately from pun ratings. Existing deployments should apply [`migrate/create_user_progress.sql`](./migrate/create_user_progress.sql) once before running this version; existing ordered progress is initialized from each user's latest rating when they next visit Play.
 
 <p align="center">
   <img src="static/img/confetti.gif" width="582" height="308"/>
