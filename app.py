@@ -348,8 +348,9 @@ pun_factor_dict = {
     'panic': '\U0001FAE8'
 }
 
-CONFETTI_MIN_GAP = 8
-CONFETTI_MAX_GAP = 22
+CONFETTI_MIN_GAP = 2
+CONFETTI_MAX_GAP = 10
+CONFETTI_GAP_WEIGHTS = (4, 2, 3, 4, 3, 2, 1, 1, 1)
 CONFETTI_SEED = 2025
 
 animal_dict = {
@@ -379,7 +380,11 @@ def build_confetti_schedule(max_total_votes):
     previous_animal = None
 
     while next_vote <= max_total_votes:
-        gap = rng.randint(CONFETTI_MIN_GAP, CONFETTI_MAX_GAP)
+        gap = rng.choices(
+            range(CONFETTI_MIN_GAP, CONFETTI_MAX_GAP + 1),
+            weights=CONFETTI_GAP_WEIGHTS,
+            k=1
+        )[0]
         next_vote += gap
         animal_pool = list(animal_dict.keys())
         if previous_animal is not None:

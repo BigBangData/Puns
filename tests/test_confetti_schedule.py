@@ -1,4 +1,5 @@
 import os
+import statistics
 
 os.environ.setdefault('DATABASE_URL', 'sqlite:///:memory:')
 os.environ.setdefault('SECRET_KEY', 'test-secret')
@@ -13,21 +14,25 @@ from app import (
 
 
 def test_confetti_schedule_has_guardrails():
-    schedule = build_confetti_schedule(5000)
+    schedule = build_confetti_schedule(10000)
     events = sorted(schedule.items())
 
     assert events
     assert len(events) > 150
 
-    previous_vote = None
+    gaps = [events[0][0]]
+    gaps.extend(
+        vote - previous_vote
+        for (previous_vote, _), (vote, _) in zip(events, events[1:])
+    )
     previous_animal = None
     for vote, animal in events:
-        if previous_vote is not None:
-            gap = vote - previous_vote
-            assert CONFETTI_MIN_GAP <= gap <= CONFETTI_MAX_GAP
-            assert animal != previous_animal
-        previous_vote = vote
+        assert animal != previous_animal
         previous_animal = animal
+
+    assert min(gaps) == CONFETTI_MIN_GAP
+    assert max(gaps) == CONFETTI_MAX_GAP
+    assert abs(statistics.mean(gaps) - 5) < 0.15
 
 
 def test_confetti_go_list_handles_long_sequence_without_repeats():
@@ -52,7 +57,11 @@ def test_confetti_go_list_handles_long_sequence_without_repeats():
             observed_events.append((total_votes, animal))
 
     assert observed_events
-    gaps = [next_vote - vote for (vote, _), (next_vote, _) in zip(observed_events, observed_events[1:])]
+    gaps = [observed_events[0][0]]
+    gaps.extend(
+        next_vote - vote
+        for (vote, _), (next_vote, _) in zip(observed_events, observed_events[1:])
+    )
     assert min(gaps) >= CONFETTI_MIN_GAP
     assert max(gaps) <= CONFETTI_MAX_GAP
 
