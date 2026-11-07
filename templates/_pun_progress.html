@@ -12,7 +12,7 @@
     >{{ progress_percent }}%</span>
     <form class="pun-progress-picker" action="{{ url_for('jump_to_pun') }}" method="POST">
         <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
-        <div class="pun-progress-grid" role="group" aria-label="Jump to a pun by number">
+        <div class="pun-progress-grid" role="group" aria-label="Choose a pun to play">
             {% for pun_id in pun_ids %}
                 <button
                     class="pun-progress-square{% if pun_id in completed_pun_ids %} completed{% endif %}{% if pun_id == current_pun_id %} current{% endif %}"
@@ -20,15 +20,16 @@
                     name="pun_id"
                     value="{{ pun_id }}"
                     data-pun-id="{{ pun_id }}"
-                    aria-label="Jump to pun {{ pun_id }}"
+                    aria-label="Choose pun {{ pun_id }}"
                     title="Pun {{ pun_id }}"
                     {% if pun_id == current_pun_id %}aria-current="true"{% endif %}
+                    {% if finished %}disabled{% endif %}
                 >{{ pun_id }}</button>
             {% endfor %}
         </div>
         {% if pun_ids %}
             <div class="pun-progress-number-picker">
-                <label class="visually-hidden" for="pun-number">Jump to pun number</label>
+                <label class="visually-hidden" for="pun-number">Choose pun number</label>
                 <input
                     id="pun-number"
                     name="pun_number"
@@ -38,8 +39,9 @@
                     max="{{ pun_ids[-1] }}"
                     step="1"
                     placeholder="#"
+                    {% if finished %}disabled{% endif %}
                 >
-                <button type="submit">Go</button>
+                <button type="submit" {% if finished %}disabled{% endif %}>Go</button>
             </div>
         {% endif %}
     </form>

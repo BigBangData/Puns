@@ -69,21 +69,21 @@ Below are some behaviors of the frontend:
 - __play__:
   + goal of `signup` and `login`
   + when logged in, `signup` or `login` will redirect to `play`
-  + goes through puns in order for every user
   + shows only question and word count so user can try to guess
-  + shows progress and lets users jump to a pun by number, using clickable tiles on desktop or a number picker on mobile
-  + jumping to a pun plays it as a one-off and does not change ordered-game progress
-  + presents an intro before the first pun and a completion screen after the last
-  + lets the user intentionally restart the pun cycle from the completion screen
+  + requires users to choose each pun from the grid before playing it, using clickable tiles on desktop or a number picker on mobile
+  + marks a pun complete when its answer is revealed; rating it does not affect grid progress
+  + returns to the grid after rating, where the user selects the next pun
+  + presents a restart screen after every pun has been selected
+  + lets the user reset the grid from the completion screen
   + any key redirects to `view_answer`
-  + persist puns asked beyond single session so user can come back where she left off
+  + persists completed puns beyond a single session
 - __view answer__:
   + reveals answer and pun
   + user must click on one of six "emoji buttons" to rate the pun
   + feedback get recorded in the backend table `ratings`, and triggers new `play`
   + new `play` might or might not throw animal confetti depending on mysterious rules
 
-The ordered progress tracker is stored separately from pun ratings. Existing deployments should apply [`migrate/create_user_progress.sql`](./migrate/create_user_progress.sql) once before running this version; existing ordered progress is initialized from each user's latest rating when they next visit Play.
+Grid completion is stored separately from pun ratings. Existing deployments should apply [`migrate/create_user_pun_completion.sql`](./migrate/create_user_pun_completion.sql) once before running this version. The new grid cycle starts with no puns marked complete.
 
 <p align="center">
   <img src="static/img/confetti.gif" width="582" height="308"/>

@@ -5,7 +5,6 @@
 {% endblock %}
 {% block content %}
     {% if intro %}
-        {% include "_pun_progress.html" %}
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for msg in messages %}
@@ -13,18 +12,23 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        <main class="pun-intro">
-            {% if finished %}
-                <h2>You've reached the pun-ultimate!</h2>
-                <p>Want to start the pun cycle all over again?</p>
-            {% else %}
-                <h2>Ready to pun-ch in?</h2>
-                <p>Your next laugh is just a pun away.</p>
-            {% endif %}
-            <form action="{{ url_for('start_game') }}" method="POST">
-                <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
-                <button class="start-game-button" type="submit">Click to play a pun game</button>
-            </form>
+        <main class="pun-game-layout">
+            <section class="pun-game-content">
+                <div class="pun-intro">
+                    {% if finished %}
+                        <h2>You've reached the pun-ultimate!</h2>
+                        <p>Want to start the grid all over again?</p>
+                        <form action="{{ url_for('start_game') }}" method="POST">
+                            <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+                            <button class="start-game-button" type="submit">Start over</button>
+                        </form>
+                    {% else %}
+                        <h2>Choose a pun to play</h2>
+                        <p>Select a number from the grid.</p>
+                    {% endif %}
+                </div>
+            </section>
+            {% include "_pun_progress.html" %}
         </main>
     {% else %}
     <style>

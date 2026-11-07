@@ -124,10 +124,11 @@ class Ratings(db.Model):
         db.session.add(new_rating)
         db.session.commit()
 
-class UserProgress(db.Model):
-    """Tracks ordered-game progress independently from ratings on selected puns."""
+class UserPunCompletion(db.Model):
+    """Tracks the puns whose answers a user has seen during the current cycle."""
+    __tablename__ = 'user_pun_completion'
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    pun_id = db.Column(db.Integer, nullable=False, default=0)
+    pun_id = db.Column(db.Integer, db.ForeignKey('puns.id'), primary_key=True)
 
 ## Authentication for Signup and Login
 
@@ -292,86 +293,49 @@ def logout():
     return redirect(url_for('login'))
 
 # Helper funcs for Play
-def get_user_latest_pun_id():
-    """Return ordered progress, initializing it from pre-existing ratings once."""
-    progress = UserProgress.query.filter_by(user_id=current_user.id).first()
-    if progress is None:
-        last_rating = (
-            db.session.query(Ratings)
-                .filter_by(user_id=current_user.id)
-                .order_by(Ratings.id.desc())
-                .first()
-        )
-        last_pun_id = last_rating.pun_id if last_rating else 0
-        progress = UserProgress(user_id=current_user.id, pun_id=last_pun_id)
-        db.session.add(progress)
-        db.session.commit()
-        logging.info(f"Initialized ordered progress for {current_user}: {last_pun_id}")
-    return progress.pun_id
-
-def set_user_latest_pun_id(pun_id):
-    """Update ordered progress after rating a pun in the ordered game."""
-    progress = UserProgress.query.filter_by(user_id=current_user.id).first()
-    if progress is None:
-        get_user_latest_pun_id()
-        progress = UserProgress.query.filter_by(user_id=current_user.id).first()
-    progress.pun_id = pun_id
-    db.session.commit()
-
 def get_pun_progress():
-    """Return rounded progress and the pun IDs completed in the current run."""
+    """Return rounded progress and the completed pun IDs in the current cycle."""
     pun_ids = [
         pun_id for (pun_id,) in db.session.query(Puns.id).order_by(Puns.id).all()
     ]
     pun_total = len(pun_ids)
-    latest_pun_id = get_user_latest_pun_id()
-    if pun_ids and latest_pun_id >= pun_ids[-1]:
-        completed_pun_ids = []
-    else:
-        completed_pun_ids = [
-            pun_id for pun_id in pun_ids if pun_id <= latest_pun_id
-        ]
+    available_pun_ids = set(pun_ids)
+    selected_pun_ids = (
+        db.session.query(UserPunCompletion.pun_id)
+        .filter_by(user_id=current_user.id)
+        .order_by(UserPunCompletion.pun_id)
+        .all()
+    )
+    completed_pun_ids = [
+        pun_id for (pun_id,) in selected_pun_ids if pun_id in available_pun_ids
+    ]
     percentage = round(len(completed_pun_ids) / pun_total * 100) if pun_total else 0
     return percentage, pun_ids, completed_pun_ids
 
-def get_next_pun():
-    """Gets the next pun."""
-    if 'pun_id' not in session:
-        # get users' latest pun_id
-        # 0 if user hasn't answered yet
-        if session.pop('start_new_game', False):
-            latest_pun_id = 0
-        elif current_user.is_authenticated:
-            latest_pun_id = get_user_latest_pun_id()
-        else:
-            latest_pun_id = 0
-        # get next pun
-        next_pun_id = latest_pun_id + 1
-        logging.info(f"Next pun id: {next_pun_id}")
-        # use filter query to get the pun row
-        pun = Puns.query.filter_by(id=next_pun_id).first()
-        # 'None' when next pun_id isn't in the puns table
-        if pun is None:
-            logging.info(f"User {current_user} answered all puns.")
-            # No more puns for the user, start back at first pun
-            pun = Puns.query.filter_by(id=1).first()
-        # get pun id, question, answer from pun object
-        pun_id = pun.id
-        question = f"{pun.question}?"
-        answer = pun.answer
-        blame = pun.blame
-        # persist for single answer
-        session['pun_id'] = pun_id
-        session['question'] = question
-        session['answer'] = answer
-        session['blame'] = blame
-        #logging.info(f"{session}")
-    else:
-        pun_id = session['pun_id']
-        question = session['question']
-        answer = session['answer']
-        blame = session['blame']
-    return pun_id, question, answer, blame
+def mark_pun_completed(pun_id):
+    """Record that the user revealed this pun's answer in the current cycle."""
+    completion = UserPunCompletion.query.filter_by(
+        user_id=current_user.id,
+        pun_id=pun_id,
+    ).first()
+    if completion is None:
+        db.session.add(UserPunCompletion(user_id=current_user.id, pun_id=pun_id))
+        db.session.commit()
+
+def reset_pun_progress():
+    UserPunCompletion.query.filter_by(user_id=current_user.id).delete(
+        synchronize_session=False
+    )
+    db.session.commit()
+
+def get_selected_pun():
+    """Return the pun currently selected for this session."""
+    return (
+        session['pun_id'],
+        session['question'],
+        session['answer'],
+        session.get('blame'),
+    )
 
 pun_factor_dict = {
     'no': '\U0001F636',
@@ -464,29 +428,20 @@ def query_voting_stats():
 @app.route('/play', methods=["POST", "GET"])
 @login_required
 def play():
-    """Delivers pun question.
-    Uses get_next_pun(), which checks for session data.
-    Session pun data is cleared when either:
-        1. Users login, or
-        2. Users answer a question ("POST" method below)
-    """
+    """Show the selected pun or let the user choose from the progress grid."""
     if request.method == "POST":
         if 'pun_id' not in session:
             return redirect(url_for('play'))
         # get rating
         rating = request.form.get("feedback")
         logging.info(f"Received rating: {rating}")
-        # get current session data
-        pun_id, question, answer, _ = get_next_pun()
         user_id = current_user.id
         # store known 'rating' data in Ratings table
         Ratings.store_ratings(
             user_id=user_id
-            , pun_id=pun_id
+            , pun_id=session['pun_id']
             , rating=rating
         )
-        if session.get('pun_selection_mode') != 'random':
-            set_user_latest_pun_id(pun_id)
         session.pop('pun_selection_mode', None)
         # clear session pun data
         session.pop('pun_id', None)
@@ -496,26 +451,21 @@ def play():
         # reload page for GET method
         return redirect(url_for('play'))
     else:
-        pun_total = Puns.query.count()
-        latest_pun_id = get_user_latest_pun_id()
-        if (
-            'pun_id' not in session
-            and not session.get('start_new_game')
-            and (latest_pun_id == 0 or latest_pun_id >= pun_total)
-        ):
-            progress_percent, pun_ids, completed_pun_ids = get_pun_progress()
+        progress_percent, pun_ids, completed_pun_ids = get_pun_progress()
+        if 'pun_id' not in session:
+            finished = bool(pun_ids) and len(completed_pun_ids) == len(pun_ids)
             return render_template(
                 'play.html',
                 intro=True,
-                finished=latest_pun_id >= pun_total and latest_pun_id > 0,
+                finished=finished,
                 progress_percent=progress_percent,
                 pun_ids=pun_ids,
                 completed_pun_ids=completed_pun_ids,
                 current_pun_id=None
             )
 
-        # GET: get next pun question and answer
-        _, question, answer, blame = get_next_pun()
+        # GET: show the pun selected from the grid
+        _, question, answer, blame = get_selected_pun()
         num_words = len(answer.split(" "))
         if num_words == 1:
             num_words_msg = f"[{num_words} word]"
@@ -530,7 +480,6 @@ def play():
         # get go nogo for each animal
         go_list = get_confetti_go_list(tot_votes=tot_votes, animal_dict=animal_dict)
         drag_go, unic_go, owls_go, zebr_go, lady_go, jell_go, axol_go = go_list
-        progress_percent, pun_ids, completed_pun_ids = get_pun_progress()
         # return play
         return render_template(
             'play.html'
@@ -561,27 +510,37 @@ def jump_to_pun():
         flash("Please choose an available pun number.", "warning")
         return redirect(url_for('play'))
 
+    _, pun_ids, completed_pun_ids = get_pun_progress()
+    if (
+        'pun_id' not in session
+        and pun_ids
+        and len(completed_pun_ids) == len(pun_ids)
+    ):
+        return redirect(url_for('play'))
+
     for key in ('pun_id', 'question', 'answer', 'blame', 'start_new_game'):
         session.pop(key, None)
     session['pun_id'] = pun.id
     session['question'] = f"{pun.question}?"
     session['answer'] = pun.answer
     session['blame'] = pun.blame
-    session['pun_selection_mode'] = 'random'
     return redirect(url_for('play'))
 
-# Start or restart a run after the intro screen.
+# Restart the grid after all puns have been selected.
 @app.route('/start', methods=["POST"])
 @login_required
 def start_game():
-    pun_total = Puns.query.count()
-    latest_pun_id = get_user_latest_pun_id()
-    if latest_pun_id not in (0, pun_total):
+    _, pun_ids, completed_pun_ids = get_pun_progress()
+    if (
+        'pun_id' in session
+        or not pun_ids
+        or len(completed_pun_ids) != len(pun_ids)
+    ):
         return redirect(url_for('play'))
 
-    for key in ('pun_id', 'question', 'answer', 'blame', 'pun_selection_mode'):
+    reset_pun_progress()
+    for key in ('pun_id', 'question', 'answer', 'blame', 'pun_selection_mode', 'start_new_game'):
         session.pop(key, None)
-    session['start_new_game'] = True
     return redirect(url_for('play'))
 
 # View Answer
@@ -589,13 +548,14 @@ def start_game():
 @login_required
 def view_answer():
     """Delivers pun answer and results.
-    Uses get_next_pun(), which checks for session data.
+    Uses the pun selected in the current session.
     """
     if request.method == "POST":
         if 'pun_id' not in session:
             return redirect(url_for('play'))
         # get session data
-        _, question, answer, blame = get_next_pun()
+        pun_id, question, answer, blame = get_selected_pun()
+        mark_pun_completed(pun_id)
         if blame:
             blame = f"~ blame {blame}"
         values = [question, answer, blame]
