@@ -187,19 +187,21 @@ footer {
     align-self: center;
 }
 .pun-game-layout .pun-progress-grid {
-    grid-template-columns: repeat(auto-fill, 18px);
-    grid-auto-rows: 18px;
+    --pun-progress-square-size: clamp(20px, 3.3vh, 24px);
+    grid-template-columns: repeat(15, var(--pun-progress-square-size));
+    grid-auto-rows: var(--pun-progress-square-size);
     gap: 2px;
     justify-content: start;
-    width: 100%;
+    width: max-content;
+    max-width: 100%;
     max-height: none;
     overflow: visible;
     box-sizing: border-box;
 }
 .pun-game-layout .pun-progress-square {
-    width: 18px;
-    height: 18px;
-    font-size: 0.55rem;
+    width: var(--pun-progress-square-size);
+    height: var(--pun-progress-square-size);
+    font-size: clamp(0.65rem, calc(var(--pun-progress-square-size) * 0.5), 0.75rem);
 }
 .pun-intro {
     display: flex;
