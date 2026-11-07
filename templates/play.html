@@ -4,6 +4,30 @@
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
 {% endblock %}
 {% block content %}
+    {% if intro %}
+        {% include "_pun_progress.html" %}
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                {% for msg in messages %}
+                    <p><h5>{{ msg }}</h5></p>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <main class="pun-intro">
+            {% if finished %}
+                <h2>You've reached the pun-ultimate!</h2>
+                <p>Want to start the pun cycle all over again?</p>
+            {% else %}
+                <h2>Ready to pun-ch in?</h2>
+                <p>Your next laugh is just a pun away.</p>
+            {% endif %}
+            <form action="{{ url_for('start_game') }}" method="POST">
+                <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+                <button class="start-game-button" type="submit">Click to play a pun game</button>
+            </form>
+        </main>
+    {% else %}
+    {% include "_pun_progress.html" %}
     <style>
         @keyframes axolotl-confetti {
             0% {
@@ -281,4 +305,5 @@
         });
     </script>
 
+    {% endif %}
 {% endblock %}

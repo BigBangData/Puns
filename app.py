@@ -3,6 +3,7 @@ import os
 import csv
 import base64
 import logging
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MaxNLocator
@@ -255,6 +256,7 @@ def login():
                     session.pop('pun_id', None)
                     session.pop('question', None)
                     session.pop('answer', None)
+                    session.pop('start_new_game', None)
                     login_user(user_id)
                     flash(f"Hello {user_id.username}, you are logged in.", "info")
                     return redirect(url_for('play'))
@@ -301,12 +303,30 @@ def get_user_latest_pun_id():
     # return last pun_id
     return last_pun_id
 
+def get_pun_progress():
+    """Return rounded progress and the pun IDs completed in the current run."""
+    pun_ids = [
+        pun_id for (pun_id,) in db.session.query(Puns.id).order_by(Puns.id).all()
+    ]
+    pun_total = len(pun_ids)
+    latest_pun_id = get_user_latest_pun_id()
+    if pun_ids and latest_pun_id >= pun_ids[-1]:
+        completed_pun_ids = []
+    else:
+        completed_pun_ids = [
+            pun_id for pun_id in pun_ids if pun_id <= latest_pun_id
+        ]
+    percentage = round(len(completed_pun_ids) / pun_total * 100) if pun_total else 0
+    return percentage, pun_ids, completed_pun_ids
+
 def get_next_pun():
     """Gets the next pun."""
     if 'pun_id' not in session:
         # get users' latest pun_id
         # 0 if user hasn't answered yet
-        if current_user.is_authenticated:
+        if session.pop('start_new_game', False):
+            latest_pun_id = 0
+        elif current_user.is_authenticated:
             latest_pun_id = get_user_latest_pun_id()
         else:
             latest_pun_id = 0
@@ -347,26 +367,64 @@ pun_factor_dict = {
     'panic': '\U0001FAE8'
 }
 
+CONFETTI_MIN_GAP = 2
+CONFETTI_MAX_GAP = 10
+CONFETTI_GAP_WEIGHTS = (4, 2, 3, 4, 3, 2, 1, 1, 1)
+CONFETTI_SEED = 2025
+
 animal_dict = {
-    'dragon': [32, 50, 68, 88, 103, 132, 152, 176, 200, 232, 250, 268, 288]
-    , 'unicorn': [17, 35, 56, 75, 95, 116, 135, 147, 158, 175, 195, 217, 235, 256, 275]
-    , 'owl': [9, 21, 37, 54, 66, 84, 99, 106, 121, 137, 162, 171, 184, 209, 221, 237, 254, 266, 284, 299]
-    , 'zebra': [13, 28, 40, 59, 72, 90, 124, 128, 156, 166, 179, 190, 213, 228, 249, 259, 272, 290]
-    , 'ladybug': [25, 44, 61, 81, 97, 109, 125, 144, 154, 181, 197, 225, 244, 261, 281, 297]
-    , 'jellyfish': [47, 77, 100, 113, 120, 148, 164, 187, 199, 247, 277, 300]
-    , 'axolotl': [295]
+    'dragon': [],
+    'unicorn': [],
+    'owl': [],
+    'zebra': [],
+    'ladybug': [],
+    'jellyfish': [],
+    'axolotl': []
 }
+
+
+def build_confetti_schedule(max_total_votes):
+    """Build a deterministic, repeating confetti schedule with guardrails.
+
+    The schedule stays stable across refreshes by using a fixed seed, while still
+    varying the gap lengths and animal choices enough to feel unpredictable.
+    """
+    if max_total_votes is None:
+        max_total_votes = 0
+    max_total_votes = max(int(max_total_votes), 0)
+
+    schedule = {}
+    rng = random.Random(CONFETTI_SEED)
+    next_vote = 0
+    previous_animal = None
+
+    while next_vote <= max_total_votes:
+        gap = rng.choices(
+            range(CONFETTI_MIN_GAP, CONFETTI_MAX_GAP + 1),
+            weights=CONFETTI_GAP_WEIGHTS,
+            k=1
+        )[0]
+        next_vote += gap
+        animal_pool = list(animal_dict.keys())
+        if previous_animal is not None:
+            animal_pool = [animal for animal in animal_pool if animal != previous_animal]
+        animal = rng.choice(animal_pool)
+        schedule[next_vote] = animal
+        previous_animal = animal
+
+    return schedule
+
 
 # throw confetti given tot_votes which is actual votes (clicks) not based on pun_id
 def get_confetti_go_list(tot_votes, animal_dict):
-    go_list = []
-    for animal in animal_dict.keys():
-        # seq of numbers (n votes) when confetti should happen
-        animal_seq = animal_dict.get(animal)
-        # get whether animal is a go
-        animal_go = 1 if tot_votes in animal_seq else 0
-        go_list.append(animal_go)
-    return go_list
+    tot_votes = max(int(tot_votes), 0)
+    schedule = build_confetti_schedule(tot_votes)
+    active_animal = schedule.get(tot_votes)
+
+    return [
+        1 if active_animal == animal else 0
+        for animal in animal_dict.keys()
+    ]
 
 def query_voting_stats():
     # query Ratings and count user selections
@@ -398,6 +456,8 @@ def play():
         2. Users answer a question ("POST" method below)
     """
     if request.method == "POST":
+        if 'pun_id' not in session:
+            return redirect(url_for('play'))
         # get rating
         rating = request.form.get("feedback")
         logging.info(f"Received rating: {rating}")
@@ -418,6 +478,23 @@ def play():
         # reload page for GET method
         return redirect(url_for('play'))
     else:
+        pun_total = Puns.query.count()
+        latest_pun_id = get_user_latest_pun_id()
+        if (
+            'pun_id' not in session
+            and not session.get('start_new_game')
+            and (latest_pun_id == 0 or latest_pun_id >= pun_total)
+        ):
+            progress_percent, pun_ids, completed_pun_ids = get_pun_progress()
+            return render_template(
+                'play.html',
+                intro=True,
+                finished=latest_pun_id >= pun_total and latest_pun_id > 0,
+                progress_percent=progress_percent,
+                pun_ids=pun_ids,
+                completed_pun_ids=completed_pun_ids
+            )
+
         # GET: get next pun question and answer
         _, question, answer, blame = get_next_pun()
         num_words = len(answer.split(" "))
@@ -434,6 +511,7 @@ def play():
         # get go nogo for each animal
         go_list = get_confetti_go_list(tot_votes=tot_votes, animal_dict=animal_dict)
         drag_go, unic_go, owls_go, zebr_go, lady_go, jell_go, axol_go = go_list
+        progress_percent, pun_ids, completed_pun_ids = get_pun_progress()
         # return play
         return render_template(
             'play.html'
@@ -445,7 +523,25 @@ def play():
             , ladybugs_go=lady_go
             , jellyfishes_go=jell_go
             , axolotls_go=axol_go
+            , intro=False
+            , progress_percent=progress_percent
+            , pun_ids=pun_ids
+            , completed_pun_ids=completed_pun_ids
         )
+
+# Start or restart a run after the intro screen.
+@app.route('/start', methods=["POST"])
+@login_required
+def start_game():
+    pun_total = Puns.query.count()
+    latest_pun_id = get_user_latest_pun_id()
+    if latest_pun_id not in (0, pun_total):
+        return redirect(url_for('play'))
+
+    for key in ('pun_id', 'question', 'answer', 'blame'):
+        session.pop(key, None)
+    session['start_new_game'] = True
+    return redirect(url_for('play'))
 
 # View Answer
 @app.route('/view_answer', methods=["POST", "GET"])
@@ -455,16 +551,22 @@ def view_answer():
     Uses get_next_pun(), which checks for session data.
     """
     if request.method == "POST":
+        if 'pun_id' not in session:
+            return redirect(url_for('play'))
         # get session data
         _, question, answer, blame = get_next_pun()
         if blame:
             blame = f"~ blame {blame}"
         values = [question, answer, blame]
+        progress_percent, pun_ids, completed_pun_ids = get_pun_progress()
         # return view answer
         return render_template(
             'view_answer.html'
             , values=values
             , pun_factor_dict=pun_factor_dict
+            , progress_percent=progress_percent
+            , pun_ids=pun_ids
+            , completed_pun_ids=completed_pun_ids
         )
     else:
         return redirect(url_for('play'))

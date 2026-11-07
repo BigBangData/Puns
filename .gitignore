@@ -5,3 +5,4 @@ instance
 logs
 static/files
 migrate
+__pycache__/
