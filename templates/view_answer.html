@@ -13,7 +13,12 @@
         <section class="pun-game-content">
             {% for item in values %}
                 {% if loop.index == 1 %}
-                    <h3 class="h3-blue">{{ item }}</h3>
+                    <h3 class="h3-blue">
+                        {% if current_pun_id is not none %}
+                            <span class="pun-number" aria-label="Question number {{ current_pun_id }}">{{ current_pun_id }}.</span>
+                        {% endif %}
+                        {{ item }}
+                    </h3>
                 {% elif loop.index == 2 %}
                     <h3 class="h3-red pun-answer">{{ item }}</h3>
                 {% else %}

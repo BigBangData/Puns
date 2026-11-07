@@ -49,15 +49,18 @@ def test_intro_progress_and_completion_restart_cycle(logged_in_client):
 
     first_pun = client.post('/start', follow_redirects=True)
     assert b'First pun' in first_pun.data
+    assert first_pun.data.index(b'>1.</span>') < first_pun.data.index(b'First pun')
     assert b'aria-valuenow="0"' in first_pun.data
     assert b'data-pun-id="1"' in first_pun.data
 
     answer = client.post('/view_answer')
     assert b'First answer' in answer.data
+    assert answer.data.index(b'>1.</span>') < answer.data.index(b'First pun')
     assert b'aria-valuenow="0"' in answer.data
 
     second_pun = rate_current_pun(client)
     assert b'Second pun' in second_pun.data
+    assert second_pun.data.index(b'>2.</span>') < second_pun.data.index(b'Second pun')
     assert b'aria-valuenow="50"' in second_pun.data
     assert second_pun.data.count(b'pun-progress-square completed') == 1
     assert b'data-pun-id="1"' in second_pun.data
@@ -93,11 +96,13 @@ def test_jump_to_pun_by_number(logged_in_client):
     response = logged_in_client.post('/jump', data={'pun_id': '2'}, follow_redirects=True)
 
     assert b'Second pun' in response.data
+    assert response.data.index(b'>2.</span>') < response.data.index(b'Second pun')
     assert b'data-pun-id="2"' in response.data
     assert b'aria-current="true"' in response.data
 
     answer = logged_in_client.post('/view_answer')
     assert b'Second answer' in answer.data
+    assert answer.data.index(b'>2.</span>') < answer.data.index(b'Second pun')
 
     number_picker_response = logged_in_client.post(
         '/jump',

@@ -269,7 +269,12 @@
                 <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
                 {% for item in values %}
                     {% if loop.index == 1 %}
-                        <h3 class="h3-blue">{{ item }}</h3>
+                        <h3 class="h3-blue">
+                            {% if current_pun_id is not none %}
+                                <span class="pun-number" aria-label="Question number {{ current_pun_id }}">{{ current_pun_id }}.</span>
+                            {% endif %}
+                            {{ item }}
+                        </h3>
                     {% elif loop.index == 2 %}
                         <h3 class="h3-red pun-word-count">{{ item }}</h3>
                     {% endif %}

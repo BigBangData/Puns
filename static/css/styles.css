@@ -159,6 +159,10 @@ footer {
     margin: 0 0 1.25rem;
     overflow-wrap: anywhere;
 }
+.pun-number {
+    margin-right: 0.5rem;
+    white-space: nowrap;
+}
 .pun-word-count {
     font-size: 1rem;
 }
