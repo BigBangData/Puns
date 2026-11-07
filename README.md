@@ -71,9 +71,11 @@ Below are some behaviors of the frontend:
   + when logged in, `signup` or `login` will redirect to `play`
   + goes through puns in order for every user
   + shows only question and word count so user can try to guess
+  + shows a percentage and three-column grid of individual completed-pun squares
+  + presents an intro before the first pun and a completion screen after the last
+  + lets the user intentionally restart the pun cycle from the completion screen
   + any key redirects to `view_answer`
   + persist puns asked beyond single session so user can come back where she left off
-  + starts over when all puns have been shown
 - __view answer__:
   + reveals answer and pun
   + user must click on one of six "emoji buttons" to rate the pun

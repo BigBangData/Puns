@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}View Answer{% endblock %}
 {% block content %}
+    {% include "_pun_progress.html" %}
     <!-- flash messages before content -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}

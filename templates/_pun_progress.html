@@ -1,0 +1,18 @@
+<aside
+    class="pun-progress"
+    role="progressbar"
+    aria-label="Pun game progress"
+    aria-valuemin="0"
+    aria-valuemax="100"
+    aria-valuenow="{{ progress_percent }}"
+>
+    <span class="pun-progress-percent">{{ progress_percent }}%</span>
+    <span class="pun-progress-grid" aria-hidden="true">
+        {% for pun_id in pun_ids %}
+            <span
+                class="pun-progress-square{% if pun_id in completed_pun_ids %} completed{% endif %}"
+                data-pun-id="{{ pun_id }}"
+            ></span>
+        {% endfor %}
+    </span>
+</aside>

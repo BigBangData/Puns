@@ -256,6 +256,7 @@ def login():
                     session.pop('pun_id', None)
                     session.pop('question', None)
                     session.pop('answer', None)
+                    session.pop('start_new_game', None)
                     login_user(user_id)
                     flash(f"Hello {user_id.username}, you are logged in.", "info")
                     return redirect(url_for('play'))
@@ -302,12 +303,30 @@ def get_user_latest_pun_id():
     # return last pun_id
     return last_pun_id
 
+def get_pun_progress():
+    """Return rounded progress and the pun IDs completed in the current run."""
+    pun_ids = [
+        pun_id for (pun_id,) in db.session.query(Puns.id).order_by(Puns.id).all()
+    ]
+    pun_total = len(pun_ids)
+    latest_pun_id = get_user_latest_pun_id()
+    if pun_ids and latest_pun_id >= pun_ids[-1]:
+        completed_pun_ids = []
+    else:
+        completed_pun_ids = [
+            pun_id for pun_id in pun_ids if pun_id <= latest_pun_id
+        ]
+    percentage = round(len(completed_pun_ids) / pun_total * 100) if pun_total else 0
+    return percentage, pun_ids, completed_pun_ids
+
 def get_next_pun():
     """Gets the next pun."""
     if 'pun_id' not in session:
         # get users' latest pun_id
         # 0 if user hasn't answered yet
-        if current_user.is_authenticated:
+        if session.pop('start_new_game', False):
+            latest_pun_id = 0
+        elif current_user.is_authenticated:
             latest_pun_id = get_user_latest_pun_id()
         else:
             latest_pun_id = 0
@@ -437,6 +456,8 @@ def play():
         2. Users answer a question ("POST" method below)
     """
     if request.method == "POST":
+        if 'pun_id' not in session:
+            return redirect(url_for('play'))
         # get rating
         rating = request.form.get("feedback")
         logging.info(f"Received rating: {rating}")
@@ -457,6 +478,23 @@ def play():
         # reload page for GET method
         return redirect(url_for('play'))
     else:
+        pun_total = Puns.query.count()
+        latest_pun_id = get_user_latest_pun_id()
+        if (
+            'pun_id' not in session
+            and not session.get('start_new_game')
+            and (latest_pun_id == 0 or latest_pun_id >= pun_total)
+        ):
+            progress_percent, pun_ids, completed_pun_ids = get_pun_progress()
+            return render_template(
+                'play.html',
+                intro=True,
+                finished=latest_pun_id >= pun_total and latest_pun_id > 0,
+                progress_percent=progress_percent,
+                pun_ids=pun_ids,
+                completed_pun_ids=completed_pun_ids
+            )
+
         # GET: get next pun question and answer
         _, question, answer, blame = get_next_pun()
         num_words = len(answer.split(" "))
@@ -473,6 +511,7 @@ def play():
         # get go nogo for each animal
         go_list = get_confetti_go_list(tot_votes=tot_votes, animal_dict=animal_dict)
         drag_go, unic_go, owls_go, zebr_go, lady_go, jell_go, axol_go = go_list
+        progress_percent, pun_ids, completed_pun_ids = get_pun_progress()
         # return play
         return render_template(
             'play.html'
@@ -484,7 +523,25 @@ def play():
             , ladybugs_go=lady_go
             , jellyfishes_go=jell_go
             , axolotls_go=axol_go
+            , intro=False
+            , progress_percent=progress_percent
+            , pun_ids=pun_ids
+            , completed_pun_ids=completed_pun_ids
         )
+
+# Start or restart a run after the intro screen.
+@app.route('/start', methods=["POST"])
+@login_required
+def start_game():
+    pun_total = Puns.query.count()
+    latest_pun_id = get_user_latest_pun_id()
+    if latest_pun_id not in (0, pun_total):
+        return redirect(url_for('play'))
+
+    for key in ('pun_id', 'question', 'answer', 'blame'):
+        session.pop(key, None)
+    session['start_new_game'] = True
+    return redirect(url_for('play'))
 
 # View Answer
 @app.route('/view_answer', methods=["POST", "GET"])
@@ -494,16 +551,22 @@ def view_answer():
     Uses get_next_pun(), which checks for session data.
     """
     if request.method == "POST":
+        if 'pun_id' not in session:
+            return redirect(url_for('play'))
         # get session data
         _, question, answer, blame = get_next_pun()
         if blame:
             blame = f"~ blame {blame}"
         values = [question, answer, blame]
+        progress_percent, pun_ids, completed_pun_ids = get_pun_progress()
         # return view answer
         return render_template(
             'view_answer.html'
             , values=values
             , pun_factor_dict=pun_factor_dict
+            , progress_percent=progress_percent
+            , pun_ids=pun_ids
+            , completed_pun_ids=completed_pun_ids
         )
     else:
         return redirect(url_for('play'))
