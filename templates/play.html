@@ -17,7 +17,6 @@
                 <div class="pun-intro">
                     {% if finished %}
                         <h2>You've reached the pun-ultimate!</h2>
-                        <p>Want to start the grid all over again?</p>
                         <form action="{{ url_for('start_game') }}" method="POST">
                             <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
                             <button class="start-game-button" type="submit">Start over</button>

@@ -176,6 +176,9 @@ footer {
     margin: 1.5rem 0;
     color: #c3c9ce;
 }
+.csrf-error p {
+    color: #c3c9ce;
+}
 .pun-key-prompt {
     margin: 2rem 0 0;
 }
