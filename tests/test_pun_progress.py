@@ -5,7 +5,7 @@ os.environ.setdefault('SECRET_KEY', 'test-secret')
 
 import pytest
 
-from app import Puns, User, app, db, hash_password
+from app import Puns, Ratings, User, app, build_confetti_schedule, db, hash_password
 
 
 @pytest.fixture
@@ -64,8 +64,10 @@ def test_selection_progress_completion_and_restart_cycle(logged_in_client):
     assert answer.data.count(b'pun-progress-square completed') == 1
 
     chooser = rate_current_pun(client)
-    assert b'Choose a pun to play' in chooser.data
+    assert b'Play Puns' not in chooser.data
+    assert b'Choose a pun to play by clicking the grid.' not in chooser.data
     assert b'Second pun' not in chooser.data
+    assert b'pun-grid-only' in chooser.data
     assert b'aria-valuenow="50"' in chooser.data
     assert chooser.data.count(b'pun-progress-square completed') == 1
 
@@ -137,6 +139,56 @@ def test_jump_rejects_unknown_pun_number(logged_in_client):
 
     assert b'Please choose an available pun number.' in response.data
     assert b'Choose a pun to play' in response.data
+
+
+def test_jump_rejects_non_integer_pun_number(logged_in_client):
+    response = logged_in_client.post(
+        '/jump', data={'pun_number': '1.5'}, follow_redirects=True
+    )
+
+    assert b'Please choose an available pun number.' in response.data
+    assert b'First pun' not in response.data
+
+
+def test_jump_rejects_missing_pun_id_within_number_range(logged_in_client):
+    with app.app_context():
+        db.session.add(Puns(id=4, question='Fourth pun', answer='Fourth answer'))
+        db.session.commit()
+
+    response = logged_in_client.post(
+        '/jump', data={'pun_number': '3'}, follow_redirects=True
+    )
+
+    assert b'Please choose an available pun number.' in response.data
+    assert b'Fourth pun' not in response.data
+
+
+def test_confetti_only_appears_once_after_rating(logged_in_client):
+    event_vote = min(build_confetti_schedule(100))
+    with app.app_context():
+        user = User.query.filter_by(username='progress-user').first()
+        db.session.add_all([
+            Ratings(user_id=user.id, pun_id=1, rating='no')
+            for _ in range(event_vote - 1)
+        ])
+        db.session.commit()
+
+    client = logged_in_client
+    selected_pun = client.post('/jump', data={'pun_id': '1'}, follow_redirects=True)
+    assert b'function shootDragons' not in selected_pun.data
+
+    client.post('/view_answer')
+    rated_pun = rate_current_pun(client)
+    assert b'pun-grid-only' in rated_pun.data
+    assert b'function shootDragons' in rated_pun.data
+
+    refreshed_grid = client.get('/play')
+    assert b'function shootDragons' not in refreshed_grid.data
+
+    selected_next_pun = client.post(
+        '/jump', data={'pun_id': '2'}, follow_redirects=True
+    )
+    assert b'function shootDragons' not in selected_next_pun.data
 
 
 def test_reselecting_a_pun_does_not_inflate_progress(logged_in_client):

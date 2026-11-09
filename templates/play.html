@@ -15,21 +15,24 @@
         <main class="pun-game-layout">
             <section class="pun-game-content">
                 <div class="pun-intro">
-                    {% if finished %}
-                        <h2>You've reached the pun-ultimate!</h2>
-                        <form action="{{ url_for('start_game') }}" method="POST">
-                            <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
-                            <button class="start-game-button" type="submit">Start over</button>
-                        </form>
-                    {% else %}
-                        <h2>Choose a pun to play</h2>
-                        <p>Select a number from the grid.</p>
-                    {% endif %}
+                    <h2>Play Puns</h2>
+                    <p>Choose a pun to play by clicking the grid.</p>
+                    <p>Rate the puns for an extra surprise now and then (optional).</p>
+                    <h3 class="pun-rating-title">Pun rating</h3>
+                    <dl class="pun-rating-guide">
+                        <div><dt>no</dt><dd>You do not believe this is a pun; you do not agree.</dd></div>
+                        <div><dt>wut</dt><dd>You do not understand; you are confused.</dd></div>
+                        <div><dt>sigh</dt><dd>The first proper response to an actual pun.</dd></div>
+                        <div><dt>eyeroll</dt><dd>The most proper response to a pun.</dd></div>
+                        <div><dt>groan</dt><dd>The pun is so good it's starting to be bad again.</dd></div>
+                        <div><dt>panic</dt><dd>The pun broke your brain and you're now in pain.</dd></div>
+                    </dl>
                 </div>
             </section>
             {% include "_pun_progress.html" %}
         </main>
     {% else %}
+    {% if confetti_triggered %}
     <style>
         @keyframes axolotl-confetti {
             0% {
@@ -256,6 +259,7 @@
         setTimeout(shootAxolotls, 0);
     }
     </script>
+    {% endif %}
 
     <!-- flash messages before content -->
     {% with messages = get_flashed_messages() %}
@@ -266,7 +270,8 @@
         {% endif %}
     {% endwith %}
 
-    <main class="pun-game-layout">
+    <main class="pun-game-layout{% if current_pun_id is none %} pun-grid-only{% endif %}">
+        {% if current_pun_id is not none %}
         <section class="pun-game-content">
             <form id="playForm" action="{{url_for('view_answer')}}" method="POST">
                 <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
@@ -285,9 +290,21 @@
                 <h5 class="pun-key-prompt">Press any key ~</h5>
             </form>
         </section>
+        {% elif finished %}
+        <section class="pun-game-content">
+            <div class="pun-intro">
+                <h2>You've reached the pun-ultimate!</h2>
+                <form action="{{ url_for('start_game') }}" method="POST">
+                    <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+                    <button class="start-game-button" type="submit">Start over</button>
+                </form>
+            </div>
+        </section>
+        {% endif %}
         {% include "_pun_progress.html" %}
     </main>
 
+    {% if current_pun_id is not none %}
     <script>
         function handleFormSubmission(event) {
             document.getElementById('playForm').submit();
@@ -309,6 +326,7 @@
             handleFormSubmission(event);
         });
     </script>
+    {% endif %}
 
     {% endif %}
 {% endblock %}

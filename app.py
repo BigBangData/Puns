@@ -264,6 +264,7 @@ def login():
                     session.pop('answer', None)
                     session.pop('start_new_game', None)
                     session.pop('pun_selection_mode', None)
+                    session.pop('rating_confetti_pending', None)
                     login_user(user_id)
                     flash(f"Hello {user_id.username}, you are logged in.", "info")
                     return redirect(url_for('play'))
@@ -288,6 +289,7 @@ def login():
 @app.route('/logout', methods=["POST", "GET"])
 @login_required
 def logout():
+    session.pop('rating_confetti_pending', None)
     logout_user()
     flash("You've logged out.", "info")
     return redirect(url_for('login'))
@@ -434,6 +436,9 @@ def play():
             return redirect(url_for('play'))
         # get rating
         rating = request.form.get("feedback")
+        if rating not in pun_factor_dict:
+            flash("Please choose a rating for this pun.", "warning")
+            return redirect(url_for('view_answer'))
         logging.info(f"Received rating: {rating}")
         user_id = current_user.id
         # store known 'rating' data in Ratings table
@@ -442,6 +447,7 @@ def play():
             , pun_id=session['pun_id']
             , rating=rating
         )
+        session['rating_confetti_pending'] = True
         session.pop('pun_selection_mode', None)
         # clear session pun data
         session.pop('pun_id', None)
@@ -451,13 +457,28 @@ def play():
         # reload page for GET method
         return redirect(url_for('play'))
     else:
+        rating_confetti_pending = session.pop('rating_confetti_pending', False)
         progress_percent, pun_ids, completed_pun_ids = get_pun_progress()
         if 'pun_id' not in session:
             finished = bool(pun_ids) and len(completed_pun_ids) == len(pun_ids)
+            intro = progress_percent == 0 and not finished
+            go_list = [0] * len(animal_dict)
+            if rating_confetti_pending:
+                total_votes = sum(votes for _, votes, _ in query_voting_stats())
+                go_list = get_confetti_go_list(total_votes, animal_dict)
+            drag_go, unic_go, owls_go, zebr_go, lady_go, jell_go, axol_go = go_list
             return render_template(
                 'play.html',
-                intro=True,
+                intro=intro,
                 finished=finished,
+                confetti_triggered=any(go_list),
+                dragons_go=drag_go,
+                unicorns_go=unic_go,
+                owls_go=owls_go,
+                zebras_go=zebr_go,
+                ladybugs_go=lady_go,
+                jellyfishes_go=jell_go,
+                axolotls_go=axol_go,
                 progress_percent=progress_percent,
                 pun_ids=pun_ids,
                 completed_pun_ids=completed_pun_ids,
@@ -471,26 +492,18 @@ def play():
             num_words_msg = f"[{num_words} word]"
         else:
             num_words_msg = f"[{num_words} words]"
-        # query voting stats
-        data = query_voting_stats()
-        # unpack votest list
-        votes_list = [item[1] for item in data]
-        # sum votes
-        tot_votes = np.sum(votes_list)
-        # get go nogo for each animal
-        go_list = get_confetti_go_list(tot_votes=tot_votes, animal_dict=animal_dict)
-        drag_go, unic_go, owls_go, zebr_go, lady_go, jell_go, axol_go = go_list
         # return play
         return render_template(
             'play.html'
             , values=[question, num_words_msg]
-            , dragons_go=drag_go
-            , unicorns_go=unic_go
-            , owls_go=owls_go
-            , zebras_go=zebr_go
-            , ladybugs_go=lady_go
-            , jellyfishes_go=jell_go
-            , axolotls_go=axol_go
+            , dragons_go=0
+            , unicorns_go=0
+            , owls_go=0
+            , zebras_go=0
+            , ladybugs_go=0
+            , jellyfishes_go=0
+            , axolotls_go=0
+            , confetti_triggered=False
             , intro=False
             , progress_percent=progress_percent
             , pun_ids=pun_ids
@@ -520,6 +533,7 @@ def jump_to_pun():
 
     for key in ('pun_id', 'question', 'answer', 'blame', 'start_new_game'):
         session.pop(key, None)
+    session.pop('rating_confetti_pending', None)
     session['pun_id'] = pun.id
     session['question'] = f"{pun.question}?"
     session['answer'] = pun.answer
@@ -541,6 +555,7 @@ def start_game():
     reset_pun_progress()
     for key in ('pun_id', 'question', 'answer', 'blame', 'pun_selection_mode', 'start_new_game'):
         session.pop(key, None)
+    session.pop('rating_confetti_pending', None)
     return redirect(url_for('play'))
 
 # View Answer
