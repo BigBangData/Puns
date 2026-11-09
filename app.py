@@ -479,6 +479,7 @@ def play():
                 ladybugs_go=lady_go,
                 jellyfishes_go=jell_go,
                 axolotls_go=axol_go,
+                pun_factor_dict=pun_factor_dict,
                 progress_percent=progress_percent,
                 pun_ids=pun_ids,
                 completed_pun_ids=completed_pun_ids,

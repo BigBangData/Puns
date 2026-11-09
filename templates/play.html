@@ -16,16 +16,24 @@
             <section class="pun-game-content">
                 <div class="pun-intro">
                     <h2>Play Puns</h2>
-                    <p>Choose a pun to play by clicking the grid.</p>
+                    <p>Choose a pun to play by clicking the grid or typing a number.</p>
                     <p>Rate the puns for an extra surprise now and then (optional).</p>
-                    <h3 class="pun-rating-title">Pun rating</h3>
+                    <h3 class="pun-rating-title">Pun Rating</h3>
                     <dl class="pun-rating-guide">
-                        <div><dt>no</dt><dd>You do not believe this is a pun; you do not agree.</dd></div>
-                        <div><dt>wut</dt><dd>You do not understand; you are confused.</dd></div>
-                        <div><dt>sigh</dt><dd>The first proper response to an actual pun.</dd></div>
-                        <div><dt>eyeroll</dt><dd>The most proper response to a pun.</dd></div>
-                        <div><dt>groan</dt><dd>The pun is so good it's starting to be bad again.</dd></div>
-                        <div><dt>panic</dt><dd>The pun broke your brain and you're now in pain.</dd></div>
+                        {% set rating_descriptions = {
+                            'no': 'You do not believe this is a pun; you do not agree.',
+                            'wut': 'You do not understand; you are confused.',
+                            'sigh': 'The first proper response to an actual pun.',
+                            'eyeroll': 'The most proper response to a pun.',
+                            'groan': "The pun is so good it's starting to be bad again.",
+                            'panic': "The pun broke your brain and you're now in pain."
+                        } %}
+                        {% for rating, emoji in pun_factor_dict.items() %}
+                            <div>
+                                <dt><span class="pun-rating-emoji">{{ emoji }}</span> {{ rating }}</dt>
+                                <dd>{{ rating_descriptions[rating] }}</dd>
+                            </div>
+                        {% endfor %}
                     </dl>
                 </div>
             </section>

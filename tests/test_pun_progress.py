@@ -5,7 +5,16 @@ os.environ.setdefault('SECRET_KEY', 'test-secret')
 
 import pytest
 
-from app import Puns, Ratings, User, app, build_confetti_schedule, db, hash_password
+from app import (
+    Puns,
+    Ratings,
+    User,
+    app,
+    build_confetti_schedule,
+    db,
+    hash_password,
+    pun_factor_dict,
+)
 
 
 @pytest.fixture
@@ -132,6 +141,21 @@ def test_jump_to_pun_by_number(logged_in_client):
     )
     assert b'First pun' in number_picker_response.data
     assert b'aria-valuenow="50"' in number_picker_response.data
+
+
+def test_rating_emojis_are_labeled_on_intro_and_rating_controls(logged_in_client):
+    intro = logged_in_client.get('/play')
+    for rating, emoji in pun_factor_dict.items():
+        assert f'<span class="pun-rating-emoji">{emoji}</span> {rating}'.encode() in intro.data
+
+    logged_in_client.post('/jump', data={'pun_id': '1'})
+    answer = logged_in_client.post('/view_answer')
+    for rating, emoji in pun_factor_dict.items():
+        emoji_markup = f'<span class="rating-button-emoji" aria-hidden="true">{emoji}</span>'.encode()
+        label_markup = f'<span class="rating-button-label">{rating}</span>'.encode()
+        assert emoji_markup in answer.data
+        assert label_markup in answer.data
+        assert answer.data.index(emoji_markup) < answer.data.index(label_markup)
 
 
 def test_jump_rejects_unknown_pun_number(logged_in_client):

@@ -41,10 +41,23 @@ th, td {
     padding: 15px;
 }
 .emoji-button {
-    font-size: 3em;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 2.8em;
+    padding: 0.1rem 0.35rem;
     background: transparent;
     border: none;
     cursor: pointer;
+}
+.rating-button-emoji {
+    font-size: 3em;
+    line-height: 1.15;
+}
+.rating-button-label {
+    color: #c3c9ce;
+    font-size: 0.85rem;
+    line-height: 1.2;
 }
 footer {
     background-color: #334352;
@@ -273,7 +286,13 @@ footer {
     min-width: 0;
 }
 .pun-rating-guide dt {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
     color: #5c9997;
+}
+.pun-rating-emoji {
+    font-size: 1.35rem;
 }
 .pun-rating-guide dd {
     margin: 0;
