@@ -1,7 +1,6 @@
 {% extends "base.html" %}
 {% block title %}View Answer{% endblock %}
 {% block content %}
-    {% include "_pun_progress.html" %}
     <!-- flash messages before content -->
     {% with messages = get_flashed_messages() %}
         {% if messages %}
@@ -10,28 +9,39 @@
             {% endfor %}
         {% endif %}
     {% endwith %}
-    <div class="container">
-        <div>
-            <br><br><br>
+    <main class="pun-game-layout">
+        <section class="pun-game-content">
             {% for item in values %}
                 {% if loop.index == 1 %}
-                    <h3 class="h3-blue text-center">{{ item }}</h3>
+                    <h3 class="h3-blue">
+                        {% if current_pun_id is not none %}
+                            <span class="pun-number" aria-label="Question number {{ current_pun_id }}">{{ current_pun_id }}.</span>
+                        {% endif %}
+                        {{ item }}
+                    </h3>
                 {% elif loop.index == 2 %}
-                    <br>
-                    <h3 class="h3-red text-center">{{ item }}</h3>
+                    <h3 class="h3-red pun-answer">{{ item }}</h3>
                 {% else %}
-                    <br>
-                    <h4>{{ item }}</h4>
+                    <p class="pun-blame">{{ item }}</p>
                 {% endif %}
             {% endfor %}
-            <br><br><br>
             <form action="{{ url_for('play') }}" method="POST">
                 <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
                 <h5>Rate the pun ~</h5>
                 {% for feedback, emoji in pun_factor_dict.items() %}
-                    <button type="submit" class="emoji-button" name="feedback" value="{{ feedback }}">{{ emoji }}</button>
+                    <button
+                        type="submit"
+                        class="emoji-button"
+                        name="feedback"
+                        value="{{ feedback }}"
+                        aria-label="{{ feedback }}"
+                    >
+                        <span class="rating-button-emoji" aria-hidden="true">{{ emoji }}</span>
+                        <span class="rating-button-label">{{ feedback }}</span>
+                    </button>
                 {% endfor %}
             </form>
-        </div>
-    </div>
+        </section>
+        {% include "_pun_progress.html" %}
+    </main>
 {% endblock %}

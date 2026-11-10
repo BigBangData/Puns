@@ -69,18 +69,22 @@ Below are some behaviors of the frontend:
 - __play__:
   + goal of `signup` and `login`
   + when logged in, `signup` or `login` will redirect to `play`
-  + goes through puns in order for every user
-  + shows only question and word count so user can try to guess
-  + shows a percentage and three-column grid of individual completed-pun squares
-  + presents an intro before the first pun and a completion screen after the last
-  + lets the user intentionally restart the pun cycle from the completion screen
+  + shows an intro page and rating guide at the start of a grid cycle
+  + lets users choose a pun from the numbered grid or enter its number
+  + shows only the question and word count so users can try to guess
+  + marks a pun complete when its answer is revealed, incremeting grid % progress
+  + returns to the grid after rating
   + any key redirects to `view_answer`
-  + persist puns asked beyond single session so user can come back where she left off
+  + persists completed puns beyond a single session
 - __view answer__:
-  + reveals answer and pun
-  + user must click on one of six "emoji buttons" to rate the pun
-  + feedback get recorded in the backend table `ratings`, and triggers new `play`
-  + new `play` might or might not throw animal confetti depending on mysterious rules
+  + pun is revealed
+  + user can rate the pun using one of six emoji buttons, each labeled with its rating
+  + feedback is recorded, then returns the user to the grid
+  + some ratings trigger a one-time animal confetti effect on the grid
+
+Grid completion is stored separately from pun ratings.
+Once grid is completed, a page prompts user to start cycle again.
+Starting over shows the intro again and begins a new grid cycle with no puns marked complete.
 
 <p align="center">
   <img src="static/img/confetti.gif" width="582" height="308"/>
@@ -113,6 +117,7 @@ __Notes on Blaming__
 ### Code Credits
 - the point of origin for some of the app's code was Tim Ruscica's tutorials below, and Arpan Neupane's tutorial for authentication
 - I also made regular use of chatGPT (free tier of https://chat.openai.com/) to help speed up and troubleshoot code and deployment
+- 2026 update: I've been vide coding with Copilot in vscode.
 
 ## Tutorials Consulted <img src=static/img/books.gif width="24" height="24"/>
 
@@ -159,6 +164,6 @@ sudo apachectl configtest
 sudo systemctl reload apache2
 ```
 
-If the app fails, inspect `/var/www/webApp/logs/error.log` and `/var/www/webApp/logs/access.log` on the server. Keep local secrets in the untracked `local.env`; do not copy it to the server or commit it.
+If the app fails, inspect `/var/www/webApp/logs/error.log` and `/var/www/webApp/logs/access.log` on the server.
 
 ---

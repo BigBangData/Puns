@@ -5,7 +5,6 @@
 {% endblock %}
 {% block content %}
     {% if intro %}
-        {% include "_pun_progress.html" %}
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for msg in messages %}
@@ -13,21 +12,35 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-        <main class="pun-intro">
-            {% if finished %}
-                <h2>You've reached the pun-ultimate!</h2>
-                <p>Want to start the pun cycle all over again?</p>
-            {% else %}
-                <h2>Ready to pun-ch in?</h2>
-                <p>Your next laugh is just a pun away.</p>
-            {% endif %}
-            <form action="{{ url_for('start_game') }}" method="POST">
-                <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
-                <button class="start-game-button" type="submit">Click to play a pun game</button>
-            </form>
+        <main class="pun-game-layout">
+            <section class="pun-game-content">
+                <div class="pun-intro">
+                    <h2>Play Puns</h2>
+                    <p>Choose a pun to play by clicking the grid or typing a number.</p>
+                    <p>Rate the puns for an extra surprise now and then (optional).</p>
+                    <h3 class="pun-rating-title">Pun Rating</h3>
+                    <dl class="pun-rating-guide">
+                        {% set rating_descriptions = {
+                            'no': 'You do not believe this is a pun; you do not agree.',
+                            'wut': 'You do not understand; you are confused.',
+                            'sigh': 'The first proper response to an actual pun.',
+                            'eyeroll': 'The most proper response to a pun.',
+                            'groan': "The pun is so good it's starting to be bad again.",
+                            'panic': "The pun broke your brain and you're now in pain."
+                        } %}
+                        {% for rating, emoji in pun_factor_dict.items() %}
+                            <div>
+                                <dt><span class="pun-rating-emoji">{{ emoji }}</span> {{ rating }}</dt>
+                                <dd>{{ rating_descriptions[rating] }}</dd>
+                            </div>
+                        {% endfor %}
+                    </dl>
+                </div>
+            </section>
+            {% include "_pun_progress.html" %}
         </main>
     {% else %}
-    {% include "_pun_progress.html" %}
+    {% if confetti_triggered %}
     <style>
         @keyframes axolotl-confetti {
             0% {
@@ -254,6 +267,7 @@
         setTimeout(shootAxolotls, 0);
     }
     </script>
+    {% endif %}
 
     <!-- flash messages before content -->
     {% with messages = get_flashed_messages() %}
@@ -264,31 +278,41 @@
         {% endif %}
     {% endwith %}
 
-    <div class="container">
-        <form id="playForm" action="{{url_for('view_answer')}}" method="POST">
-            <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
-            <br><br><br>
-            {% for item in values %}
-                {% if loop.index == 1 %}
-                    <h3 class="h3-blue text-center">{{ item }}</h3>
-                {% elif loop.index == 2 %}
-                    <br>
-                    <h3 class="h3-red text-center">{{ item }}</h3>
-                {% endif %}
-            {% endfor %}
-            <br>
-            <div class="text-center">
-                 {% for item in values %}
-                     {% if loop.index == 3 %}
-                         {{ item }}
-                     {% endif %}
-                 {% endfor %}
-                 <br><br>
-                 <p><h5>Press any key ~</h5></p>
+    <main class="pun-game-layout{% if current_pun_id is none %} pun-grid-only{% endif %}">
+        {% if current_pun_id is not none %}
+        <section class="pun-game-content">
+            <form id="playForm" action="{{url_for('view_answer')}}" method="POST">
+                <input id="csrf_token" name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+                {% for item in values %}
+                    {% if loop.index == 1 %}
+                        <h3 class="h3-blue">
+                            {% if current_pun_id is not none %}
+                                <span class="pun-number" aria-label="Question number {{ current_pun_id }}">{{ current_pun_id }}.</span>
+                            {% endif %}
+                            {{ item }}
+                        </h3>
+                    {% elif loop.index == 2 %}
+                        <h3 class="h3-red pun-word-count">{{ item }}</h3>
+                    {% endif %}
+                {% endfor %}
+                <h5 class="pun-key-prompt">Press any key ~</h5>
+            </form>
+        </section>
+        {% elif finished %}
+        <section class="pun-game-content">
+            <div class="pun-intro">
+                <h2>You've reached the pun-ultimate!</h2>
+                <form action="{{ url_for('start_game') }}" method="POST">
+                    <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+                    <button class="start-game-button" type="submit">Start over</button>
+                </form>
             </div>
-        </form>
-    </div>
+        </section>
+        {% endif %}
+        {% include "_pun_progress.html" %}
+    </main>
 
+    {% if current_pun_id is not none %}
     <script>
         function handleFormSubmission(event) {
             document.getElementById('playForm').submit();
@@ -296,14 +320,21 @@
     
         // event listener for key presses (desktop and some mobile devices)
         document.addEventListener('keydown', function(event) {
+            if (event.target.closest('.pun-progress')) {
+                return;
+            }
             handleFormSubmission(event);
         });
-    
+
         // event listener for touch (mobile and tablets)
         document.addEventListener('touchstart', function(event) {
+            if (event.target.closest('.pun-progress')) {
+                return;
+            }
             handleFormSubmission(event);
         });
     </script>
+    {% endif %}
 
     {% endif %}
 {% endblock %}
