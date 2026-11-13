@@ -27,22 +27,5 @@
                 >{{ pun_id }}</button>
             {% endfor %}
         </div>
-        {% if pun_ids %}
-            <div class="pun-progress-number-picker">
-                <label class="visually-hidden" for="pun-number">Choose pun number</label>
-                <input
-                    id="pun-number"
-                    name="pun_number"
-                    type="number"
-                    inputmode="numeric"
-                    min="{{ pun_ids[0] }}"
-                    max="{{ pun_ids[-1] }}"
-                    step="1"
-                    placeholder="#"
-                    {% if finished %}disabled{% endif %}
-                >
-                <button type="submit" {% if finished %}disabled{% endif %}>Go</button>
-            </div>
-        {% endif %}
     </form>
 </aside>

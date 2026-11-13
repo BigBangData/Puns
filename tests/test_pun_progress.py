@@ -115,10 +115,11 @@ def test_progress_grid_renders_300_pun_squares(logged_in_client):
     assert response.data.count(b'pun-progress-square') == 300
     assert b'aria-label="Choose pun 300"' in response.data
     assert b'>300</button>' in response.data
-    assert b'Choose pun number' in response.data
+    assert b'pun-progress-number-picker' not in response.data
+    assert b'name="pun_number"' not in response.data
 
 
-def test_jump_to_pun_by_number(logged_in_client):
+def test_jump_to_pun_from_grid(logged_in_client):
     response = logged_in_client.post('/jump', data={'pun_id': '2'}, follow_redirects=True)
 
     assert b'Second pun' in response.data
@@ -134,13 +135,11 @@ def test_jump_to_pun_by_number(logged_in_client):
     assert b'aria-valuenow="50"' in answer.data
     assert answer.data.count(b'pun-progress-square completed') == 1
 
-    number_picker_response = logged_in_client.post(
-        '/jump',
-        data={'pun_number': '1'},
-        follow_redirects=True,
+    grid_response = logged_in_client.post(
+        '/jump', data={'pun_id': '1'}, follow_redirects=True
     )
-    assert b'First pun' in number_picker_response.data
-    assert b'aria-valuenow="50"' in number_picker_response.data
+    assert b'First pun' in grid_response.data
+    assert b'aria-valuenow="50"' in grid_response.data
 
 
 def test_rating_emojis_are_labeled_on_intro_and_rating_controls(logged_in_client):

@@ -151,37 +151,6 @@ footer {
     outline: 2px solid #f0d7a2;
     outline-offset: 1px;
 }
-.pun-progress-number-picker {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.35rem;
-    margin-top: 0.5rem;
-}
-.pun-progress-number-picker input {
-    width: 4.5rem;
-    min-height: 2.5rem;
-    padding: 0.35rem;
-    border: 1px solid #87909c;
-    border-radius: 5px;
-    background: #293743;
-    color: #fff;
-    text-align: center;
-}
-.pun-progress-number-picker button {
-    min-height: 2.5rem;
-    padding: 0.35rem 0.7rem;
-    border: 0;
-    border-radius: 5px;
-    background: #5c9997;
-    color: #fff;
-    font-weight: 700;
-}
-.pun-progress-number-picker button:focus-visible,
-.pun-progress-number-picker input:focus-visible {
-    outline: 2px solid #f0d7a2;
-    outline-offset: 2px;
-}
 .content:has(.pun-game-layout) {
     display: flex;
     flex-direction: column;
