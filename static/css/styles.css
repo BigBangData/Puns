@@ -331,6 +331,10 @@ footer {
         align-items: stretch;
         gap: 1rem;
     }
+    .pun-game-layout .pun-progress {
+        flex-direction: column;
+        align-items: center;
+    }
     .pun-game-content {
         text-align: center;
     }
@@ -345,17 +349,14 @@ footer {
     .pun-progress-percent {
         font-size: 0.9rem;
     }
-    .pun-progress-grid {
-        display: none;
-    }
     .pun-progress-picker {
         display: flex;
         align-items: center;
     }
     .pun-game-layout .pun-progress-picker {
-        flex: 1;
+        flex: 0 1 auto;
         min-width: 0;
-        width: auto;
+        width: 100%;
     }
     .pun-intro {
         padding: 2rem 1rem;
@@ -367,5 +368,10 @@ footer {
     .start-game-button {
         padding: 0.8rem 1rem;
         font-size: 1.1rem;
+    }
+}
+@media (max-width: 575px) {
+    .pun-game-layout .pun-progress-grid {
+        grid-template-columns: repeat(10, var(--pun-progress-square-size));
     }
 }
