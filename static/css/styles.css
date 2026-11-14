@@ -1,10 +1,10 @@
 html, body {
-    height: 100%;
     margin: 0;
     display: flex;
     flex-direction: column;
 }
 body {
+    min-height: 100vh;
     font-family: 'Arial', sans-serif;
     background-color: #334352;
     text-align: center;
@@ -156,7 +156,7 @@ footer {
 .content:has(.pun-game-layout) {
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    min-height: min-content;
 }
 .pun-game-layout {
     display: grid;
@@ -301,6 +301,8 @@ footer {
         flex-direction: column;
         align-items: stretch;
         gap: 1rem;
+        flex: 0 0 auto;
+        min-height: auto;
     }
     .pun-game-layout .pun-progress {
         flex-direction: column;
