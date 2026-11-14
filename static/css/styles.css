@@ -123,6 +123,8 @@ footer {
     align-items: center;
     justify-content: center;
     padding: 0;
+    -webkit-appearance: none;
+    appearance: none;
     border: 0;
     border-radius: 2px;
     background: #465563;
@@ -306,6 +308,9 @@ footer {
     }
     .pun-game-content {
         text-align: center;
+    }
+    .emoji-button .rating-button-emoji {
+        font-size: 1.5em;
     }
     .pun-progress {
         flex-direction: row;
